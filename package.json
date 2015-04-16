@@ -1,0 +1,33 @@
+{
+  "name": "markua-js",
+  "version": "1.0.0",
+  "description": "A markua implementation in javascript.",
+  "main": "index.js",
+  "scripts": {
+    "test": "gulp test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ruboss/markua-js"
+  },
+  "keywords": [
+    "markua",
+    "javascript",
+    "markdown",
+    "html"
+  ],
+  "author": "Braden Simpson",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/ruboss/markua-js/issues"
+  },
+  "homepage": "https://github.com/ruboss/markua-js",
+  "devDependencies": {
+    "gulp": "^3.8.11",
+    "gulp-rename": "^1.2.2",
+    "gulp-shell": "^0.4.1",
+    "gulp-traceur": "^0.17.1",
+    "mocha": "^2.2.4",
+    "should": "^6.0.1"
+  }
+}
