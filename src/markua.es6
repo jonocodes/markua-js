@@ -15,4 +15,3 @@ class Markua {
 };
 
 export default new Markua();
- 

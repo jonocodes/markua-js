@@ -24,9 +24,10 @@
   "homepage": "https://github.com/ruboss/markua-js",
   "devDependencies": {
     "gulp": "^3.8.11",
+    "gulp-babel": "^5.1.0",
+    "gulp-mocha": "^2.0.1",
     "gulp-rename": "^1.2.2",
     "gulp-shell": "^0.4.1",
-    "gulp-traceur": "^0.17.1",
     "mocha": "^2.2.4",
     "should": "^6.0.1"
   }

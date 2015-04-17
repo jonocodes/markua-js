@@ -1,15 +1,18 @@
 "use strict";
-var Lexer = (function() {
-  function Lexer() {
-    console.log("Making a new lexer....");
-  }
-  return ($traceurRuntime.createClass)(Lexer, {}, {});
-}());
-;
-var $__default = Lexer;
-Object.defineProperties(module.exports, {
-  default: {get: function() {
-      return $__default;
-    }},
-  __esModule: {value: true}
+
+var _classCallCheck = function (instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } };
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
 });
+
+var Lexer = function Lexer() {
+  _classCallCheck(this, Lexer);
+
+  console.log("Making a new lexer....");
+};
+
+;
+
+exports["default"] = Lexer;
+module.exports = exports["default"];
