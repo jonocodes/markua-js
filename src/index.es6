@@ -1,4 +1,4 @@
 import markua from "./markua"
 
 if (window)
-  window.markua = markua;
+  window.markua = new Markua();

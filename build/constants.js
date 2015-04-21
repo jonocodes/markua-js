@@ -9,6 +9,23 @@ var ObjectAssign = require('object-assign');
 var noop = function noop() {};
 noop.exec = noop;
 
+var escape = function escape(html, encode) {
+  return html.replace(!encode ? /&(?!#?\w+;)/g : /&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+};
+
+exports.escape = escape;
+var unescape = function unescape(html) {
+  return html.replace(/&([#\w]+);/g, function (_, n) {
+    n = n.toLowerCase();
+    if (n === 'colon') return ':';
+    if (n.charAt(0) === '#') {
+      return n.charAt(1) === 'x' ? String.fromCharCode(parseInt(n.substring(2), 16)) : String.fromCharCode(+n.substring(1));
+    }
+    return '';
+  });
+};
+
+exports.unescape = unescape;
 var replace = function replace(regex, opt) {
   regex = regex.source;
   opt = opt || '';
@@ -23,6 +40,10 @@ var replace = function replace(regex, opt) {
 };
 
 exports.replace = replace;
+/**
+ * Block level constants.  Mostly regexes to match what text to turn into
+ * tokens during the lexing process
+ */
 var block = {
   newline: /^\n+/,
   code: /^( {4}[^\n]+\n*)+/,
@@ -61,4 +82,54 @@ block.gfm.paragraph = replace(block.paragraph)('(?!', '(?!' + block.gfm.fences.s
 block.tables = ObjectAssign({}, block.gfm, {
   nptable: /^ *(\S.*\|.*)\n *([-:]+ *\|[-| :]*)\n((?:.*\|.*(?:\n|$))*)\n*/,
   table: /^ *\|(.+)\n *\|( *[-:]+[-| :]*)\n((?: *\|.*(?:\n|$))*)\n*/
+});
+
+/**
+ * Inline level constants
+ */
+var inline = {
+  escape: /^\\([\\`*{}\[\]()#+\-.!_>])/,
+  autolink: /^<([^ >]+(@|:\/)[^ >]+)>/,
+  url: noop,
+  link: /^!?\[(inside)\]\(href\)/,
+  reflink: /^!?\[(inside)\]\s*\[([^\]]*)\]/,
+  nolink: /^!?\[((?:\[[^\]]*\]|[^\[\]])*)\]/,
+  strong: /^__([\s\S]+?)__(?!_)|^\*\*([\s\S]+?)\*\*(?!\*)/,
+  em: /^\b_((?:__|[\s\S])+?)_\b|^\*((?:\*\*|[\s\S])+?)\*(?!\*)/,
+  code: /^(`+)\s*([\s\S]*?[^`])\s*\1(?!`)/,
+  br: /^ {2,}\n(?!\s*$)/,
+  del: noop,
+  text: /^[\s\S]+?(?=[\\<!\[_*`]| {2,}\n|$)/
+};
+
+exports.inline = inline;
+inline._inside = /(?:\[[^\]]*\]|[^\[\]]|\](?=[^\[]*\]))*/;
+inline._href = /\s*<?([\s\S]*?)>?(?:\s+['"]([\s\S]*?)['"])?\s*/;
+
+inline.link = replace(inline.link)('inside', inline._inside)('href', inline._href)();
+
+inline.reflink = replace(inline.reflink)('inside', inline._inside)();
+
+/**
+* Normal Inline Grammar
+*/
+inline.normal = ObjectAssign({}, inline);
+
+/**
+* GFM Inline Grammar
+*/
+
+inline.gfm = ObjectAssign({}, inline.normal, {
+  escape: replace(inline.escape)('])', '~|])')(),
+  url: /^(https?:\/\/[^\s<]+[^<.,:;"')\]\s])/,
+  del: /^~~(?=\S)([\s\S]*?\S)~~/,
+  text: replace(inline.text)(']|', '~]|')('|', '|https?://|')()
+});
+
+/**
+* GFM + Line Breaks Inline Grammar
+*/
+inline.breaks = ObjectAssign({}, inline.gfm, {
+  br: replace(inline.br)('{2,}', '*')(),
+  text: replace(inline.gfm.text)('{2,}', '*')()
 });

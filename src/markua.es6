@@ -14,4 +14,4 @@ class Markua {
   }
 };
 
-export default new Markua();
+export default Markua;
