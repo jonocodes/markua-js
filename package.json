@@ -23,13 +23,25 @@
   },
   "homepage": "https://github.com/ruboss/markua-js",
   "devDependencies": {
+    "babel-core": "^5.1.10",
+    "browserify-shim": "^3.8.5",
     "gulp": "^3.8.11",
     "gulp-babel": "^5.1.0",
+    "gulp-browserify": "^0.5.1",
     "gulp-mocha": "^2.0.1",
     "gulp-rename": "^1.2.2",
     "gulp-shell": "^0.4.1",
     "mocha": "^2.2.4",
     "object-assign": "^2.0.0",
-    "should": "^6.0.1"
+    "should": "^6.0.1",
+    "vinyl-source-stream": "^1.1.0"
+  },
+  "browserify-shim": {
+    "jquery": "$"
+  },
+  "browserify": {
+    "transform": [
+      "browserify-shim"
+    ]
   }
 }

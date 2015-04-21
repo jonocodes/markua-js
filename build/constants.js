@@ -7,6 +7,7 @@ Object.defineProperty(exports, '__esModule', {
 var ObjectAssign = require('object-assign');
 
 var noop = function noop() {};
+noop.exec = noop;
 
 var replace = function replace(regex, opt) {
   regex = regex.source;
@@ -27,12 +28,13 @@ var block = {
   code: /^( {4}[^\n]+\n*)+/,
   fences: noop,
   nptable: noop,
+  hr: /^( *[-*_]){3,} *(?:\n+|$)/,
   heading: /^ *(#{1,6}) *([^\n]+?) *#* *(?:\n+|$)/,
   blockquote: /^( *>[^\n]+(\n(?!def)[^\n]+)*\n*)+/,
   list: /^( *)(bull) [\s\S]+?(?:hr|def|\n{2,}(?! )(?!\1bull )\n*|\s*$)/,
   def: /^ *\[([^\]]+)\]: *<?([^\s>]+)>?(?: +["(]([^\n]+)[")])? *(?:\n+|$)/,
   table: noop,
-  paragraph: /^((?:[^\n]+\n?(?!hr|heading|lheading|blockquote))+)\n*/,
+  paragraph: /^((?:[^\n]+\n?(?!hr|heading|blockquote))+)\n*/,
   text: /^[^\n]+/
 };
 

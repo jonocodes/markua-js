@@ -2,6 +2,7 @@
 let ObjectAssign = require("object-assign")
 
 let noop = () => {}
+noop.exec = noop
 
 export let replace = (regex, opt) => {
   regex = regex.source;
@@ -15,17 +16,23 @@ export let replace = (regex, opt) => {
   };
 }
 
+/**
+ * Block level constants.  Mostly regexes to match what text to turn into
+ * tokens during the lexing process
+ */
+
 export let block = {
   newline: /^\n+/,
   code: /^( {4}[^\n]+\n*)+/,
   fences: noop,
   nptable: noop,
+  hr: /^( *[-*_]){3,} *(?:\n+|$)/,
   heading: /^ *(#{1,6}) *([^\n]+?) *#* *(?:\n+|$)/,
   blockquote: /^( *>[^\n]+(\n(?!def)[^\n]+)*\n*)+/,
   list: /^( *)(bull) [\s\S]+?(?:hr|def|\n{2,}(?! )(?!\1bull )\n*|\s*$)/,
   def: /^ *\[([^\]]+)\]: *<?([^\s>]+)>?(?: +["(]([^\n]+)[")])? *(?:\n+|$)/,
   table: noop,
-  paragraph: /^((?:[^\n]+\n?(?!hr|heading|lheading|blockquote))+)\n*/,
+  paragraph: /^((?:[^\n]+\n?(?!hr|heading|blockquote))+)\n*/,
   text: /^[^\n]+/
 };
 
