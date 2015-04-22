@@ -3,7 +3,7 @@ import InlineLexer from "./inline_lexer"
 
 class Parser {
   constructor(options = {}) {
-    console.log("Making new parser...");
+    this.options = options;
     this.tokens = [];
     this.token = null;
     this.renderer = new Renderer();
@@ -11,7 +11,7 @@ class Parser {
   }
 
   static parse(src, options) {
-    new Parser(options).parse(src);
+    return new Parser(options).parse(src);
   }
 
   parse(src) {
@@ -22,7 +22,7 @@ class Parser {
     while (this.next()) {
       out += this.tok();
     }
-
+    console.log("Parser done with ", out);
     return out;
   }
 
@@ -57,6 +57,7 @@ class Parser {
    * Parse Current Token
    */
   tok() {
+    console.log("Parsing token", this.token);
     switch (this.token.type) {
       case 'space': {
         return '';

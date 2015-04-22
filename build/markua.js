@@ -18,20 +18,39 @@ var _Parser = require("./parser");
 
 var _Parser2 = _interopRequireWildcard(_Parser);
 
+var ObjectAssign = require("object-assign");
+
+var DEFAULT_OPTIONS = {
+  tables: true,
+  breaks: false,
+  sanitize: false,
+  silent: false,
+  highlight: null,
+  langPrefix: "lang-",
+  headerPrefix: ""
+};
+
 var Markua = (function () {
   function Markua() {
     _classCallCheck(this, Markua);
-
-    this.lexer = new _Lexer2["default"]();
-    this.parser = new _Parser2["default"]();
-
-    console.log("Making a new markua instance");
   }
 
   _createClass(Markua, null, [{
     key: "run",
     value: function run(source, options) {
       console.log("Running with source " + source + " and options " + options);
+
+      options = ObjectAssign(DEFAULT_OPTIONS, options);
+
+      // TODO @bradens highlighting
+      try {
+        var tokens = _Lexer2["default"].lex(source, options);
+        console.error(tokens);
+        return _Parser2["default"].parse(tokens, options);
+      } catch (e) {
+        console.log(e);
+        return e;
+      }
     }
   }]);
 
@@ -40,5 +59,5 @@ var Markua = (function () {
 
 ;
 
-exports["default"] = new Markua();
+exports["default"] = Markua;
 module.exports = exports["default"];

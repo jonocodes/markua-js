@@ -42,14 +42,12 @@ var Lexer = (function () {
       while (src) {
         // newline
         if (cap = this.rules.newline.exec(src)) {
-          console.log('newline');
           src = src.substring(cap[0].length);
           if (cap[0].length > 1) this.tokens.push({ type: 'space' });
         }
 
         // code
         if (cap = this.rules.code.exec(src)) {
-          console.log('code');
           src = src.substring(cap[0].length);
           cap = cap[0].replace(/^ {4}/gm, '');
           this.tokens.push({
@@ -61,7 +59,6 @@ var Lexer = (function () {
 
         // fences (gfm)
         if (cap = this.rules.fences.exec(src)) {
-          console.log('fences');
           src = src.substring(cap[0].length);
           this.tokens.push({
             type: 'code',
@@ -73,7 +70,6 @@ var Lexer = (function () {
 
         // heading
         if (cap = this.rules.heading.exec(src)) {
-          console.log('heading');
           src = src.substring(cap[0].length);
           this.tokens.push({
             type: 'heading',
@@ -115,7 +111,6 @@ var Lexer = (function () {
 
         // hr
         if (cap = this.rules.hr.exec(src)) {
-          console.log('hr');
           src = src.substring(cap[0].length);
           this.tokens.push({ type: 'hr' });
           continue;
@@ -123,7 +118,6 @@ var Lexer = (function () {
 
         // blockquote
         if (cap = this.rules.blockquote.exec(src)) {
-          console.log('bloquote');
           src = src.substring(cap[0].length);
 
           this.tokens.push({ type: 'blockquote_start' });
@@ -258,7 +252,7 @@ var Lexer = (function () {
     key: 'lex',
     value: function lex(src, options) {
       var lexer = new Lexer(options);
-      lexer.lex(src);
+      return lexer.lex(src);
     }
   }]);
 

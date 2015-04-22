@@ -1,0 +1,4 @@
+Markua = require("./build/markua");
+fs = require("fs");
+buf = fs.readFileSync('./test.txt', "utf8");
+Markua.run(buf, {});

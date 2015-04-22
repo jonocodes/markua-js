@@ -1,3 +1,5 @@
+import { escape, unescape } from "./constants";
+
 class Renderer {
   constructor(options = {}) {
     this.options = options;
@@ -133,4 +135,4 @@ class Renderer {
   };
 }
 
-exports default Renderer;
+export default Renderer;

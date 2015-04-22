@@ -1,4 +1,4 @@
-import { inline } from "./constants"
+import { inline, escape } from "./constants"
 import Renderer from "./renderer"
 
 // Lexes and pipes tokens to the inline renderer
@@ -16,7 +16,7 @@ class InlineLexer {
 
   // Exposed output function
   static output(src, links, options) {
-    new InlineLexer(links, options).output(src)
+    return new InlineLexer(links, options).output(src)
   }
 
   // lex and send tokens to the renderer
@@ -163,8 +163,9 @@ class InlineLexer {
       // ellipses
       .replace(/\.{3}/g, '\u2026');
   }
-
-  // Expose rules
-  static rules = inline
 }
-export default new InlineLexer();
+
+// Expose rules
+InlineLexer.rules = inline
+
+export default InlineLexer;

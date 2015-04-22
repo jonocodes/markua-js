@@ -1,0 +1,18 @@
+# heading one
+## heading two
+### heading three
+
+Some paragraph here
+
+* List item one
+* List item two
+
+Here is another paragraph that has an ![inline image](http://markua.com/img/crab.svg)
+
+    Some code sample here
+    something ellipsesaoeuao
+    aoeu
+
+    function something() {
+      word();
+    }

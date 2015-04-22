@@ -11,7 +11,7 @@ class Lexer {
 
   static lex(src, options) {
     let lexer = new Lexer(options);
-    lexer.lex(src);
+    return lexer.lex(src);
   }
 
   lex(src) {

@@ -6,4 +6,4 @@ var _markua = require("./markua");
 
 var _markua2 = _interopRequireWildcard(_markua);
 
-if (window) window.markua = _markua2["default"];
+if (window) window.markua = new Markua();
