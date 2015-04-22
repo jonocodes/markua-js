@@ -82,7 +82,7 @@ var Lexer = (function () {
         // table no leading pipe (gfm)
         if (top && (cap = this.rules.nptable.exec(src))) {
           src = src.substring(cap[0].length);
-          item = {
+          var item = {
             type: 'table',
             header: cap[1].replace(/^ *| *\| *$/g, '').split(RegExp(' *\\| *')),
             align: cap[2].replace(/^ *|\| *$/g, '').split(RegExp(' *\\| *')),
@@ -149,18 +149,18 @@ var Lexer = (function () {
           var l = cap.length;
 
           for (var i = 0; i < l; i++) {
-            var _item = cap[i];
+            var item = cap[i];
 
             // Remove the list item's bullet
             // so it is seen as the next token.
-            var space = _item.length;
-            _item = _item.replace(/^ *([*+-]|\d+\.) +/, '');
+            var space = item.length;
+            item = item.replace(/^ *([*+-]|\d+\.) +/, '');
 
             // Outdent whatever the
             // list item contains. Hacky.
-            if (~_item.indexOf('\n ')) {
-              space -= _item.length;
-              _item = _item.replace(/^ {1,4}/gm, '');
+            if (~item.indexOf('\n ')) {
+              space -= item.length;
+              item = item.replace(/^ {1,4}/gm, '');
             }
             // Determine whether the next list item belongs here.
             // Backpedal if it does not belong in this list.
@@ -173,17 +173,17 @@ var Lexer = (function () {
             // Determine whether item is loose or not.
             // Use: /(^|\n)(?! )[^\n]+\n\n(?!\s*$)/
             // for discount behavior.
-            var loose = next || /\n\n(?!\s*$)/.test(_item);
+            var loose = next || /\n\n(?!\s*$)/.test(item);
 
             if (i != l - 1) {
-              next = _item.charAt(_item.length - 1) == '\n';
+              next = item.charAt(item.length - 1) == '\n';
               if (!loose) loose = next;
             }
 
             this.tokens.push({ type: loose ? 'loose_item_start' : 'list_item_start' });
 
             // Recurse.
-            this.token(_item, false, bq);
+            this.token(item, false, bq);
             this.tokens.push({ type: 'list_item_end' });
           }
           this.tokens.push({ type: 'list_end' });
@@ -203,7 +203,7 @@ var Lexer = (function () {
         // table (gfm)
         if (top && (cap = this.rules.table.exec(src))) {
           src = src.substring(cap[0].length);
-          item = {
+          var item = {
             type: 'table',
             header: cap[1].replace(/^ *| *\| *$/g, '').split(RegExp(' *\\| *')),
             align: cap[2].replace(/^ *|\| *$/g, '').split(RegExp(' *\\| *')),

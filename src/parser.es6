@@ -22,7 +22,6 @@ class Parser {
     while (this.next()) {
       out += this.tok();
     }
-    console.log("Parser done with ", out);
     return out;
   }
 
@@ -57,7 +56,6 @@ class Parser {
    * Parse Current Token
    */
   tok() {
-    console.log("Parsing token", this.token);
     switch (this.token.type) {
       case 'space': {
         return '';

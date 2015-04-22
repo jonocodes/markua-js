@@ -45,14 +45,14 @@ export let replace = (regex, opt) => {
 export let block = {
   newline: /^\n+/,
   code: /^( {4}[^\n]+\n*)+/,
-  fences: noop,
-  nptable: noop,
+  fences: /^ *(`{3,}|~{3,}) *(\S+)? *\n([\s\S]+?)\s*\1 *(?:\n+|$)/,
+  nptable: /^ *(\S.*\|.*)\n *([-:]+ *\|[-| :]*)\n((?:.*\|.*(?:\n|$))*)\n*/,
   hr: /^( *[-*_]){3,} *(?:\n+|$)/,
   heading: /^ *(#{1,6}) *([^\n]+?) *#* *(?:\n+|$)/,
   blockquote: /^( *>[^\n]+(\n(?!def)[^\n]+)*\n*)+/,
   list: /^( *)(bull) [\s\S]+?(?:hr|def|\n{2,}(?! )(?!\1bull )\n*|\s*$)/,
   def: /^ *\[([^\]]+)\]: *<?([^\s>]+)>?(?: +["(]([^\n]+)[")])? *(?:\n+|$)/,
-  table: noop,
+  table: /^ *\|(.+)\n *\|( *[-:]+[-| :]*)\n((?: *\|.*(?:\n|$))*)\n*/,
   paragraph: /^((?:[^\n]+\n?(?!hr|heading|blockquote))+)\n*/,
   text: /^[^\n]+/
 };
@@ -76,20 +76,6 @@ block.paragraph = replace(block.paragraph)
   ();
 
 block.normal = ObjectAssign({}, block);
-
-block.gfm = ObjectAssign({}, block.normal, {
-  fences: /^ *(`{3,}|~{3,}) *(\S+)? *\n([\s\S]+?)\s*\1 *(?:\n+|$)/,
-  paragraph: /^/
-});
-
-block.gfm.paragraph = replace(block.paragraph)('(?!', '(?!'
-     + block.gfm.fences.source.replace('\\1', '\\2') + '|'
-     + block.list.source.replace('\\1', '\\3') + '|')();
-
-block.tables = ObjectAssign({}, block.gfm, {
-  nptable: /^ *(\S.*\|.*)\n *([-:]+ *\|[-| :]*)\n((?:.*\|.*(?:\n|$))*)\n*/,
-  table: /^ *\|(.+)\n *\|( *[-:]+[-| :]*)\n((?: *\|.*(?:\n|$))*)\n*/
-});
 
 /**
  * Inline level constants

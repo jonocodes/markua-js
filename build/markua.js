@@ -38,15 +38,12 @@ var Markua = (function () {
   _createClass(Markua, null, [{
     key: "run",
     value: function run(source, options) {
-      console.log("Running with source " + source + " and options " + options);
-
       options = ObjectAssign(DEFAULT_OPTIONS, options);
 
       // TODO @bradens highlighting
       try {
         var tokens = _Lexer2["default"].lex(source, options);
-        console.error(tokens);
-        return _Parser2["default"].parse(tokens, options);
+        return console.log(_Parser2["default"].parse(tokens, options));
       } catch (e) {
         console.log(e);
         return e;

@@ -74,7 +74,7 @@ class Lexer {
       // table no leading pipe (gfm)
       if (top && (cap = this.rules.nptable.exec(src))) {
         src = src.substring(cap[0].length)
-        item = {
+        let item = {
           type: 'table',
           header: cap[1].replace(/^ *| *\| *$/g, '').split(RegExp(' *\\| *')),
           align: cap[2].replace(/^ *|\| *$/g, '').split(RegExp(' *\\| *')),
@@ -200,7 +200,7 @@ class Lexer {
       // table (gfm)
       if (top && (cap = this.rules.table.exec(src))) {
         src = src.substring(cap[0].length)
-        item = {
+        let item = {
           type: 'table',
           header: cap[1].replace(/^ *| *\| *$/g, '').split(RegExp(' *\\| *')),
           align: cap[2].replace(/^ *|\| *$/g, '').split(RegExp(' *\\| *')),

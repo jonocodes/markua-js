@@ -41,7 +41,6 @@ var Parser = (function () {
       while (this.next()) {
         out += this.tok();
       }
-      console.log("Parser done with ", out);
       return out;
     }
   }, {
@@ -84,7 +83,6 @@ var Parser = (function () {
      * Parse Current Token
      */
     value: function tok() {
-      console.log("Parsing token", this.token);
       switch (this.token.type) {
         case "space":
           {

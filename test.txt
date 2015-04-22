@@ -1,18 +1,31 @@
+![Leanpub](http://markua.com/img/leanpub.svg)
+
 # heading one
 ## heading two
 ### heading three
 
-Some paragraph here
+Some paragraph here with aoentuhaohe unahotnaonentaoeuntoa ant noae u anoet
+unath unatho untaoeuSome paragraph here with aoentuhaohe unahotnaonentaoeuntoa
+ant noae u anoet unath unatho untaoeu Some paragraph here with aoentuhaohe
+nahotnaonentaoeuntoa ant noae u anoet unath unatho untaoeu
 
-* List item one
-* List item two
+* List **item** one
+* List item *two*
+* List item with image in it
 
-Here is another paragraph that has an ![inline image](http://markua.com/img/crab.svg)
+Here is another paragraph that has an ![inline image](http://markua.com/img/crab.svg) in it
 
-    Some code sample here
-    something ellipsesaoeuao
-    aoeu
+```
+  Some code sample here
+  something ellipsesaoeuao
+  aoeu
 
-    function something() {
-      word();
-    }
+  function something() {
+    word();
+  }
+```
+
+
+| First Header | Second Header  |
+| ------------ | -------------  |
+| something    | something else |

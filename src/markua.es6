@@ -15,15 +15,12 @@ const DEFAULT_OPTIONS = {
 
 class Markua {
   static run (source, options) {
-    console.log(`Running with source ${source} and options ${options}`);
-
     options = ObjectAssign(DEFAULT_OPTIONS, options);
 
     // TODO @bradens highlighting
     try {
       let tokens = Lexer.lex(source, options);
-      console.error(tokens);
-      return Parser.parse(tokens, options);
+      return console.log(Parser.parse(tokens, options));
     } catch (e) {
       console.log(e);
       return e;
