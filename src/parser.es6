@@ -14,6 +14,7 @@ class Parser {
     return new Parser(options).parse(src);
   }
 
+  // Parse all the tokens
   parse(src) {
     this.inline = new InlineLexer(src.links, this.options);
     this.tokens = src.reverse();
@@ -25,23 +26,17 @@ class Parser {
     return out;
   }
 
-  /**
-   * Next Token
-   */
+  // Next Token
   next() {
     return this.token = this.tokens.pop();
   }
 
-  /**
-   * Preview Next Token
-   */
+  // Preview Next Token
   peek() {
     return this.tokens[this.tokens.length - 1] || 0;
   }
 
-  /**
-   * Parse Text Tokens
-   */
+  // Parse Text Tokens
   parseText() {
     var body = this.token.text;
 
@@ -52,9 +47,7 @@ class Parser {
     return this.inline.output(body);
   }
 
-  /**
-   * Parse Current Token
-   */
+  // Parse Current Token
   tok() {
     switch (this.token.type) {
       case 'space': {

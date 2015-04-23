@@ -25,7 +25,6 @@ Here is another paragraph that has an ![inline image](http://markua.com/img/crab
   }
 ```
 
-
 | First Header | Second Header  |
 | ------------ | -------------  |
 | something    | something else |
