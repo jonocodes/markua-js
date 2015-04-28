@@ -1,4 +1,4 @@
 import markua from "./markua"
 
-if (window)
+if (typeof window !== 'undefined')
   window.markua = markua;

@@ -1,4 +1,6 @@
-Markua = require("./build/markua");
-fs = require("fs");
-buf = fs.readFileSync('./test.txt', "utf8");
-Markua.run(buf, {});
+#! /Users/braden/.npm-packages/bin/babel-node
+
+let markua = require("./build/markua");
+let fs = require("fs");
+let buf = fs.readFileSync(process.argv[2], "utf8");
+console.log(markua.run(buf));
