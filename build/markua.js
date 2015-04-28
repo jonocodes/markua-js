@@ -27,7 +27,8 @@ var DEFAULT_OPTIONS = {
   silent: false,
   highlight: null,
   langPrefix: "lang-",
-  headerPrefix: ""
+  headerPrefix: "",
+  debug: true
 };
 
 var Markua = (function () {
@@ -43,7 +44,7 @@ var Markua = (function () {
       // TODO @bradens highlighting
       try {
         var tokens = _Lexer2["default"].lex(source, options);
-        return console.log(_Parser2["default"].parse(tokens, options));
+        return _Parser2["default"].parse(tokens, options);
       } catch (e) {
         console.log(e);
         return e;

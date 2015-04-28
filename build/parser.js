@@ -33,6 +33,8 @@ var Parser = (function () {
 
   _createClass(Parser, [{
     key: "parse",
+
+    // Parse all the tokens
     value: function parse(src) {
       this.inline = new _InlineLexer2["default"](src.links, this.options);
       this.tokens = src.reverse();
@@ -46,27 +48,21 @@ var Parser = (function () {
   }, {
     key: "next",
 
-    /**
-     * Next Token
-     */
+    // Next Token
     value: function next() {
       return this.token = this.tokens.pop();
     }
   }, {
     key: "peek",
 
-    /**
-     * Preview Next Token
-     */
+    // Preview Next Token
     value: function peek() {
       return this.tokens[this.tokens.length - 1] || 0;
     }
   }, {
     key: "parseText",
 
-    /**
-     * Parse Text Tokens
-     */
+    // Parse Text Tokens
     value: function parseText() {
       var body = this.token.text;
 
@@ -79,9 +75,7 @@ var Parser = (function () {
   }, {
     key: "tok",
 
-    /**
-     * Parse Current Token
-     */
+    // Parse Current Token
     value: function tok() {
       switch (this.token.type) {
         case "space":

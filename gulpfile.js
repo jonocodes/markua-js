@@ -5,15 +5,28 @@ var rename = require("gulp-rename");
 var mocha = require("gulp-mocha");
 var browserify = require("gulp-browserify");
 var source = require("vinyl-source-stream");
+var sass = require("gulp-sass")
 
-gulp.task('build', function() {
+gulp.task('build-styles', function() {
+  gulp.src("./src/styles/*.scss")
+    .pipe(sass())
+    .on('error', function(error) {
+      console.log(error.message);
+    })
+    .pipe(gulp.dest('build'))
+});
+
+gulp.task('build-js', function() {
   gulp.src("./src/*.es6")
     .pipe(babel())
+    .on("error", function(error) {
+      console.log(error.message);
+    })
     .pipe(rename({ extname: ".js" }))
     .pipe(gulp.dest('build'));
 });
 
-gulp.task('browserify', ['build'], function() {
+gulp.task('browserify', ['build-js'], function() {
   return gulp.src('./build/index.js')
     .pipe(browserify({
       insertGlobals: true
@@ -23,6 +36,7 @@ gulp.task('browserify', ['build'], function() {
 });
 
 gulp.task('dev-web', function() {
+  gulp.watch("./src/styles/*", ["build-styles"]);
   gulp.watch("./src/*", ["browserify"]);
 });
 
@@ -37,5 +51,5 @@ gulp.task('test', function() {
 });
 
 gulp.task('watch', function() {
-  gulp.watch('./src/*', ['build']);
+  gulp.watch('./src/*', ['build-js']);
 });

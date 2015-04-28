@@ -7,6 +7,7 @@ class Lexer {
     this.tokens.links = {};
     this.options = options;
     this.rules = block.normal;
+    this.warnings = []
   }
 
   static lex(src, options) {
@@ -63,6 +64,12 @@ class Lexer {
       // heading
       if (cap = this.rules.heading.exec(src)){
         src = src.substring(cap[0].length)
+
+        // Check to make sure there is another newline under this thing
+        if (!this.rules.twonewlines.exec(src)) {
+          this.warnings.push(`Must be a newline after ${cap[0]}`);
+        }
+
         this.tokens.push({
           type: 'heading',
           depth: cap[1].length,
@@ -249,6 +256,13 @@ class Lexer {
 
       if (src)
         throw new Error('Infinite loop on byte: ' + src.charCodeAt(0));
+    }
+
+    if (this.options.debug) {
+      for (var warning of this.warnings) {
+        console.warn(warning);
+      }
+      this.warnings = []
     }
 
     return this.tokens;

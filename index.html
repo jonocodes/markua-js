@@ -2,14 +2,65 @@
   <head>
     <title>Markua-JS</title>
     <script src="node_modules/babel-core/browser-polyfill.js" type="text/javascript"></script>
-    <script src="build/bundle.js" type="text/javascript"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.1.9/ace.js" type="text/javascript"></script>
+    <link href='http://fonts.googleapis.com/css?family=Lato:300,400,700' rel='stylesheet' type='text/css'>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/normalize/3.0.3/normalize.css" />
+    <link rel="stylesheet" href="build/main.css" />
   </head>
   <body>
     <section class="main">
-      <h1>Welcome to the markua-js website.</h1>
+      <h1 class="logo">Try out Markua</h1>
+      <div id="editor" class="col">![Leanpub](http://markua.com/img/leanpub.svg)
+
+# heading one
+## heading two
+
+### heading three
+
+Some paragraph here with aoentuhaohe unahotnaonentaoeuntoa ant noae u anoet
+unath unatho untaoeuSome paragraph here with aoentuhaohe unahotnaonentaoeuntoa
+ant noae u anoet unath unatho untaoeu Some paragraph here with aoentuhaohe
+nahotnaonentaoeuntoa ant noae u anoet unath unatho untaoeu
+
+* List **item** one
+* List item *two*
+* List item with image in it
+
+Here is another paragraph that has an ![inline image](http://markua.com/img/crab.svg) in it
+
+```
+  Some code sample here
+  something ellipsesaoeuao
+  aoeu
+
+  function something() {
+    word();
+  }
+```
+
+| First Header | Second Header  |
+| ------------ | -------------  |
+| something    | something else |</div>
+      <section id="output" class="col">
+      </section>
     </section>
+    <script src="build/bundle.js" type="text/javascript"></script>
     <script>
-      console.log("Welcome to markua");
+      output = function(source) {
+        document.getElementById("output").innerHTML = markua.run(source);
+      };
+      editor = ace.edit('editor');
+      editor.setTheme("ace/theme/xcode");
+      editor.renderer.setShowGutter(false);
+      editor.renderer.setPadding(20);
+      editor.renderer.setScrollMargin(20);
+      editor.setShowPrintMargin(false);
+      editor.getSession().setMode("ace/mode/markdown");
+      editor.on("change", function(e) {
+        output(editor.getValue())
+      });
+
+      output(editor.getValue());
     </script>
   </body>
 </html>

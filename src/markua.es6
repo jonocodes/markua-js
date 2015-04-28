@@ -10,7 +10,8 @@ const DEFAULT_OPTIONS = {
   silent: false,
   highlight: null,
   langPrefix: 'lang-',
-  headerPrefix: ''
+  headerPrefix: '',
+  debug: true
 }
 
 class Markua {
@@ -20,7 +21,7 @@ class Markua {
     // TODO @bradens highlighting
     try {
       let tokens = Lexer.lex(source, options);
-      return console.log(Parser.parse(tokens, options));
+      return Parser.parse(tokens, options);
     } catch (e) {
       console.log(e);
       return e;

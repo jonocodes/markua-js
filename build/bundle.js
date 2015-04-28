@@ -5,6 +5,27 @@
 Object.defineProperty(exports, '__esModule', {
   value: true
 });
+// Using some of the https://github.com/chjj/marked for a lot of the regexes
+// Copyright (c) 2011-2014, Christopher Jeffrey (https://github.com/chjj/)
+//
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files (the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions:
+//
+// The above copyright notice and this permission notice shall be included in
+// all copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+// THE SOFTWARE.
+
 // Need this polyfill for Object.assign for now...
 var ObjectAssign = require('object-assign');
 
@@ -49,16 +70,18 @@ exports.replace = replace;
 var block = {
   newline: /^\n+/,
   code: /^( {4}[^\n]+\n*)+/,
-  fences: noop,
+  fences: /^ *(`{3,}|~{3,}) *(\S+)? *\n([\s\S]+?)\s*\1 *(?:\n+|$)/,
   nptable: /^ *(\S.*\|.*)\n *([-:]+ *\|[-| :]*)\n((?:.*\|.*(?:\n|$))*)\n*/,
   hr: /^( *[-*_]){3,} *(?:\n+|$)/,
-  heading: /^ *(#{1,6}) *([^\n]+?) *#* *(?:\n+|$)/,
+  heading: /^ *(#{1,6}) *([^\n]+) */,
+  //heading: /^ *(#{1,6}) *([^\n]+?) *#* *(?:\n+|$)/,
   blockquote: /^( *>[^\n]+(\n(?!def)[^\n]+)*\n*)+/,
   list: /^( *)(bull) [\s\S]+?(?:hr|def|\n{2,}(?! )(?!\1bull )\n*|\s*$)/,
   def: /^ *\[([^\]]+)\]: *<?([^\s>]+)>?(?: +["(]([^\n]+)[")])? *(?:\n+|$)/,
   table: /^ *\|(.+)\n *\|( *[-:]+[-| :]*)\n((?: *\|.*(?:\n|$))*)\n*/,
   paragraph: /^((?:[^\n]+\n?(?!hr|heading|blockquote))+)\n*/,
-  text: /^[^\n]+/
+  text: /^[^\n]+/,
+  twonewlines: /^ *[\n]{2,}/
 };
 
 exports.block = block;
@@ -73,13 +96,6 @@ block.blockquote = replace(block.blockquote)('def', block.def)();
 block.paragraph = replace(block.paragraph)('heading', block.heading)('blockquote', block.blockquote)();
 
 block.normal = ObjectAssign({}, block);
-
-block.gfm = ObjectAssign({}, block.normal, {
-  fences: /^ *(`{3,}|~{3,}) *(\S+)? *\n([\s\S]+?)\s*\1 *(?:\n+|$)/,
-  paragraph: /^/
-});
-
-block.gfm.paragraph = replace(block.paragraph)('(?!', '(?!' + block.gfm.fences.source.replace('\\1', '\\2') + '|' + block.list.source.replace('\\1', '\\3') + '|')();
 
 /**
  * Inline level constants
@@ -142,7 +158,7 @@ var _markua = require("./markua");
 var _markua2 = _interopRequireWildcard(_markua);
 
 if (window) window.markua = _markua2["default"];
-}).call(this,require("1YiZ5S"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/fake_7348fa2e.js","/")
+}).call(this,require("1YiZ5S"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/fake_56ded736.js","/")
 },{"./markua":5,"1YiZ5S":11,"buffer":8}],3:[function(require,module,exports){
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
 "use strict";
@@ -371,6 +387,7 @@ var Lexer = (function () {
     this.tokens.links = {};
     this.options = options;
     this.rules = _block.block.normal;
+    this.warnings = [];
   }
 
   _createClass(Lexer, [{
@@ -420,6 +437,12 @@ var Lexer = (function () {
         // heading
         if (cap = this.rules.heading.exec(src)) {
           src = src.substring(cap[0].length);
+
+          // Check to make sure there is another newline under this thing
+          if (!this.rules.twonewlines.exec(src)) {
+            this.warnings.push('Must be a newline after ' + cap[0]);
+          }
+
           this.tokens.push({
             type: 'heading',
             depth: cap[1].length,
@@ -595,6 +618,35 @@ var Lexer = (function () {
         if (src) throw new Error('Infinite loop on byte: ' + src.charCodeAt(0));
       }
 
+      if (this.options.debug) {
+        var _iteratorNormalCompletion = true;
+        var _didIteratorError = false;
+        var _iteratorError = undefined;
+
+        try {
+          for (var _iterator = this.warnings[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
+            var warning = _step.value;
+
+            console.warn(warning);
+          }
+        } catch (err) {
+          _didIteratorError = true;
+          _iteratorError = err;
+        } finally {
+          try {
+            if (!_iteratorNormalCompletion && _iterator['return']) {
+              _iterator['return']();
+            }
+          } finally {
+            if (_didIteratorError) {
+              throw _iteratorError;
+            }
+          }
+        }
+
+        this.warnings = [];
+      }
+
       return this.tokens;
     }
   }], [{
@@ -644,7 +696,8 @@ var DEFAULT_OPTIONS = {
   silent: false,
   highlight: null,
   langPrefix: "lang-",
-  headerPrefix: ""
+  headerPrefix: "",
+  debug: true
 };
 
 var Markua = (function () {
@@ -660,7 +713,7 @@ var Markua = (function () {
       // TODO @bradens highlighting
       try {
         var tokens = _Lexer2["default"].lex(source, options);
-        return console.log(_Parser2["default"].parse(tokens, options));
+        return _Parser2["default"].parse(tokens, options);
       } catch (e) {
         console.log(e);
         return e;
@@ -713,6 +766,8 @@ var Parser = (function () {
 
   _createClass(Parser, [{
     key: "parse",
+
+    // Parse all the tokens
     value: function parse(src) {
       this.inline = new _InlineLexer2["default"](src.links, this.options);
       this.tokens = src.reverse();
@@ -726,27 +781,21 @@ var Parser = (function () {
   }, {
     key: "next",
 
-    /**
-     * Next Token
-     */
+    // Next Token
     value: function next() {
       return this.token = this.tokens.pop();
     }
   }, {
     key: "peek",
 
-    /**
-     * Preview Next Token
-     */
+    // Preview Next Token
     value: function peek() {
       return this.tokens[this.tokens.length - 1] || 0;
     }
   }, {
     key: "parseText",
 
-    /**
-     * Parse Text Tokens
-     */
+    // Parse Text Tokens
     value: function parseText() {
       var body = this.token.text;
 
@@ -759,9 +808,7 @@ var Parser = (function () {
   }, {
     key: "tok",
 
-    /**
-     * Parse Current Token
-     */
+    // Parse Current Token
     value: function tok() {
       switch (this.token.type) {
         case "space":
