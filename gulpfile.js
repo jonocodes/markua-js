@@ -35,7 +35,7 @@ gulp.task('browserify', ['build-js'], function() {
     .pipe(gulp.dest('build'))
 });
 
-gulp.task('dev-web', function() {
+gulp.task('dev-web', ['browserify', 'build-styles'], function() {
   gulp.watch("./src/styles/*", ["build-styles"]);
   gulp.watch("./src/*", ["browserify"]);
 });

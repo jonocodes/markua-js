@@ -10,8 +10,13 @@ html, body {
   padding: 10px 20px;
 }
 
+.content {
+  white-space: nowrap;
+}
+
 #editor {
-  position: absolute;
+  white-space: normal;
+  position: relative;
   height: 80%;
   width: 50%;
   max-width: 700px;
@@ -21,10 +26,9 @@ html, body {
 }
 
 #output {
-  position: absolute;
-  left: 50%;
-  width: 50%;
-  min-width: 500px;
+  max-width: calc(100% - 800px); 
+  white-space: normal;
+  vertical-align: top;
   display: inline-block;
   padding: 0 20px;
 }

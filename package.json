@@ -23,6 +23,7 @@
   },
   "homepage": "https://github.com/ruboss/markua-js",
   "devDependencies": {
+    "async": "^0.9.0",
     "babel-core": "^5.1.10",
     "browserify-shim": "^3.8.5",
     "gulp": "^3.8.11",
@@ -35,6 +36,7 @@
     "mocha": "^2.2.4",
     "object-assign": "^2.0.0",
     "should": "^6.0.1",
+    "underscore": "^1.8.3",
     "vinyl-source-stream": "^1.1.0"
   },
   "browserify-shim": {

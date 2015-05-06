@@ -18,9 +18,16 @@ var _Parser = require("./parser");
 
 var _Parser2 = _interopRequireWildcard(_Parser);
 
+var _nativeFileAccessor = require("./native_file_accessor");
+
+var _nativeFileAccessor2 = _interopRequireWildcard(_nativeFileAccessor);
+
 var ObjectAssign = require("object-assign");
+var _ = require("underscore");
+var async = require("async");
 
 var DEFAULT_OPTIONS = {
+  fileAccessor: _nativeFileAccessor2["default"],
   tables: true,
   breaks: false,
   sanitize: false,
@@ -32,23 +39,63 @@ var DEFAULT_OPTIONS = {
 };
 
 var Markua = (function () {
-  function Markua() {
+  // Run the markua book generator on a given project path.
+
+  function Markua(projectPath, options) {
     _classCallCheck(this, Markua);
+
+    this.projectPath = projectPath;
+    this.options = ObjectAssign(DEFAULT_OPTIONS, options);
+    this.fileAccessor = new this.options.fileAccessor(projectPath);
   }
 
-  _createClass(Markua, null, [{
+  _createClass(Markua, [{
     key: "run",
-    value: function run(source, options) {
-      options = ObjectAssign(DEFAULT_OPTIONS, options);
+    value: function run(cb) {
+      // First, get all the chapters in the book using book.txt
+      async.waterfall([this.loadBook.bind(this), this.loadChapters.bind(this), this.processChapters.bind(this)], function (error, result) {
+        if (error) {
+          // There was an error, report it
+          console.log("Error when generating the markua document. ", error);
+          return cb(error);
+        }
+        cb(error, result);
+      });
+    }
+  }, {
+    key: "loadBook",
+    value: function loadBook(done) {
+      this.fileAccessor.get("book.txt", function (error, bookString) {
+        if (error) return done(error);
+        var lines = _.compact(bookString.split("\n"));
+        done(null, lines);
+      });
+    }
+  }, {
+    key: "loadChapters",
+    value: function loadChapters(chapters, done) {
+      var _this = this;
 
-      // TODO @bradens highlighting
-      try {
-        var tokens = _Lexer2["default"].lex(source, options);
-        return _Parser2["default"].parse(tokens, options);
-      } catch (e) {
-        console.log(e);
-        return e;
-      }
+      async.map(chapters, function (chapter, cb) {
+        _this.fileAccessor.get(chapter, cb);
+      }, done);
+    }
+  }, {
+    key: "processChapters",
+    value: function processChapters(chapters, done) {
+      var _this2 = this;
+
+      async.map(chapters, function (chapter, cb) {
+        try {
+          var tokens = _Lexer2["default"].lex(chapter, _this2.options);
+          cb(null, _Parser2["default"].parse(tokens, _this2.options));
+        } catch (e) {
+          cb(e);
+        }
+      }, function (error, results) {
+        // Concat it
+        done(null, results.join("\n\n"));
+      });
     }
   }]);
 

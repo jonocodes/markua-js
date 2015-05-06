@@ -1,6 +1,10 @@
 #! /Users/braden/.npm-packages/bin/babel-node
 
-let markua = require("./build/markua");
-let fs = require("fs");
-let buf = fs.readFileSync(process.argv[2], "utf8");
-console.log(markua.run(buf));
+let Markua = require("./build/markua");
+// let fs = require("fs");
+// let buf = fs.readFileSync(process.argv[2], "utf8");
+
+let markua = new Markua("./data/test_book")
+markua.run((error, bookHtml) => {
+  console.log(bookHtml);
+});
