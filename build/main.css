@@ -11,6 +11,22 @@ html, body {
 .content {
   white-space: nowrap; }
 
+.list.files {
+  list-style: none;
+  padding: 5px 15px; }
+  .list.files li {
+    display: inline-block;
+    margin: 0 5px;
+    border-radius: 4px;
+    transition: all .1s ease-in-out;
+    cursor: pointer; }
+    .list.files li a {
+      padding: 5px 8px;
+      display: inline-block; }
+    .list.files li.active {
+      background: tomato;
+      color: white; }
+
 #editor {
   white-space: normal;
   position: relative;

@@ -14,6 +14,26 @@ html, body {
   white-space: nowrap;
 }
 
+.list.files {
+  list-style: none;
+  padding: 5px 15px;
+  li {
+    display: inline-block;
+    margin: 0 5px;
+    border-radius: 4px;
+    transition: all .1s ease-in-out;
+    cursor: pointer;
+    a {
+      padding: 5px 8px;
+      display: inline-block;
+    }
+    &.active {
+      background: tomato;
+      color: white;
+    }
+  }
+}
+
 #editor {
   white-space: normal;
   position: relative;
@@ -26,7 +46,7 @@ html, body {
 }
 
 #output {
-  max-width: calc(100% - 800px); 
+  max-width: calc(100% - 800px);
   white-space: normal;
   vertical-align: top;
   display: inline-block;

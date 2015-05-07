@@ -8,11 +8,13 @@ class Renderer {
   getHeadingClass(level) {
     switch (this.options.bookType) {
       case "book":
-        HEADING_BOOK_CLASS_MAP[level]
+        return HEADING_BOOK_CLASS_MAP[level]
       case "multi-part-book":
-        HEADING_MULTI_PART_CLASS_MAP[level]
+        return HEADING_MULTI_PART_CLASS_MAP[level]
       case "document":
-        HEADING_DOCUMENT_CLASS_MAP[level]
+        return HEADING_DOCUMENT_CLASS_MAP[level]
+      default:
+        return "";
     }
   }
 

@@ -12,37 +12,10 @@
     <section class="main">
       <h1 class="logo">Try out Markua</h1>
       <div class="content">
-        <div id="editor" class="col">![Leanpub](http://markua.com/img/leanpub.svg)
+        <ul class="files list">
 
-# heading one
-## heading two
-
-### heading three
-
-Some paragraph here with aoentuhaohe unahotnaonentaoeuntoa ant noae u anoet
-unath unatho untaoeuSome paragraph here with aoentuhaohe unahotnaonentaoeuntoa
-ant noae u anoet unath unatho untaoeu Some paragraph here with aoentuhaohe
-nahotnaonentaoeuntoa ant noae u anoet unath unatho untaoeu
-
-* List **item** one
-* List item *two*
-* List item with image in it
-
-Here is another paragraph that has an ![inline image](http://markua.com/img/crab.svg) in it
-
-```
-  Some code sample here
-  something ellipsesaoeuao
-  aoeu
-
-  function something() {
-    word();
-  }
-```
-
-| First Header | Second Header  |
-| ------------ | -------------  |
-| something    | something else |</div>
+        </ul>
+        <div id="editor" class="col"></div>
         <section id="output" class="col">
         </section>
       </div>
@@ -52,13 +25,14 @@ Here is another paragraph that has an ![inline image](http://markua.com/img/crab
       $(function() {
         filesToGet = ["book.txt", "chapter1.txt", "chapter2.txt", "chapter3.txt"]
         window.fileData = {}
-
+        var currentFile = "/data/test_book/book.txt"
         setup = function() {
-          output = function(source) {
-            document.getElementById("output").innerHTML = markua.run(function(error, result) {
+          output = function() {
+            markua.run(function(error, result) {
               $("#output").html(result)
             });
           };
+
           editor = ace.edit('editor');
           editor.setTheme("ace/theme/xcode");
           editor.renderer.setShowGutter(false);
@@ -66,18 +40,30 @@ Here is another paragraph that has an ![inline image](http://markua.com/img/crab
           editor.renderer.setScrollMargin(20);
           editor.setShowPrintMargin(false);
           editor.getSession().setMode("ace/mode/markdown");
+          editor.setValue(window.fileData[currentFile], -1);
           editor.on("change", function(e) {
-            // Update localstorage with this result
-            // TODO
-            output(editor.getValue())
+            window.fileData[currentFile] = editor.getValue()
+            output()
           });
 
           output(editor.getValue());
+
+          $(".files.list li a[data-target='" + currentFile + "']").parent().addClass("active")
+
+          $(".files.list li a").on("click", function() {
+            fileName = $(this).data("target")
+            currentFile = fileName
+            $(this).parent().siblings().removeClass('active')
+            $(this).parent().addClass("active")
+            editor.setValue(window.fileData[fileName], -1)
+          });
         }
 
         onReceiveFile = function(contents) {
           // Take it away from what we need to get
           filesToGet.splice(filesToGet.indexOf(this.value), 1)
+
+          $(".files.list").append("<li><a data-target='/data/test_book/" + this.value + "'>" + this.value + "</a></li>");
 
           // Stash the value of this file somewhere
           window.fileData["/data/test_book/" + this.value] = contents
