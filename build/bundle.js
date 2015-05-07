@@ -146,20 +146,58 @@ inline.breaks = ObjectAssign({}, inline.gfm, {
   br: replace(inline.br)('{2,}', '*')(),
   text: replace(inline.gfm.text)('{2,}', '*')()
 });
+
+/**
+ * Renderer constants
+ */
+
+var HEADING_BOOK_CLASS_MAP = {
+  '1': 'chapter',
+  '2': 'section',
+  '3': 'sub-section',
+  '4': 'sub-sub-section',
+  '5': 'sub-sub-sub-section',
+  '6': 'sub-sub-sub-sub-section'
+};
+
+exports.HEADING_BOOK_CLASS_MAP = HEADING_BOOK_CLASS_MAP;
+var HEADING_MULTI_PART_CLASS_MAP = {
+  '1': 'part',
+  '2': 'chapter',
+  '3': 'section',
+  '4': 'sub-section',
+  '5': 'sub-sub-section',
+  '6': 'sub-sub-sub-section'
+};
+
+exports.HEADING_MULTI_PART_CLASS_MAP = HEADING_MULTI_PART_CLASS_MAP;
+var HEADING_DOCUMENT_CLASS_MAP = {
+  '1': 'section',
+  '2': 'sub-section',
+  '3': 'sub-sub-section',
+  '4': 'sub-sub-sub-section',
+  '5': 'sub-sub-sub-sub-section',
+  '6': 'sub-sub-sub-sub-sub-section'
+};
+exports.HEADING_DOCUMENT_CLASS_MAP = HEADING_DOCUMENT_CLASS_MAP;
 }).call(this,require("1YiZ5S"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/constants.js","/")
-},{"1YiZ5S":16,"buffer":12,"object-assign":17}],2:[function(require,module,exports){
+},{"1YiZ5S":17,"buffer":13,"object-assign":18}],2:[function(require,module,exports){
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
 "use strict";
 
 var _interopRequireWildcard = function (obj) { return obj && obj.__esModule ? obj : { "default": obj }; };
 
-var _markua = require("./markua");
+var _Markua = require("./markua");
 
-var _markua2 = _interopRequireWildcard(_markua);
+var _Markua2 = _interopRequireWildcard(_Markua);
 
-if (typeof window !== "undefined") window.markua = _markua2["default"];
-}).call(this,require("1YiZ5S"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/fake_402a21b.js","/")
-},{"./markua":6,"1YiZ5S":16,"buffer":12}],3:[function(require,module,exports){
+var _WebFileAccessor = require("./web_file_accessor");
+
+var _WebFileAccessor2 = _interopRequireWildcard(_WebFileAccessor);
+
+if (typeof window !== "undefined") window.markua = new _Markua2["default"]("/data/test_book", { fileAccessor: _WebFileAccessor2["default"] });
+}).call(this,require("1YiZ5S"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/fake_837a293d.js","/")
+},{"./markua":6,"./web_file_accessor":10,"1YiZ5S":17,"buffer":13}],3:[function(require,module,exports){
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
 "use strict";
 
@@ -191,7 +229,7 @@ var FileAccessor = (function () {
 exports["default"] = FileAccessor;
 module.exports = exports["default"];
 }).call(this,require("1YiZ5S"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/file_accessor.js","/")
-},{"1YiZ5S":16,"buffer":12}],4:[function(require,module,exports){
+},{"1YiZ5S":17,"buffer":13}],4:[function(require,module,exports){
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
 "use strict";
 
@@ -393,7 +431,7 @@ InlineLexer.rules = _inline$escape.inline;
 exports["default"] = InlineLexer;
 module.exports = exports["default"];
 }).call(this,require("1YiZ5S"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/inline_lexer.js","/")
-},{"./constants":1,"./renderer":9,"1YiZ5S":16,"buffer":12}],5:[function(require,module,exports){
+},{"./constants":1,"./renderer":9,"1YiZ5S":17,"buffer":13}],5:[function(require,module,exports){
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
 'use strict';
 
@@ -697,7 +735,7 @@ var Lexer = (function () {
 exports['default'] = Lexer;
 module.exports = exports['default'];
 }).call(this,require("1YiZ5S"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/lexer.js","/")
-},{"./constants":1,"1YiZ5S":16,"buffer":12}],6:[function(require,module,exports){
+},{"./constants":1,"1YiZ5S":17,"buffer":13}],6:[function(require,module,exports){
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
 "use strict";
 
@@ -736,7 +774,8 @@ var DEFAULT_OPTIONS = {
   highlight: null,
   langPrefix: "lang-",
   headerPrefix: "",
-  debug: true
+  debug: false,
+  bookType: "book"
 };
 
 var Markua = (function () {
@@ -795,7 +834,7 @@ var Markua = (function () {
         }
       }, function (error, results) {
         // Concat it
-        results.join("\n\n");
+        done(null, results.join("\n\n"));
       });
     }
   }]);
@@ -808,7 +847,7 @@ var Markua = (function () {
 exports["default"] = Markua;
 module.exports = exports["default"];
 }).call(this,require("1YiZ5S"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/markua.js","/")
-},{"./lexer":5,"./native_file_accessor":7,"./parser":8,"1YiZ5S":16,"async":10,"buffer":12,"object-assign":17,"underscore":18}],7:[function(require,module,exports){
+},{"./lexer":5,"./native_file_accessor":7,"./parser":8,"1YiZ5S":17,"async":11,"buffer":13,"object-assign":18,"underscore":19}],7:[function(require,module,exports){
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
 "use strict";
 
@@ -861,7 +900,7 @@ var NativeFileAccessor = (function (_FileAccessor) {
 exports["default"] = NativeFileAccessor;
 module.exports = exports["default"];
 }).call(this,require("1YiZ5S"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/native_file_accessor.js","/")
-},{"./file_accessor":3,"1YiZ5S":16,"buffer":12,"fs":11,"path":15}],8:[function(require,module,exports){
+},{"./file_accessor":3,"1YiZ5S":17,"buffer":13,"fs":12,"path":16}],8:[function(require,module,exports){
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
 "use strict";
 
@@ -1058,19 +1097,19 @@ var Parser = (function () {
 exports["default"] = Parser;
 module.exports = exports["default"];
 }).call(this,require("1YiZ5S"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/parser.js","/")
-},{"./inline_lexer":4,"./renderer":9,"1YiZ5S":16,"buffer":12}],9:[function(require,module,exports){
+},{"./inline_lexer":4,"./renderer":9,"1YiZ5S":17,"buffer":13}],9:[function(require,module,exports){
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
-'use strict';
+"use strict";
 
-var _classCallCheck = function (instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError('Cannot call a class as a function'); } };
+var _classCallCheck = function (instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } };
 
-var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ('value' in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
+var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
 
-Object.defineProperty(exports, '__esModule', {
+Object.defineProperty(exports, "__esModule", {
   value: true
 });
 
-var _escape$unescape = require('./constants');
+var _escape$unescape$HEADING_BOOK_CLASS_MAP$HEADING_MULTI_PART_CLASS_MAP$HEADING_DOCUMENT_CLASS_MAP = require("./constants");
 
 var Renderer = (function () {
   function Renderer() {
@@ -1082,7 +1121,19 @@ var Renderer = (function () {
   }
 
   _createClass(Renderer, [{
-    key: 'code',
+    key: "getHeadingClass",
+    value: function getHeadingClass(level) {
+      switch (this.options.bookType) {
+        case "book":
+          _escape$unescape$HEADING_BOOK_CLASS_MAP$HEADING_MULTI_PART_CLASS_MAP$HEADING_DOCUMENT_CLASS_MAP.HEADING_BOOK_CLASS_MAP[level];
+        case "multi-part-book":
+          _escape$unescape$HEADING_BOOK_CLASS_MAP$HEADING_MULTI_PART_CLASS_MAP$HEADING_DOCUMENT_CLASS_MAP.HEADING_MULTI_PART_CLASS_MAP[level];
+        case "document":
+          _escape$unescape$HEADING_BOOK_CLASS_MAP$HEADING_MULTI_PART_CLASS_MAP$HEADING_DOCUMENT_CLASS_MAP.HEADING_DOCUMENT_CLASS_MAP[level];
+      }
+    }
+  }, {
+    key: "code",
     value: (function (_code) {
       function code(_x, _x2, _x3) {
         return _code.apply(this, arguments);
@@ -1103,114 +1154,114 @@ var Renderer = (function () {
       }
 
       if (!lang) {
-        return '<pre><code>' + (escaped ? code : _escape$unescape.escape(code, true)) + '\n</code></pre>';
+        return "<pre><code>" + (escaped ? code : _escape$unescape$HEADING_BOOK_CLASS_MAP$HEADING_MULTI_PART_CLASS_MAP$HEADING_DOCUMENT_CLASS_MAP.escape(code, true)) + "\n</code></pre>";
       }
 
-      return '<pre><code class="' + this.options.langPrefix + _escape$unescape.escape(lang, true) + '">' + (escaped ? code : _escape$unescape.escape(code, true)) + '\n</code></pre>\n';
+      return "<pre><code class=\"" + this.options.langPrefix + _escape$unescape$HEADING_BOOK_CLASS_MAP$HEADING_MULTI_PART_CLASS_MAP$HEADING_DOCUMENT_CLASS_MAP.escape(lang, true) + "\">" + (escaped ? code : _escape$unescape$HEADING_BOOK_CLASS_MAP$HEADING_MULTI_PART_CLASS_MAP$HEADING_DOCUMENT_CLASS_MAP.escape(code, true)) + "\n</code></pre>\n";
     })
   }, {
-    key: 'blockquote',
+    key: "blockquote",
     value: function blockquote(quote) {
-      return '<blockquote>\n' + quote + '</blockquote>\n';
+      return "<blockquote>\n" + quote + "</blockquote>\n";
     }
   }, {
-    key: 'heading',
+    key: "heading",
     value: function heading(text, level, raw) {
-      return '<h' + level + ' id="' + this.options.headerPrefix + raw.toLowerCase().replace(/[^\w]+/g, '-') + '">' + text + '</h' + level + '>\n';
+      return "<h" + level + (" class=\"" + this.getHeadingClass(level) + "\"") + (" id=\"" + this.options.headerPrefix + "" + raw.toLowerCase().replace(/[^\w]+/g, "-") + "\">") + text + "</h" + level + ">\n";
     }
   }, {
-    key: 'hr',
+    key: "hr",
     value: function hr() {
-      return '<hr>\n';
+      return "<hr>\n";
     }
   }, {
-    key: 'list',
+    key: "list",
     value: function list(body, ordered) {
-      var type = ordered ? 'ol' : 'ul';
-      return '<' + type + '>\n' + body + '</' + type + '>\n';
+      var type = ordered ? "ol" : "ul";
+      return "<" + type + ">\n" + body + "</" + type + ">\n";
     }
   }, {
-    key: 'listitem',
+    key: "listitem",
     value: function listitem(text) {
-      return '<li>' + text + '</li>\n';
+      return "<li>" + text + "</li>\n";
     }
   }, {
-    key: 'paragraph',
+    key: "paragraph",
     value: function paragraph(text) {
-      return '<p>' + text + '</p>\n';
+      return "<p>" + text + "</p>\n";
     }
   }, {
-    key: 'table',
+    key: "table",
     value: function table(header, body) {
-      return '<table>\n' + '<thead>\n' + header + '</thead>\n' + '<tbody>\n' + body + '</tbody>\n' + '</table>\n';
+      return "<table>\n" + "<thead>\n" + header + "</thead>\n" + "<tbody>\n" + body + "</tbody>\n" + "</table>\n";
     }
   }, {
-    key: 'tablerow',
+    key: "tablerow",
     value: function tablerow(content) {
-      return '<tr>\n' + content + '</tr>\n';
+      return "<tr>\n" + content + "</tr>\n";
     }
   }, {
-    key: 'tablecell',
+    key: "tablecell",
     value: function tablecell(content, flags) {
-      var type = flags.header ? 'th' : 'td';
-      var tag = flags.align ? '<' + type + ' style="text-align: ' + flags.align + '">' : '<' + type + '>';
-      return tag + content + '</' + type + '>\n';
+      var type = flags.header ? "th" : "td";
+      var tag = flags.align ? "<" + type + " style=\"text-align: " + flags.align + "\">" : "<" + type + ">";
+      return tag + content + "</" + type + ">\n";
     }
   }, {
-    key: 'strong',
+    key: "strong",
 
     // span level renderer
     value: function strong(text) {
-      return '<strong>' + text + '</strong>';
+      return "<strong>" + text + "</strong>";
     }
   }, {
-    key: 'em',
+    key: "em",
     value: function em(text) {
-      return '<em>' + text + '</em>';
+      return "<em>" + text + "</em>";
     }
   }, {
-    key: 'codespan',
+    key: "codespan",
     value: function codespan(text) {
-      return '<code>' + text + '</code>';
+      return "<code>" + text + "</code>";
     }
   }, {
-    key: 'br',
+    key: "br",
     value: function br() {
-      return '<br>';
+      return "<br>";
     }
   }, {
-    key: 'del',
+    key: "del",
     value: function del(text) {
-      return '<del>' + text + '</del>';
+      return "<del>" + text + "</del>";
     }
   }, {
-    key: 'link',
+    key: "link",
     value: function link(href, title, text) {
       if (this.options.sanitize) {
         try {
-          var prot = decodeURIComponent(_escape$unescape.unescape(href)).replace(/[^\w:]/g, '').toLowerCase();
+          var prot = decodeURIComponent(_escape$unescape$HEADING_BOOK_CLASS_MAP$HEADING_MULTI_PART_CLASS_MAP$HEADING_DOCUMENT_CLASS_MAP.unescape(href)).replace(/[^\w:]/g, "").toLowerCase();
         } catch (e) {
-          return '';
+          return "";
         }
-        if (prot.indexOf('javascript:') === 0 || prot.indexOf('vbscript:') === 0) {
-          return '';
+        if (prot.indexOf("javascript:") === 0 || prot.indexOf("vbscript:") === 0) {
+          return "";
         }
       }
-      var out = '<a href="' + href + '"';
+      var out = "<a href=\"" + href + "\"";
       if (title) {
-        out += ' title="' + title + '"';
+        out += " title=\"" + title + "\"";
       }
-      out += '>' + text + '</a>';
+      out += ">" + text + "</a>";
       return out;
     }
   }, {
-    key: 'image',
+    key: "image",
     value: function image(href, title, text) {
-      var out = '<img src="' + href + '" alt="' + text + '"';
+      var out = "<img src=\"" + href + "\" alt=\"" + text + "\"";
       if (title) {
-        out += ' title="' + title + '"';
+        out += " title=\"" + title + "\"";
       }
-      out += '>';
+      out += ">";
       return out;
     }
   }]);
@@ -1218,10 +1269,59 @@ var Renderer = (function () {
   return Renderer;
 })();
 
-exports['default'] = Renderer;
-module.exports = exports['default'];
+exports["default"] = Renderer;
+module.exports = exports["default"];
 }).call(this,require("1YiZ5S"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/renderer.js","/")
-},{"./constants":1,"1YiZ5S":16,"buffer":12}],10:[function(require,module,exports){
+},{"./constants":1,"1YiZ5S":17,"buffer":13}],10:[function(require,module,exports){
+(function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
+"use strict";
+
+var _interopRequireWildcard = function (obj) { return obj && obj.__esModule ? obj : { "default": obj }; };
+
+var _classCallCheck = function (instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } };
+
+var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
+
+var _inherits = function (subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) subClass.__proto__ = superClass; };
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _FileAccessor2 = require("./file_accessor");
+
+var _FileAccessor3 = _interopRequireWildcard(_FileAccessor2);
+
+var WebFileAccessor = (function (_FileAccessor) {
+  function WebFileAccessor() {
+    _classCallCheck(this, WebFileAccessor);
+
+    if (_FileAccessor != null) {
+      _FileAccessor.apply(this, arguments);
+    }
+  }
+
+  _inherits(WebFileAccessor, _FileAccessor);
+
+  _createClass(WebFileAccessor, [{
+    key: "get",
+
+    // Retrieves a file from our client side data (faked)
+    value: function get(filePath, cb) {
+      var item = window.fileData["" + this.projectPath + "/" + filePath];
+      cb(null, item);
+    }
+  }]);
+
+  return WebFileAccessor;
+})(_FileAccessor3["default"]);
+
+;
+
+exports["default"] = WebFileAccessor;
+module.exports = exports["default"];
+}).call(this,require("1YiZ5S"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/web_file_accessor.js","/")
+},{"./file_accessor":3,"1YiZ5S":17,"buffer":13}],11:[function(require,module,exports){
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
 /*!
  * async
@@ -2348,9 +2448,9 @@ module.exports = exports['default'];
 }());
 
 }).call(this,require("1YiZ5S"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/../node_modules/async/lib/async.js","/../node_modules/async/lib")
-},{"1YiZ5S":16,"buffer":12}],11:[function(require,module,exports){
+},{"1YiZ5S":17,"buffer":13}],12:[function(require,module,exports){
 
-},{"1YiZ5S":16,"buffer":12}],12:[function(require,module,exports){
+},{"1YiZ5S":17,"buffer":13}],13:[function(require,module,exports){
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
 /*!
  * The buffer module from node.js, for the browser.
@@ -3463,7 +3563,7 @@ function assert (test, message) {
 }
 
 }).call(this,require("1YiZ5S"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/../node_modules/gulp-browserify/node_modules/browserify/node_modules/buffer/index.js","/../node_modules/gulp-browserify/node_modules/browserify/node_modules/buffer")
-},{"1YiZ5S":16,"base64-js":13,"buffer":12,"ieee754":14}],13:[function(require,module,exports){
+},{"1YiZ5S":17,"base64-js":14,"buffer":13,"ieee754":15}],14:[function(require,module,exports){
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
 var lookup = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
 
@@ -3591,7 +3691,7 @@ var lookup = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
 }(typeof exports === 'undefined' ? (this.base64js = {}) : exports))
 
 }).call(this,require("1YiZ5S"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/../node_modules/gulp-browserify/node_modules/browserify/node_modules/buffer/node_modules/base64-js/lib/b64.js","/../node_modules/gulp-browserify/node_modules/browserify/node_modules/buffer/node_modules/base64-js/lib")
-},{"1YiZ5S":16,"buffer":12}],14:[function(require,module,exports){
+},{"1YiZ5S":17,"buffer":13}],15:[function(require,module,exports){
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
 exports.read = function(buffer, offset, isLE, mLen, nBytes) {
   var e, m,
@@ -3679,7 +3779,7 @@ exports.write = function(buffer, value, offset, isLE, mLen, nBytes) {
 };
 
 }).call(this,require("1YiZ5S"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/../node_modules/gulp-browserify/node_modules/browserify/node_modules/buffer/node_modules/ieee754/index.js","/../node_modules/gulp-browserify/node_modules/browserify/node_modules/buffer/node_modules/ieee754")
-},{"1YiZ5S":16,"buffer":12}],15:[function(require,module,exports){
+},{"1YiZ5S":17,"buffer":13}],16:[function(require,module,exports){
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
 // Copyright Joyent, Inc. and other Node contributors.
 //
@@ -3907,7 +4007,7 @@ var substr = 'ab'.substr(-1) === 'b'
 ;
 
 }).call(this,require("1YiZ5S"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/../node_modules/gulp-browserify/node_modules/browserify/node_modules/path-browserify/index.js","/../node_modules/gulp-browserify/node_modules/browserify/node_modules/path-browserify")
-},{"1YiZ5S":16,"buffer":12}],16:[function(require,module,exports){
+},{"1YiZ5S":17,"buffer":13}],17:[function(require,module,exports){
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
 // shim for using process in browser
 
@@ -3974,7 +4074,7 @@ process.chdir = function (dir) {
 };
 
 }).call(this,require("1YiZ5S"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/../node_modules/gulp-browserify/node_modules/browserify/node_modules/process/browser.js","/../node_modules/gulp-browserify/node_modules/browserify/node_modules/process")
-},{"1YiZ5S":16,"buffer":12}],17:[function(require,module,exports){
+},{"1YiZ5S":17,"buffer":13}],18:[function(require,module,exports){
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
 'use strict';
 
@@ -4004,7 +4104,7 @@ module.exports = Object.assign || function (target, source) {
 };
 
 }).call(this,require("1YiZ5S"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/../node_modules/object-assign/index.js","/../node_modules/object-assign")
-},{"1YiZ5S":16,"buffer":12}],18:[function(require,module,exports){
+},{"1YiZ5S":17,"buffer":13}],19:[function(require,module,exports){
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
 //     Underscore.js 1.8.3
 //     http://underscorejs.org
@@ -5556,4 +5656,4 @@ module.exports = Object.assign || function (target, source) {
 }.call(this));
 
 }).call(this,require("1YiZ5S"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/../node_modules/underscore/underscore.js","/../node_modules/underscore")
-},{"1YiZ5S":16,"buffer":12}]},{},[2])
+},{"1YiZ5S":17,"buffer":13}]},{},[2])

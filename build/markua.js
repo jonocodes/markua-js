@@ -35,7 +35,8 @@ var DEFAULT_OPTIONS = {
   highlight: null,
   langPrefix: "lang-",
   headerPrefix: "",
-  debug: true
+  debug: false,
+  bookType: "book"
 };
 
 var Markua = (function () {

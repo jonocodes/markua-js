@@ -144,3 +144,37 @@ inline.breaks = ObjectAssign({}, inline.gfm, {
   br: replace(inline.br)('{2,}', '*')(),
   text: replace(inline.gfm.text)('{2,}', '*')()
 });
+
+/**
+ * Renderer constants
+ */
+
+var HEADING_BOOK_CLASS_MAP = {
+  '1': 'chapter',
+  '2': 'section',
+  '3': 'sub-section',
+  '4': 'sub-sub-section',
+  '5': 'sub-sub-sub-section',
+  '6': 'sub-sub-sub-sub-section'
+};
+
+exports.HEADING_BOOK_CLASS_MAP = HEADING_BOOK_CLASS_MAP;
+var HEADING_MULTI_PART_CLASS_MAP = {
+  '1': 'part',
+  '2': 'chapter',
+  '3': 'section',
+  '4': 'sub-section',
+  '5': 'sub-sub-section',
+  '6': 'sub-sub-sub-section'
+};
+
+exports.HEADING_MULTI_PART_CLASS_MAP = HEADING_MULTI_PART_CLASS_MAP;
+var HEADING_DOCUMENT_CLASS_MAP = {
+  '1': 'section',
+  '2': 'sub-section',
+  '3': 'sub-sub-section',
+  '4': 'sub-sub-sub-section',
+  '5': 'sub-sub-sub-sub-section',
+  '6': 'sub-sub-sub-sub-sub-section'
+};
+exports.HEADING_DOCUMENT_CLASS_MAP = HEADING_DOCUMENT_CLASS_MAP;

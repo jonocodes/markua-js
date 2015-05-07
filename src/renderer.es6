@@ -1,8 +1,19 @@
-import { escape, unescape } from "./constants";
+import { escape, unescape, HEADING_BOOK_CLASS_MAP, HEADING_MULTI_PART_CLASS_MAP, HEADING_DOCUMENT_CLASS_MAP } from "./constants";
 
 class Renderer {
   constructor(options = {}) {
     this.options = options;
+  }
+
+  getHeadingClass(level) {
+    switch (this.options.bookType) {
+      case "book":
+        HEADING_BOOK_CLASS_MAP[level]
+      case "multi-part-book":
+        HEADING_MULTI_PART_CLASS_MAP[level]
+      case "document":
+        HEADING_DOCUMENT_CLASS_MAP[level]
+    }
   }
 
   code(code, lang, escaped) {
@@ -33,10 +44,8 @@ class Renderer {
   heading(text, level, raw) {
     return '<h'
       + level
-      + ' id="'
-      + this.options.headerPrefix
-      + raw.toLowerCase().replace(/[^\w]+/g, '-')
-      + '">'
+      + ` class="${this.getHeadingClass(level)}"`
+      + ` id="${this.options.headerPrefix}${raw.toLowerCase().replace(/[^\w]+/g, '-')}">`
       + text
       + '</h'
       + level

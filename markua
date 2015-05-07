@@ -4,7 +4,7 @@ let Markua = require("./build/markua");
 // let fs = require("fs");
 // let buf = fs.readFileSync(process.argv[2], "utf8");
 
-let markua = new Markua("./data/test_book")
+let markua = new Markua("./data/test_book", { debug: true })
 markua.run((error, bookHtml) => {
   console.log(bookHtml);
 });

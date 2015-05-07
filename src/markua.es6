@@ -15,7 +15,8 @@ const DEFAULT_OPTIONS = {
   highlight: null,
   langPrefix: 'lang-',
   headerPrefix: '',
-  debug: true
+  debug: false,
+  bookType: "book"
 }
 
 class Markua {

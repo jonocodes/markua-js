@@ -3,6 +3,7 @@
     <title>Markua-JS</title>
     <script src="node_modules/babel-core/browser-polyfill.js" type="text/javascript"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.1.9/ace.js" type="text/javascript"></script>
+    <script src="https://code.jquery.com/jquery-2.1.4.min.js" type="text/javascript"></script>
     <link href='http://fonts.googleapis.com/css?family=Lato:300,400,700' rel='stylesheet' type='text/css'>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/normalize/3.0.3/normalize.css" />
     <link rel="stylesheet" href="build/main.css" />
@@ -48,21 +49,49 @@ Here is another paragraph that has an ![inline image](http://markua.com/img/crab
     </section>
     <script src="build/bundle.js" type="text/javascript"></script>
     <script>
-      output = function(source) {
-        document.getElementById("output").innerHTML = markua.run(source);
-      };
-      editor = ace.edit('editor');
-      editor.setTheme("ace/theme/xcode");
-      editor.renderer.setShowGutter(false);
-      editor.renderer.setPadding(20);
-      editor.renderer.setScrollMargin(20);
-      editor.setShowPrintMargin(false);
-      editor.getSession().setMode("ace/mode/markdown");
-      editor.on("change", function(e) {
-        output(editor.getValue())
-      });
+      $(function() {
+        filesToGet = ["book.txt", "chapter1.txt", "chapter2.txt", "chapter3.txt"]
+        window.fileData = {}
 
-      output(editor.getValue());
+        setup = function() {
+          output = function(source) {
+            document.getElementById("output").innerHTML = markua.run(function(error, result) {
+              $("#output").html(result)
+            });
+          };
+          editor = ace.edit('editor');
+          editor.setTheme("ace/theme/xcode");
+          editor.renderer.setShowGutter(false);
+          editor.renderer.setPadding(20);
+          editor.renderer.setScrollMargin(20);
+          editor.setShowPrintMargin(false);
+          editor.getSession().setMode("ace/mode/markdown");
+          editor.on("change", function(e) {
+            // Update localstorage with this result
+            // TODO
+            output(editor.getValue())
+          });
+
+          output(editor.getValue());
+        }
+
+        onReceiveFile = function(contents) {
+          // Take it away from what we need to get
+          filesToGet.splice(filesToGet.indexOf(this.value), 1)
+
+          // Stash the value of this file somewhere
+          window.fileData["/data/test_book/" + this.value] = contents
+
+          if (filesToGet.length === 0) {
+            setup()
+          }
+        }
+
+        // Once we've loaded the page, start loading our text data.
+        for (fileIndex in filesToGet) {
+          $.get("/data/test_book/" + filesToGet[fileIndex], onReceiveFile.bind({ value: filesToGet[fileIndex]}))
+        }
+      });
     </script>
   </body>
 </html>
