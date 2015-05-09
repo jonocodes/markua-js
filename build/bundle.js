@@ -74,7 +74,6 @@ var block = {
   nptable: /^ *(\S.*\|.*)\n *([-:]+ *\|[-| :]*)\n((?:.*\|.*(?:\n|$))*)\n*/,
   hr: /^( *[-*_]){3,} *(?:\n+|$)/,
   heading: /^ *(#{1,6}) *([^\n]+) */,
-  //heading: /^ *(#{1,6}) *([^\n]+?) *#* *(?:\n+|$)/,
   blockquote: /^( *>[^\n]+(\n(?!def)[^\n]+)*\n*)+/,
   list: /^( *)(bull) [\s\S]+?(?:hr|def|\n{2,}(?! )(?!\1bull )\n*|\s*$)/,
   def: /^ *\[([^\]]+)\]: *<?([^\s>]+)>?(?: +["(]([^\n]+)[")])? *(?:\n+|$)/,
@@ -181,7 +180,7 @@ var HEADING_DOCUMENT_CLASS_MAP = {
 };
 exports.HEADING_DOCUMENT_CLASS_MAP = HEADING_DOCUMENT_CLASS_MAP;
 }).call(this,require("1YiZ5S"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/constants.js","/")
-},{"1YiZ5S":17,"buffer":13,"object-assign":18}],2:[function(require,module,exports){
+},{"1YiZ5S":15,"buffer":11,"object-assign":16}],2:[function(require,module,exports){
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
 "use strict";
 
@@ -196,8 +195,8 @@ var _WebFileAccessor = require("./web_file_accessor");
 var _WebFileAccessor2 = _interopRequireWildcard(_WebFileAccessor);
 
 if (typeof window !== "undefined") window.markua = new _Markua2["default"]("/data/test_book", { fileAccessor: _WebFileAccessor2["default"] });
-}).call(this,require("1YiZ5S"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/fake_6d5fba37.js","/")
-},{"./markua":6,"./web_file_accessor":10,"1YiZ5S":17,"buffer":13}],3:[function(require,module,exports){
+}).call(this,require("1YiZ5S"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/fake_4303abd5.js","/")
+},{"./markua":5,"./web_file_accessor":8,"1YiZ5S":15,"buffer":11}],3:[function(require,module,exports){
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
 "use strict";
 
@@ -229,209 +228,7 @@ var FileAccessor = (function () {
 exports["default"] = FileAccessor;
 module.exports = exports["default"];
 }).call(this,require("1YiZ5S"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/file_accessor.js","/")
-},{"1YiZ5S":17,"buffer":13}],4:[function(require,module,exports){
-(function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
-"use strict";
-
-var _interopRequireWildcard = function (obj) { return obj && obj.__esModule ? obj : { "default": obj }; };
-
-var _classCallCheck = function (instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } };
-
-var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-
-var _inline$escape = require("./constants");
-
-var _Renderer = require("./renderer");
-
-var _Renderer2 = _interopRequireWildcard(_Renderer);
-
-// Lexes and pipes tokens to the inline renderer
-
-var InlineLexer = (function () {
-  function InlineLexer(links, options) {
-    _classCallCheck(this, InlineLexer);
-
-    this.options = options;
-    this.links = links;
-    this.rules = _inline$escape.inline.normal;
-
-    this.renderer = new _Renderer2["default"]();
-
-    if (!this.links) throw new Error("Tokens array requires a `links` property.");
-  }
-
-  _createClass(InlineLexer, [{
-    key: "output",
-
-    // lex and send tokens to the renderer
-    value: function output(src) {
-      var cap = undefined,
-          link = undefined,
-          text = undefined,
-          href = undefined,
-          out = "";
-
-      while (src) {
-        // escape
-        if (cap = this.rules.escape.exec(src)) {
-          src = src.substring(cap[0].length);
-          out += cap[1];
-          continue;
-        }
-
-        // autolink
-        if (cap = this.rules.autolink.exec(src)) {
-          src = src.substring(cap[0].length);
-          if (cap[2] === "@") {
-            text = cap[1].charAt(6) === ":" ? cap[1].substring(7) : cap[1];
-            href = "mailto:" + text;
-          } else {
-            text = _inline$escape.escape(cap[1]);
-            href = text;
-          }
-          out += this.renderer.link(href, null, text);
-          continue;
-        }
-
-        // url (gfm)
-        if (!this.inLink && (cap = this.rules.url.exec(src))) {
-          src = src.substring(cap[0].length);
-          text = _inline$escape.escape(cap[1]);
-          href = text;
-          out += this.renderer.link(href, null, text);
-          continue;
-        }
-
-        // link
-        if (cap = this.rules.link.exec(src)) {
-          src = src.substring(cap[0].length);
-          this.inLink = true;
-          out += this.outputLink(cap, {
-            href: cap[2],
-            title: cap[3]
-          });
-          this.inLink = false;
-          continue;
-        }
-
-        // reflink, nolink
-        if ((cap = this.rules.reflink.exec(src)) || (cap = this.rules.nolink.exec(src))) {
-          src = src.substring(cap[0].length);
-          link = (cap[2] || cap[1]).replace(/\s+/g, " ");
-          link = this.links[link.toLowerCase()];
-          if (!link || !link.href) {
-            out += cap[0].charAt(0);
-            src = cap[0].substring(1) + src;
-            continue;
-          }
-          this.inLink = true;
-          out += this.outputLink(cap, link);
-          this.inLink = false;
-          continue;
-        }
-
-        // strong
-        if (cap = this.rules.strong.exec(src)) {
-          src = src.substring(cap[0].length);
-          out += this.renderer.strong(this.output(cap[2] || cap[1]));
-          continue;
-        }
-
-        // em
-        if (cap = this.rules.em.exec(src)) {
-          src = src.substring(cap[0].length);
-          out += this.renderer.em(this.output(cap[2] || cap[1]));
-          continue;
-        }
-
-        // code
-        if (cap = this.rules.code.exec(src)) {
-          src = src.substring(cap[0].length);
-          out += this.renderer.codespan(_inline$escape.escape(cap[2], true));
-          continue;
-        }
-
-        // br
-        if (cap = this.rules.br.exec(src)) {
-          src = src.substring(cap[0].length);
-          out += this.renderer.br();
-          continue;
-        }
-
-        // del (gfm)
-        if (cap = this.rules.del.exec(src)) {
-          src = src.substring(cap[0].length);
-          out += this.renderer.del(this.output(cap[1]));
-          continue;
-        }
-
-        // text
-        if (cap = this.rules.text.exec(src)) {
-          src = src.substring(cap[0].length);
-          out += _inline$escape.escape(this.smartypants(cap[0]));
-          continue;
-        }
-
-        if (src) {
-          throw new Error("Infinite loop on byte: " + src.charCodeAt(0));
-        }
-      }
-
-      return out;
-    }
-  }, {
-    key: "outputLink",
-
-    // Compile a link or Image
-    value: function outputLink(cap, link) {
-      var href = _inline$escape.escape(link.href),
-          title = link.title ? _inline$escape.escape(link.title) : null;
-
-      return cap[0].charAt(0) !== "!" ? this.renderer.link(href, title, this.output(cap[1])) : this.renderer.image(href, title, _inline$escape.escape(cap[1]));
-    }
-  }, {
-    key: "smartypants",
-
-    // Turn dashes and stuff into special characters
-    // -- SmartyPants
-    value: function smartypants(text) {
-      return text
-      // em-dashes
-      .replace(/--/g, "—")
-      // opening singles
-      .replace(/(^|[-\u2014/(\[{"\s])'/g, "$1‘")
-      // closing singles & apostrophes
-      .replace(/'/g, "’")
-      // opening doubles
-      .replace(/(^|[-\u2014/(\[{\u2018\s])"/g, "$1“")
-      // closing doubles
-      .replace(/"/g, "”")
-      // ellipses
-      .replace(/\.{3}/g, "…");
-    }
-  }], [{
-    key: "output",
-
-    // Exposed output function
-    value: function output(src, links, options) {
-      return new InlineLexer(links, options).output(src);
-    }
-  }]);
-
-  return InlineLexer;
-})();
-
-// Expose rules
-InlineLexer.rules = _inline$escape.inline;
-
-exports["default"] = InlineLexer;
-module.exports = exports["default"];
-}).call(this,require("1YiZ5S"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/inline_lexer.js","/")
-},{"./constants":1,"./renderer":9,"1YiZ5S":17,"buffer":13}],5:[function(require,module,exports){
+},{"1YiZ5S":15,"buffer":11}],4:[function(require,module,exports){
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
 'use strict';
 
@@ -735,7 +532,7 @@ var Lexer = (function () {
 exports['default'] = Lexer;
 module.exports = exports['default'];
 }).call(this,require("1YiZ5S"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/lexer.js","/")
-},{"./constants":1,"1YiZ5S":17,"buffer":13}],6:[function(require,module,exports){
+},{"./constants":1,"1YiZ5S":15,"buffer":11}],5:[function(require,module,exports){
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
 "use strict";
 
@@ -816,8 +613,9 @@ var Markua = (function () {
     value: function loadChapters(chapters, done) {
       var _this = this;
 
+      console.log(chapters);
       async.map(chapters, function (chapter, cb) {
-        _this.fileAccessor.get(chapter, cb);
+        _this.fileAccessor.get("manuscript/" + chapter, cb);
       }, done);
     }
   }, {
@@ -825,7 +623,7 @@ var Markua = (function () {
     value: function processChapters(chapters, done) {
       var _this2 = this;
 
-      async.map(chapters, function (chapter, cb) {
+      async.map(_.compact(chapters), function (chapter, cb) {
         try {
           var tokens = _Lexer2["default"].lex(chapter, _this2.options);
           cb(null, _Parser2["default"].parse(tokens, _this2.options));
@@ -847,7 +645,7 @@ var Markua = (function () {
 exports["default"] = Markua;
 module.exports = exports["default"];
 }).call(this,require("1YiZ5S"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/markua.js","/")
-},{"./lexer":5,"./native_file_accessor":7,"./parser":8,"1YiZ5S":17,"async":11,"buffer":13,"object-assign":18,"underscore":19}],7:[function(require,module,exports){
+},{"./lexer":4,"./native_file_accessor":6,"./parser":7,"1YiZ5S":15,"async":9,"buffer":11,"object-assign":16,"underscore":17}],6:[function(require,module,exports){
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
 "use strict";
 
@@ -900,381 +698,11 @@ var NativeFileAccessor = (function (_FileAccessor) {
 exports["default"] = NativeFileAccessor;
 module.exports = exports["default"];
 }).call(this,require("1YiZ5S"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/native_file_accessor.js","/")
-},{"./file_accessor":3,"1YiZ5S":17,"buffer":13,"fs":12,"path":16}],8:[function(require,module,exports){
+},{"./file_accessor":3,"1YiZ5S":15,"buffer":11,"fs":10,"path":14}],7:[function(require,module,exports){
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
-"use strict";
 
-var _interopRequireWildcard = function (obj) { return obj && obj.__esModule ? obj : { "default": obj }; };
-
-var _classCallCheck = function (instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } };
-
-var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-
-var _Renderer = require("./renderer");
-
-var _Renderer2 = _interopRequireWildcard(_Renderer);
-
-var _InlineLexer = require("./inline_lexer");
-
-var _InlineLexer2 = _interopRequireWildcard(_InlineLexer);
-
-var Parser = (function () {
-  function Parser() {
-    var options = arguments[0] === undefined ? {} : arguments[0];
-
-    _classCallCheck(this, Parser);
-
-    this.options = options;
-    this.tokens = [];
-    this.token = null;
-    this.renderer = new _Renderer2["default"]();
-    this.renderer.options = this.options;
-  }
-
-  _createClass(Parser, [{
-    key: "parse",
-
-    // Parse all the tokens
-    value: function parse(src) {
-      this.inline = new _InlineLexer2["default"](src.links, this.options);
-      this.tokens = src.reverse();
-
-      var out = "";
-      while (this.next()) {
-        out += this.tok();
-      }
-      return out;
-    }
-  }, {
-    key: "next",
-
-    // Next Token
-    value: function next() {
-      return this.token = this.tokens.pop();
-    }
-  }, {
-    key: "peek",
-
-    // Preview Next Token
-    value: function peek() {
-      return this.tokens[this.tokens.length - 1] || 0;
-    }
-  }, {
-    key: "parseText",
-
-    // Parse Text Tokens
-    value: function parseText() {
-      var body = this.token.text;
-
-      while (this.peek().type === "text") {
-        body += "\n" + this.next().text;
-      }
-
-      return this.inline.output(body);
-    }
-  }, {
-    key: "tok",
-
-    // Parse Current Token
-    value: function tok() {
-      switch (this.token.type) {
-        case "space":
-          {
-            return "";
-          }
-        case "hr":
-          {
-            return this.renderer.hr();
-          }
-        case "heading":
-          {
-            return this.renderer.heading(this.inline.output(this.token.text), this.token.depth, this.token.text);
-          }
-        case "code":
-          {
-            return this.renderer.code(this.token.text, this.token.lang, this.token.escaped);
-          }
-        case "table":
-          {
-            var header = "",
-                body = "",
-                i,
-                row,
-                cell,
-                flags,
-                j;
-
-            // header
-            cell = "";
-            for (i = 0; i < this.token.header.length; i++) {
-              flags = { header: true, align: this.token.align[i] };
-              cell += this.renderer.tablecell(this.inline.output(this.token.header[i]), { header: true, align: this.token.align[i] });
-            }
-            header += this.renderer.tablerow(cell);
-
-            for (i = 0; i < this.token.cells.length; i++) {
-              row = this.token.cells[i];
-
-              cell = "";
-              for (j = 0; j < row.length; j++) {
-                cell += this.renderer.tablecell(this.inline.output(row[j]), { header: false, align: this.token.align[j] });
-              }
-
-              body += this.renderer.tablerow(cell);
-            }
-            return this.renderer.table(header, body);
-          }
-        case "blockquote_start":
-          {
-            var body = "";
-
-            while (this.next().type !== "blockquote_end") {
-              body += this.tok();
-            }
-
-            return this.renderer.blockquote(body);
-          }
-        case "list_start":
-          {
-            var body = "",
-                ordered = this.token.ordered;
-
-            while (this.next().type !== "list_end") {
-              body += this.tok();
-            }
-
-            return this.renderer.list(body, ordered);
-          }
-        case "list_item_start":
-          {
-            var body = "";
-
-            while (this.next().type !== "list_item_end") {
-              body += this.token.type === "text" ? this.parseText() : this.tok();
-            }
-
-            return this.renderer.listitem(body);
-          }
-        case "loose_item_start":
-          {
-            var body = "";
-
-            while (this.next().type !== "list_item_end") {
-              body += this.tok();
-            }
-
-            return this.renderer.listitem(body);
-          }
-        case "html":
-          {
-            var html = !this.token.pre && !this.options.pedantic ? this.inline.output(this.token.text) : this.token.text;
-            return this.renderer.html(html);
-          }
-        case "paragraph":
-          {
-            return this.renderer.paragraph(this.inline.output(this.token.text));
-          }
-        case "text":
-          {
-            return this.renderer.paragraph(this.parseText());
-          }
-      }
-    }
-  }], [{
-    key: "parse",
-    value: function parse(src, options) {
-      return new Parser(options).parse(src);
-    }
-  }]);
-
-  return Parser;
-})();
-
-exports["default"] = Parser;
-module.exports = exports["default"];
 }).call(this,require("1YiZ5S"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/parser.js","/")
-},{"./inline_lexer":4,"./renderer":9,"1YiZ5S":17,"buffer":13}],9:[function(require,module,exports){
-(function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
-"use strict";
-
-var _classCallCheck = function (instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } };
-
-var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-
-var _escape$unescape$HEADING_BOOK_CLASS_MAP$HEADING_MULTI_PART_CLASS_MAP$HEADING_DOCUMENT_CLASS_MAP = require("./constants");
-
-var Renderer = (function () {
-  function Renderer() {
-    var options = arguments[0] === undefined ? {} : arguments[0];
-
-    _classCallCheck(this, Renderer);
-
-    this.options = options;
-  }
-
-  _createClass(Renderer, [{
-    key: "getHeadingClass",
-    value: function getHeadingClass(level) {
-      switch (this.options.bookType) {
-        case "book":
-          return _escape$unescape$HEADING_BOOK_CLASS_MAP$HEADING_MULTI_PART_CLASS_MAP$HEADING_DOCUMENT_CLASS_MAP.HEADING_BOOK_CLASS_MAP[level];
-        case "multi-part-book":
-          return _escape$unescape$HEADING_BOOK_CLASS_MAP$HEADING_MULTI_PART_CLASS_MAP$HEADING_DOCUMENT_CLASS_MAP.HEADING_MULTI_PART_CLASS_MAP[level];
-        case "document":
-          return _escape$unescape$HEADING_BOOK_CLASS_MAP$HEADING_MULTI_PART_CLASS_MAP$HEADING_DOCUMENT_CLASS_MAP.HEADING_DOCUMENT_CLASS_MAP[level];
-        default:
-          return "";
-      }
-    }
-  }, {
-    key: "code",
-    value: (function (_code) {
-      function code(_x, _x2, _x3) {
-        return _code.apply(this, arguments);
-      }
-
-      code.toString = function () {
-        return _code.toString();
-      };
-
-      return code;
-    })(function (code, lang, escaped) {
-      if (this.options.highlight) {
-        var out = this.options.highlight(code, lang);
-        if (out != null && out !== code) {
-          escaped = true;
-          code = out;
-        }
-      }
-
-      if (!lang) {
-        return "<pre><code>" + (escaped ? code : _escape$unescape$HEADING_BOOK_CLASS_MAP$HEADING_MULTI_PART_CLASS_MAP$HEADING_DOCUMENT_CLASS_MAP.escape(code, true)) + "\n</code></pre>";
-      }
-
-      return "<pre><code class=\"" + this.options.langPrefix + _escape$unescape$HEADING_BOOK_CLASS_MAP$HEADING_MULTI_PART_CLASS_MAP$HEADING_DOCUMENT_CLASS_MAP.escape(lang, true) + "\">" + (escaped ? code : _escape$unescape$HEADING_BOOK_CLASS_MAP$HEADING_MULTI_PART_CLASS_MAP$HEADING_DOCUMENT_CLASS_MAP.escape(code, true)) + "\n</code></pre>\n";
-    })
-  }, {
-    key: "blockquote",
-    value: function blockquote(quote) {
-      return "<blockquote>\n" + quote + "</blockquote>\n";
-    }
-  }, {
-    key: "heading",
-    value: function heading(text, level, raw) {
-      return "<h" + level + (" class=\"" + this.getHeadingClass(level) + "\"") + (" id=\"" + this.options.headerPrefix + "" + raw.toLowerCase().replace(/[^\w]+/g, "-") + "\">") + text + "</h" + level + ">\n";
-    }
-  }, {
-    key: "hr",
-    value: function hr() {
-      return "<hr>\n";
-    }
-  }, {
-    key: "list",
-    value: function list(body, ordered) {
-      var type = ordered ? "ol" : "ul";
-      return "<" + type + ">\n" + body + "</" + type + ">\n";
-    }
-  }, {
-    key: "listitem",
-    value: function listitem(text) {
-      return "<li>" + text + "</li>\n";
-    }
-  }, {
-    key: "paragraph",
-    value: function paragraph(text) {
-      return "<p>" + text + "</p>\n";
-    }
-  }, {
-    key: "table",
-    value: function table(header, body) {
-      return "<table>\n" + "<thead>\n" + header + "</thead>\n" + "<tbody>\n" + body + "</tbody>\n" + "</table>\n";
-    }
-  }, {
-    key: "tablerow",
-    value: function tablerow(content) {
-      return "<tr>\n" + content + "</tr>\n";
-    }
-  }, {
-    key: "tablecell",
-    value: function tablecell(content, flags) {
-      var type = flags.header ? "th" : "td";
-      var tag = flags.align ? "<" + type + " style=\"text-align: " + flags.align + "\">" : "<" + type + ">";
-      return tag + content + "</" + type + ">\n";
-    }
-  }, {
-    key: "strong",
-
-    // span level renderer
-    value: function strong(text) {
-      return "<strong>" + text + "</strong>";
-    }
-  }, {
-    key: "em",
-    value: function em(text) {
-      return "<em>" + text + "</em>";
-    }
-  }, {
-    key: "codespan",
-    value: function codespan(text) {
-      return "<code>" + text + "</code>";
-    }
-  }, {
-    key: "br",
-    value: function br() {
-      return "<br>";
-    }
-  }, {
-    key: "del",
-    value: function del(text) {
-      return "<del>" + text + "</del>";
-    }
-  }, {
-    key: "link",
-    value: function link(href, title, text) {
-      if (this.options.sanitize) {
-        try {
-          var prot = decodeURIComponent(_escape$unescape$HEADING_BOOK_CLASS_MAP$HEADING_MULTI_PART_CLASS_MAP$HEADING_DOCUMENT_CLASS_MAP.unescape(href)).replace(/[^\w:]/g, "").toLowerCase();
-        } catch (e) {
-          return "";
-        }
-        if (prot.indexOf("javascript:") === 0 || prot.indexOf("vbscript:") === 0) {
-          return "";
-        }
-      }
-      var out = "<a href=\"" + href + "\"";
-      if (title) {
-        out += " title=\"" + title + "\"";
-      }
-      out += ">" + text + "</a>";
-      return out;
-    }
-  }, {
-    key: "image",
-    value: function image(href, title, text) {
-      var out = "<img src=\"" + href + "\" alt=\"" + text + "\"";
-      if (title) {
-        out += " title=\"" + title + "\"";
-      }
-      out += ">";
-      return out;
-    }
-  }]);
-
-  return Renderer;
-})();
-
-exports["default"] = Renderer;
-module.exports = exports["default"];
-}).call(this,require("1YiZ5S"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/renderer.js","/")
-},{"./constants":1,"1YiZ5S":17,"buffer":13}],10:[function(require,module,exports){
+},{"1YiZ5S":15,"buffer":11}],8:[function(require,module,exports){
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
 "use strict";
 
@@ -1323,7 +751,7 @@ var WebFileAccessor = (function (_FileAccessor) {
 exports["default"] = WebFileAccessor;
 module.exports = exports["default"];
 }).call(this,require("1YiZ5S"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/web_file_accessor.js","/")
-},{"./file_accessor":3,"1YiZ5S":17,"buffer":13}],11:[function(require,module,exports){
+},{"./file_accessor":3,"1YiZ5S":15,"buffer":11}],9:[function(require,module,exports){
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
 /*!
  * async
@@ -2450,9 +1878,9 @@ module.exports = exports["default"];
 }());
 
 }).call(this,require("1YiZ5S"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/../node_modules/async/lib/async.js","/../node_modules/async/lib")
-},{"1YiZ5S":17,"buffer":13}],12:[function(require,module,exports){
+},{"1YiZ5S":15,"buffer":11}],10:[function(require,module,exports){
 
-},{"1YiZ5S":17,"buffer":13}],13:[function(require,module,exports){
+},{"1YiZ5S":15,"buffer":11}],11:[function(require,module,exports){
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
 /*!
  * The buffer module from node.js, for the browser.
@@ -3565,7 +2993,7 @@ function assert (test, message) {
 }
 
 }).call(this,require("1YiZ5S"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/../node_modules/gulp-browserify/node_modules/browserify/node_modules/buffer/index.js","/../node_modules/gulp-browserify/node_modules/browserify/node_modules/buffer")
-},{"1YiZ5S":17,"base64-js":14,"buffer":13,"ieee754":15}],14:[function(require,module,exports){
+},{"1YiZ5S":15,"base64-js":12,"buffer":11,"ieee754":13}],12:[function(require,module,exports){
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
 var lookup = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
 
@@ -3693,7 +3121,7 @@ var lookup = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
 }(typeof exports === 'undefined' ? (this.base64js = {}) : exports))
 
 }).call(this,require("1YiZ5S"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/../node_modules/gulp-browserify/node_modules/browserify/node_modules/buffer/node_modules/base64-js/lib/b64.js","/../node_modules/gulp-browserify/node_modules/browserify/node_modules/buffer/node_modules/base64-js/lib")
-},{"1YiZ5S":17,"buffer":13}],15:[function(require,module,exports){
+},{"1YiZ5S":15,"buffer":11}],13:[function(require,module,exports){
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
 exports.read = function(buffer, offset, isLE, mLen, nBytes) {
   var e, m,
@@ -3781,7 +3209,7 @@ exports.write = function(buffer, value, offset, isLE, mLen, nBytes) {
 };
 
 }).call(this,require("1YiZ5S"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/../node_modules/gulp-browserify/node_modules/browserify/node_modules/buffer/node_modules/ieee754/index.js","/../node_modules/gulp-browserify/node_modules/browserify/node_modules/buffer/node_modules/ieee754")
-},{"1YiZ5S":17,"buffer":13}],16:[function(require,module,exports){
+},{"1YiZ5S":15,"buffer":11}],14:[function(require,module,exports){
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
 // Copyright Joyent, Inc. and other Node contributors.
 //
@@ -4009,7 +3437,7 @@ var substr = 'ab'.substr(-1) === 'b'
 ;
 
 }).call(this,require("1YiZ5S"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/../node_modules/gulp-browserify/node_modules/browserify/node_modules/path-browserify/index.js","/../node_modules/gulp-browserify/node_modules/browserify/node_modules/path-browserify")
-},{"1YiZ5S":17,"buffer":13}],17:[function(require,module,exports){
+},{"1YiZ5S":15,"buffer":11}],15:[function(require,module,exports){
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
 // shim for using process in browser
 
@@ -4076,7 +3504,7 @@ process.chdir = function (dir) {
 };
 
 }).call(this,require("1YiZ5S"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/../node_modules/gulp-browserify/node_modules/browserify/node_modules/process/browser.js","/../node_modules/gulp-browserify/node_modules/browserify/node_modules/process")
-},{"1YiZ5S":17,"buffer":13}],18:[function(require,module,exports){
+},{"1YiZ5S":15,"buffer":11}],16:[function(require,module,exports){
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
 'use strict';
 
@@ -4106,7 +3534,7 @@ module.exports = Object.assign || function (target, source) {
 };
 
 }).call(this,require("1YiZ5S"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/../node_modules/object-assign/index.js","/../node_modules/object-assign")
-},{"1YiZ5S":17,"buffer":13}],19:[function(require,module,exports){
+},{"1YiZ5S":15,"buffer":11}],17:[function(require,module,exports){
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
 //     Underscore.js 1.8.3
 //     http://underscorejs.org
@@ -5658,4 +5086,4 @@ module.exports = Object.assign || function (target, source) {
 }.call(this));
 
 }).call(this,require("1YiZ5S"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/../node_modules/underscore/underscore.js","/../node_modules/underscore")
-},{"1YiZ5S":17,"buffer":13}]},{},[2])
+},{"1YiZ5S":15,"buffer":11}]},{},[2])

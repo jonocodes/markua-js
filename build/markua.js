@@ -77,8 +77,9 @@ var Markua = (function () {
     value: function loadChapters(chapters, done) {
       var _this = this;
 
+      console.log(chapters);
       async.map(chapters, function (chapter, cb) {
-        _this.fileAccessor.get(chapter, cb);
+        _this.fileAccessor.get("manuscript/" + chapter, cb);
       }, done);
     }
   }, {
@@ -86,7 +87,7 @@ var Markua = (function () {
     value: function processChapters(chapters, done) {
       var _this2 = this;
 
-      async.map(chapters, function (chapter, cb) {
+      async.map(_.compact(chapters), function (chapter, cb) {
         try {
           var tokens = _Lexer2["default"].lex(chapter, _this2.options);
           cb(null, _Parser2["default"].parse(tokens, _this2.options));

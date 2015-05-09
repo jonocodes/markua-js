@@ -48,13 +48,14 @@ class Markua {
   }
 
   loadChapters(chapters, done) {
+    console.log(chapters);
     async.map(chapters, (chapter, cb) => {
-      this.fileAccessor.get(chapter, cb)
+      this.fileAccessor.get(`manuscript/${chapter}`, cb)
     }, done)
   }
 
   processChapters(chapters, done) {
-    async.map(chapters, (chapter, cb) => {
+    async.map(_.compact(chapters), (chapter, cb) => {
       try {
         let tokens = Lexer.lex(chapter, this.options);
         cb(null, Parser.parse(tokens, this.options));
