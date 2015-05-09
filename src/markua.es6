@@ -48,7 +48,6 @@ class Markua {
   }
 
   loadChapters(chapters, done) {
-    console.log(chapters);
     async.map(chapters, (chapter, cb) => {
       this.fileAccessor.get(`manuscript/${chapter}`, cb)
     }, done)

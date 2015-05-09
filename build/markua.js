@@ -77,7 +77,6 @@ var Markua = (function () {
     value: function loadChapters(chapters, done) {
       var _this = this;
 
-      console.log(chapters);
       async.map(chapters, function (chapter, cb) {
         _this.fileAccessor.get("manuscript/" + chapter, cb);
       }, done);
