@@ -195,7 +195,7 @@ var _WebFileAccessor = require("./web_file_accessor");
 var _WebFileAccessor2 = _interopRequireWildcard(_WebFileAccessor);
 
 if (typeof window !== "undefined") window.markua = new _Markua2["default"]("/data/test_book", { fileAccessor: _WebFileAccessor2["default"] });
-}).call(this,require("1YiZ5S"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/fake_1a43c3f5.js","/")
+}).call(this,require("1YiZ5S"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/fake_4c642849.js","/")
 },{"./markua":6,"./web_file_accessor":10,"1YiZ5S":17,"buffer":13}],3:[function(require,module,exports){
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
 "use strict";
@@ -815,7 +815,6 @@ var Markua = (function () {
     value: function loadChapters(chapters, done) {
       var _this = this;
 
-      console.log(chapters);
       async.map(chapters, function (chapter, cb) {
         _this.fileAccessor.get("manuscript/" + chapter, cb);
       }, done);
