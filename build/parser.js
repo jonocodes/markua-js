@@ -94,6 +94,12 @@ var Parser = (function () {
           {
             return this.renderer.code(this.token.text, this.token.lang, this.token.escaped);
           }
+        case "attribute":
+          {
+            // Set the attributes for the next tag
+            this.attributes = this.token.attributes;
+            return "";
+          }
         case "table":
           {
             var header = "",

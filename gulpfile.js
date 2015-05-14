@@ -5,7 +5,7 @@ var rename = require("gulp-rename");
 var mocha = require("gulp-mocha");
 var browserify = require("gulp-browserify");
 var source = require("vinyl-source-stream");
-var sass = require("gulp-sass")
+var sass = require("gulp-sass");
 
 gulp.task('build-styles', function() {
   gulp.src("./src/styles/*.scss")
@@ -13,7 +13,7 @@ gulp.task('build-styles', function() {
     .on('error', function(error) {
       console.log(error.message);
     })
-    .pipe(gulp.dest('build'))
+    .pipe(gulp.dest('build'));
 });
 
 gulp.task('build-js', function() {
@@ -32,7 +32,7 @@ gulp.task('browserify', ['build-js'], function() {
       insertGlobals: true
     }))
     .pipe(rename('bundle.js'))
-    .pipe(gulp.dest('build'))
+    .pipe(gulp.dest('build'));
 });
 
 gulp.task('dev-web', ['browserify', 'build-styles'], function() {

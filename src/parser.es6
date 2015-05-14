@@ -1,5 +1,5 @@
-import Renderer from "./renderer"
-import InlineLexer from "./inline_lexer"
+import Renderer from "./renderer";
+import InlineLexer from "./inline_lexer";
 
 class Parser {
   constructor(options = {}) {
@@ -7,7 +7,7 @@ class Parser {
     this.tokens = [];
     this.token = null;
     this.renderer = new Renderer();
-    this.renderer.options = this.options
+    this.renderer.options = this.options;
   }
 
   static parse(src, options) {
@@ -66,6 +66,11 @@ class Parser {
         return this.renderer.code(this.token.text,
           this.token.lang,
           this.token.escaped);
+      }
+      case 'attribute': {
+        // Set the attributes for the next tag
+        this.attributes = this.token.attributes;
+        return '';
       }
       case 'table': {
         var header = ''

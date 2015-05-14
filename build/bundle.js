@@ -80,11 +80,16 @@ var block = {
   table: /^ *\|(.+)\n *\|( *[-:]+[-| :]*)\n((?: *\|.*(?:\n|$))*)\n*/,
   paragraph: /^((?:[^\n]+\n?(?!hr|heading|blockquote))+)\n*/,
   text: /^[^\n]+/,
-  twonewlines: /^ *[\n]{2,}/
+  'break': /^ *[\n]{2,}/,
+  attribute: {
+    group: /^(?:{)(?: *(?:("(?:[^\s"]|[ ])+")|('(?:[^\s']|[ ])+')|((?:[^\s])+))(?:: *)(?:("(?:[^\s"]|[ ])+")|('(?:[^\s']|[ ])+')|((?:[^\s])+)))(?:(?: *, *)(?: *(?:("(?:[^\s"]|[ ])+")|('(?:[^\s']|[ ])+')|((?:[^\s])+))(?:: *)(?:("(?:[^\s"]|[ ])+")|('(?:[^\s']|[ ])+')|((?:[^\s,])+))))*(?: *)(?:})/,
+    value: /(?: *(?:("(?:[^\s"]|[ ])+")|('(?:[^\s']|[ ])+')|((?:[^\s,])+))(?:: *)(?:("(?:[^\s"]|[ ])+")|('(?:[^\s']|[ ])+')|((?:[^\s,])+)))/g
+  },
+  number: /([0-9]+)/
 };
 
 exports.block = block;
-block.bullet = /(?:[*+-]|\d+\.)/;
+block.bullet = /(?:[*]|\d+\.)/;
 block.item = /^( *)(bull) [^\n]*(?:\n(?!\1bull )[^\n]*)*/;
 block.item = replace(block.item, 'gm')(/bull/g, block.bullet)();
 
@@ -195,7 +200,7 @@ var _WebFileAccessor = require("./web_file_accessor");
 var _WebFileAccessor2 = _interopRequireWildcard(_WebFileAccessor);
 
 if (typeof window !== "undefined") window.markua = new _Markua2["default"]("/data/test_book", { fileAccessor: _WebFileAccessor2["default"] });
-}).call(this,require("1YiZ5S"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/fake_4c642849.js","/")
+}).call(this,require("1YiZ5S"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/fake_81ad99af.js","/")
 },{"./markua":6,"./web_file_accessor":10,"1YiZ5S":17,"buffer":13}],3:[function(require,module,exports){
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
 "use strict";
@@ -432,17 +437,19 @@ module.exports = exports["default"];
 }).call(this,require("1YiZ5S"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/inline_lexer.js","/")
 },{"./constants":1,"./renderer":9,"1YiZ5S":17,"buffer":13}],5:[function(require,module,exports){
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
-'use strict';
+"use strict";
 
-var _classCallCheck = function (instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError('Cannot call a class as a function'); } };
+var _classCallCheck = function (instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } };
 
-var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ('value' in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
+var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
 
-Object.defineProperty(exports, '__esModule', {
+Object.defineProperty(exports, "__esModule", {
   value: true
 });
 
-var _block = require('./constants');
+var _block = require("./constants");
+
+var _ = require("underscore");
 
 // Class for lexing block elements of markua
 
@@ -460,33 +467,51 @@ var Lexer = (function () {
   }
 
   _createClass(Lexer, [{
-    key: 'lex',
+    key: "lex",
     value: function lex(src) {
       // Preprocess
-      src = src.replace(/\r\n|\r/g, '\n').replace(/\t/g, '    ').replace(/\u00a0/g, ' ').replace(/\u2424/g, '\n');
+      src = src.replace(/\r\n|\r/g, "\n").replace(/\t/g, "    ").replace(/\u00a0/g, " ").replace(/\u2424/g, "\n");
 
       // Go go go
       return this.token(src, true);
     }
   }, {
-    key: 'token',
+    key: "token",
     value: function token(src, top, bq) {
       var cap = undefined;
-      src = src.replace(/^ +$/gm, '');
+      src = src.replace(/^ +$/gm, "");
 
       while (src) {
         // newline
         if (cap = this.rules.newline.exec(src)) {
           src = src.substring(cap[0].length);
-          if (cap[0].length > 1) this.tokens.push({ type: 'space' });
+          if (cap[0].length > 1) this.tokens.push({ type: "space" });
+        }
+
+        // attribute
+        if (cap = this.rules.attribute.group.exec(src)) {
+          src = src.substring(cap[0].length);
+
+          var attributes = [];
+          var pair = undefined;
+
+          while ((pair = _.compact(this.rules.attribute.value.exec(cap[0]))).length) {
+            attributes.push({ key: pair[1], value: pair[2] });
+          }
+
+          this.tokens.push({
+            type: "attribute",
+            attributes: attributes
+          });
+          continue;
         }
 
         // code
         if (cap = this.rules.code.exec(src)) {
           src = src.substring(cap[0].length);
-          cap = cap[0].replace(/^ {4}/gm, '');
+          cap = cap[0].replace(/^ {4}/gm, "");
           this.tokens.push({
-            type: 'code',
+            type: "code",
             text: cap
           });
           continue;
@@ -496,7 +521,7 @@ var Lexer = (function () {
         if (cap = this.rules.fences.exec(src)) {
           src = src.substring(cap[0].length);
           this.tokens.push({
-            type: 'code',
+            type: "code",
             lang: cap[2],
             text: cap[3]
           });
@@ -508,12 +533,12 @@ var Lexer = (function () {
           src = src.substring(cap[0].length);
 
           // Check to make sure there is another newline under this thing
-          if (!this.rules.twonewlines.exec(src)) {
-            this.warnings.push('Must be a newline after ' + cap[0]);
+          if (!this.rules["break"].exec(src)) {
+            this.warnings.push("Must be a newline after " + cap[0]);
           }
 
           this.tokens.push({
-            type: 'heading',
+            type: "heading",
             depth: cap[1].length,
             text: cap[2]
           });
@@ -524,26 +549,26 @@ var Lexer = (function () {
         if (top && (cap = this.rules.nptable.exec(src))) {
           src = src.substring(cap[0].length);
           var item = {
-            type: 'table',
-            header: cap[1].replace(/^ *| *\| *$/g, '').split(RegExp(' *\\| *')),
-            align: cap[2].replace(/^ *|\| *$/g, '').split(RegExp(' *\\| *')),
-            cells: cap[3].replace(/\n$/, '').split('\n')
+            type: "table",
+            header: cap[1].replace(/^ *| *\| *$/g, "").split(RegExp(" *\\| *")),
+            align: cap[2].replace(/^ *|\| *$/g, "").split(RegExp(" *\\| *")),
+            cells: cap[3].replace(/\n$/, "").split("\n")
           };
 
           for (var i = 0; i < item.align.length; i++) {
             if (/^ *-+: *$/.test(item.align[i])) {
-              item.align[i] = 'right';
+              item.align[i] = "right";
             } else if (/^ *:-+: *$/.test(item.align[i])) {
-              item.align[i] = 'center';
+              item.align[i] = "center";
             } else if (/^ *:-+ *$/.test(item.align[i])) {
-              item.align[i] = 'left';
+              item.align[i] = "left";
             } else {
               item.align[i] = null;
             }
           }
 
           for (var i = 0; i < item.cells.length; i++) {
-            item.cells[i] = item.cells[i].split(RegExp(' *\\| *'));
+            item.cells[i] = item.cells[i].split(RegExp(" *\\| *"));
           }
 
           this.tokens.push(item);
@@ -553,7 +578,7 @@ var Lexer = (function () {
         // hr
         if (cap = this.rules.hr.exec(src)) {
           src = src.substring(cap[0].length);
-          this.tokens.push({ type: 'hr' });
+          this.tokens.push({ type: "hr" });
           continue;
         }
 
@@ -561,15 +586,15 @@ var Lexer = (function () {
         if (cap = this.rules.blockquote.exec(src)) {
           src = src.substring(cap[0].length);
 
-          this.tokens.push({ type: 'blockquote_start' });
+          this.tokens.push({ type: "blockquote_start" });
 
-          cap = cap[0].replace(/^ *> ?/gm, '');
+          cap = cap[0].replace(/^ *> ?/gm, "");
 
           // Pass `top` to keep the current
           // "toplevel" state. This is exactly
           // how markdown.pl works.
           this.token(cap, top, true);
-          this.tokens.push({ type: 'blockquote_end' });
+          this.tokens.push({ type: "blockquote_end" });
           continue;
         }
 
@@ -578,8 +603,11 @@ var Lexer = (function () {
           src = src.substring(cap[0].length);
           var bull = cap[2];
 
+          var start = parseInt(this.rules.number.exec(cap[0])[0]);
+
           this.tokens.push({
-            type: 'list_start',
+            type: "list_start",
+            start: start,
             ordered: bull.length > 1
           });
 
@@ -595,19 +623,19 @@ var Lexer = (function () {
             // Remove the list item's bullet
             // so it is seen as the next token.
             var space = item.length;
-            item = item.replace(/^ *([*+-]|\d+\.) +/, '');
+            item = item.replace(/^ *([*]|\d+\.) +/, "");
 
             // Outdent whatever the
             // list item contains. Hacky.
-            if (~item.indexOf('\n ')) {
+            if (~item.indexOf("\n ")) {
               space -= item.length;
-              item = item.replace(/^ {1,4}/gm, '');
+              item = item.replace(/^ {1,4}/gm, "");
             }
             // Determine whether the next list item belongs here.
             // Backpedal if it does not belong in this list.
             if (this.options.smartLists && i != l - 1) {
               var b = _block.block.bullet.exec(cap[i + 1])[0];
-              if (bull != b && !(bull.length > 1 && b.length > 1)) src = cap.slice(i + 1).join('\n') + src;
+              if (bull != b && !(bull.length > 1 && b.length > 1)) src = cap.slice(i + 1).join("\n") + src;
               i = l - 1;
             }
 
@@ -617,17 +645,17 @@ var Lexer = (function () {
             var loose = next || /\n\n(?!\s*$)/.test(item);
 
             if (i != l - 1) {
-              next = item.charAt(item.length - 1) == '\n';
+              next = item.charAt(item.length - 1) == "\n";
               if (!loose) loose = next;
             }
 
-            this.tokens.push({ type: loose ? 'loose_item_start' : 'list_item_start' });
+            this.tokens.push({ type: loose ? "loose_item_start" : "list_item_start" });
 
             // Recurse.
             this.token(item, false, bq);
-            this.tokens.push({ type: 'list_item_end' });
+            this.tokens.push({ type: "list_item_end" });
           }
-          this.tokens.push({ type: 'list_end' });
+          this.tokens.push({ type: "list_end" });
           continue;
         }
 
@@ -645,18 +673,18 @@ var Lexer = (function () {
         if (top && (cap = this.rules.table.exec(src))) {
           src = src.substring(cap[0].length);
           var item = {
-            type: 'table',
-            header: cap[1].replace(/^ *| *\| *$/g, '').split(RegExp(' *\\| *')),
-            align: cap[2].replace(/^ *|\| *$/g, '').split(RegExp(' *\\| *')),
-            cells: cap[3].replace(/(?: *\| *)?\n$/, '').split('\n')
+            type: "table",
+            header: cap[1].replace(/^ *| *\| *$/g, "").split(RegExp(" *\\| *")),
+            align: cap[2].replace(/^ *|\| *$/g, "").split(RegExp(" *\\| *")),
+            cells: cap[3].replace(/(?: *\| *)?\n$/, "").split("\n")
           };
 
           for (var i = 0; i < item.align.length; i++) {
-            if (/^ *-+: *$/.test(item.align[i])) item.align[i] = 'right';else if (/^ *:-+: *$/.test(item.align[i])) item.align[i] = 'center';else if (/^ *:-+ *$/.test(item.align[i])) item.align[i] = 'left';else item.align[i] = null;
+            if (/^ *-+: *$/.test(item.align[i])) item.align[i] = "right";else if (/^ *:-+: *$/.test(item.align[i])) item.align[i] = "center";else if (/^ *:-+ *$/.test(item.align[i])) item.align[i] = "left";else item.align[i] = null;
           }
 
           for (var i = 0; i < item.cells.length; i++) {
-            item.cells[i] = item.cells[i].replace(/^ *\| *| *\| *$/g, '').split(RegExp(' *\\| *'));
+            item.cells[i] = item.cells[i].replace(/^ *\| *| *\| *$/g, "").split(RegExp(" *\\| *"));
           }
 
           this.tokens.push(item);
@@ -667,8 +695,8 @@ var Lexer = (function () {
         if (top && (cap = this.rules.paragraph.exec(src))) {
           src = src.substring(cap[0].length);
           this.tokens.push({
-            type: 'paragraph',
-            text: cap[1].charAt(cap[1].length - 1) == '\n' ? cap[1].slice(0, -1) : cap[1]
+            type: "paragraph",
+            text: cap[1].charAt(cap[1].length - 1) == "\n" ? cap[1].slice(0, -1) : cap[1]
           });
           continue;
         }
@@ -678,13 +706,13 @@ var Lexer = (function () {
           // Top-level should never reach here.
           src = src.substring(cap[0].length);
           this.tokens.push({
-            type: 'text',
+            type: "text",
             text: cap[0]
           });
           continue;
         }
 
-        if (src) throw new Error('Infinite loop on byte: ' + src.charCodeAt(0));
+        if (src) throw new Error("Infinite loop on byte: " + src.charCodeAt(0));
       }
 
       if (this.options.debug) {
@@ -703,8 +731,8 @@ var Lexer = (function () {
           _iteratorError = err;
         } finally {
           try {
-            if (!_iteratorNormalCompletion && _iterator['return']) {
-              _iterator['return']();
+            if (!_iteratorNormalCompletion && _iterator["return"]) {
+              _iterator["return"]();
             }
           } finally {
             if (_didIteratorError) {
@@ -719,7 +747,7 @@ var Lexer = (function () {
       return this.tokens;
     }
   }], [{
-    key: 'lex',
+    key: "lex",
     value: function lex(src, options) {
       var lexer = new Lexer(options);
       return lexer.lex(src);
@@ -731,10 +759,10 @@ var Lexer = (function () {
 
 ;
 
-exports['default'] = Lexer;
-module.exports = exports['default'];
+exports["default"] = Lexer;
+module.exports = exports["default"];
 }).call(this,require("1YiZ5S"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/lexer.js","/")
-},{"./constants":1,"1YiZ5S":17,"buffer":13}],6:[function(require,module,exports){
+},{"./constants":1,"1YiZ5S":17,"buffer":13,"underscore":19}],6:[function(require,module,exports){
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
 "use strict";
 
@@ -996,6 +1024,12 @@ var Parser = (function () {
         case "code":
           {
             return this.renderer.code(this.token.text, this.token.lang, this.token.escaped);
+          }
+        case "attribute":
+          {
+            // Set the attributes for the next tag
+            this.attributes = this.token.attributes;
+            return "";
           }
         case "table":
           {

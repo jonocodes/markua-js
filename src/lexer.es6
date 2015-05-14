@@ -1,4 +1,5 @@
 import { block } from "./constants"
+let _ = require("underscore")
 
 // Class for lexing block elements of markua
 class Lexer {
@@ -39,6 +40,24 @@ class Lexer {
           this.tokens.push({ type: 'space' });
       }
 
+      // attribute
+      if (cap = this.rules.attribute.group.exec(src)) {
+        src = src.substring(cap[0].length);
+
+        let attributes = []
+        let pair;
+
+        while ((pair = _.compact(this.rules.attribute.value.exec(cap[0]))).length) {
+          attributes.push({ key: pair[1], value: pair[2] })
+        }
+
+        this.tokens.push({
+          type: 'attribute',
+          attributes: attributes
+        });
+        continue;
+      }
+
       // code
       if (cap = this.rules.code.exec(src)) {
         src = src.substring(cap[0].length)
@@ -66,7 +85,7 @@ class Lexer {
         src = src.substring(cap[0].length)
 
         // Check to make sure there is another newline under this thing
-        if (!this.rules.twonewlines.exec(src)) {
+        if (!this.rules.break.exec(src)) {
           this.warnings.push(`Must be a newline after ${cap[0]}`);
         }
 
@@ -139,8 +158,11 @@ class Lexer {
         src = src.substring(cap[0].length);
         let bull = cap[2];
 
+        let start = parseInt(this.rules.number.exec(cap[0])[0])
+
         this.tokens.push({
           type: 'list_start',
+          start: start,
           ordered: bull.length > 1
         });
 
@@ -156,7 +178,7 @@ class Lexer {
           // Remove the list item's bullet
           // so it is seen as the next token.
           let space = item.length;
-          item = item.replace(/^ *([*+-]|\d+\.) +/, '');
+          item = item.replace(/^ *([*]|\d+\.) +/, '');
 
           // Outdent whatever the
           // list item contains. Hacky.
