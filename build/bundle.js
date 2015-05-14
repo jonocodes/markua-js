@@ -199,8 +199,8 @@ var _WebFileAccessor = require("./web_file_accessor");
 
 var _WebFileAccessor2 = _interopRequireWildcard(_WebFileAccessor);
 
-if (typeof window !== "undefined") window.markua = new _Markua2["default"]("/data/test_book", { fileAccessor: _WebFileAccessor2["default"] });
-}).call(this,require("1YiZ5S"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/fake_81ad99af.js","/")
+if (typeof window !== "undefined") window.markua = new _Markua2["default"]("/data/test_book", { fileAccessor: _WebFileAccessor2["default"], debug: true });
+}).call(this,require("1YiZ5S"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/fake_d3ac3ac3.js","/")
 },{"./markua":6,"./web_file_accessor":10,"1YiZ5S":17,"buffer":13}],3:[function(require,module,exports){
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
 "use strict";
@@ -603,22 +603,35 @@ var Lexer = (function () {
           src = src.substring(cap[0].length);
           var bull = cap[2];
 
-          var start = parseInt(this.rules.number.exec(cap[0])[0]);
+          // Determine what number the list will start with -- if it's a numbered
+          // list
+          var startingToken = this.rules.number.exec(cap[0]);
+          var startingNumber = startingToken ? parseInt(startingToken[0]) : null;
 
           this.tokens.push({
             type: "list_start",
-            start: start,
+            start: startingNumber,
             ordered: bull.length > 1
           });
 
           // Get each top-level item.
           cap = cap[0].match(this.rules.item);
 
+          var prevNumber = null;
+          var nextNumber = null;
           var next = false;
           var l = cap.length;
 
           for (var i = 0; i < l; i++) {
             var item = cap[i];
+
+            // If the list is numbered, and we aren't at the start, ensure that
+            // the current number is one greater than the previous
+            var currentNumber = this.rules.number.exec(item) ? parseInt(this.rules.number.exec(item)[0]) : null;
+
+            if (startingNumber !== null && currentNumber !== startingNumber && currentNumber !== 1 + prevNumber) {
+              this.warnings.push("List numbers should be consecutive, automatically incrementing near " + cap[0]);
+            }
 
             // Remove the list item's bullet
             // so it is seen as the next token.
@@ -654,6 +667,7 @@ var Lexer = (function () {
             // Recurse.
             this.token(item, false, bq);
             this.tokens.push({ type: "list_item_end" });
+            prevNumber = currentNumber;
           }
           this.tokens.push({ type: "list_end" });
           continue;
@@ -857,6 +871,7 @@ var Markua = (function () {
           var tokens = _Lexer2["default"].lex(chapter, _this2.options);
           cb(null, _Parser2["default"].parse(tokens, _this2.options));
         } catch (e) {
+          console.error(e);
           cb(e);
         }
       }, function (error, results) {
@@ -1074,13 +1089,14 @@ var Parser = (function () {
         case "list_start":
           {
             var body = "",
-                ordered = this.token.ordered;
+                ordered = this.token.ordered,
+                start = this.token.start;
 
             while (this.next().type !== "list_end") {
               body += this.tok();
             }
 
-            return this.renderer.list(body, ordered);
+            return this.renderer.list(body, ordered, start);
           }
         case "list_item_start":
           {
@@ -1211,9 +1227,12 @@ var Renderer = (function () {
     }
   }, {
     key: "list",
-    value: function list(body, ordered) {
+    value: function list(body, ordered, start) {
       var type = ordered ? "ol" : "ul";
-      return "<" + type + ">\n" + body + "</" + type + ">\n";
+      var startAttr = "";
+      if (type === "ol" && start) startAttr = " start=" + start;
+
+      return "<" + type + "" + startAttr + ">\n" + body + "</" + type + ">\n";
     }
   }, {
     key: "listitem",

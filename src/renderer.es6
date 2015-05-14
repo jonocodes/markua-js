@@ -58,9 +58,13 @@ class Renderer {
     return '<hr>\n';
   };
 
-  list(body, ordered) {
+  list(body, ordered, start) {
     var type = ordered ? 'ol' : 'ul';
-    return `<${type}>\n${body}</${type}>\n`;
+    var startAttr = ``;
+    if (type === "ol" && start)
+      startAttr = ` start=${start}`;
+
+    return `<${type}${startAttr}>\n${body}</${type}>\n`;
   };
 
   listitem(text) {

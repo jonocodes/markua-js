@@ -77,9 +77,12 @@ var Renderer = (function () {
     }
   }, {
     key: "list",
-    value: function list(body, ordered) {
+    value: function list(body, ordered, start) {
       var type = ordered ? "ol" : "ul";
-      return "<" + type + ">\n" + body + "</" + type + ">\n";
+      var startAttr = "";
+      if (type === "ol" && start) startAttr = " start=" + start;
+
+      return "<" + type + "" + startAttr + ">\n" + body + "</" + type + ">\n";
     }
   }, {
     key: "listitem",

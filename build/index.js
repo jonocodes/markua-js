@@ -10,4 +10,4 @@ var _WebFileAccessor = require("./web_file_accessor");
 
 var _WebFileAccessor2 = _interopRequireWildcard(_WebFileAccessor);
 
-if (typeof window !== "undefined") window.markua = new _Markua2["default"]("/data/test_book", { fileAccessor: _WebFileAccessor2["default"] });
+if (typeof window !== "undefined") window.markua = new _Markua2["default"]("/data/test_book", { fileAccessor: _WebFileAccessor2["default"], debug: true });

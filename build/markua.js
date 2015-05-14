@@ -91,6 +91,7 @@ var Markua = (function () {
           var tokens = _Lexer2["default"].lex(chapter, _this2.options);
           cb(null, _Parser2["default"].parse(tokens, _this2.options));
         } catch (e) {
+          console.error(e);
           cb(e);
         }
       }, function (error, results) {

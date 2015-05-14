@@ -158,22 +158,35 @@ class Lexer {
         src = src.substring(cap[0].length);
         let bull = cap[2];
 
-        let start = parseInt(this.rules.number.exec(cap[0])[0])
+        // Determine what number the list will start with -- if it's a numbered
+        // list
+        let startingToken = this.rules.number.exec(cap[0])
+        let startingNumber = startingToken ? parseInt(startingToken[0]) : null
 
         this.tokens.push({
           type: 'list_start',
-          start: start,
+          start: startingNumber,
           ordered: bull.length > 1
         });
 
         // Get each top-level item.
         cap = cap[0].match(this.rules.item);
 
+        var prevNumber = null;
+        var nextNumber = null;
         let next = false;
         let l = cap.length;
 
         for (let i = 0; i < l;i++) {
           let item = cap[i];
+
+          // If the list is numbered, and we aren't at the start, ensure that
+          // the current number is one greater than the previous
+          let currentNumber = this.rules.number.exec(item) ? parseInt(this.rules.number.exec(item)[0]) : null
+
+          if (startingNumber !== null && currentNumber !== startingNumber && currentNumber !== 1 + prevNumber) {
+            this.warnings.push(`List numbers should be consecutive, automatically incrementing near ${cap[0]}`);
+          }
 
           // Remove the list item's bullet
           // so it is seen as the next token.
@@ -211,6 +224,7 @@ class Lexer {
           // Recurse.
           this.token(item, false, bq);
           this.tokens.push({ type: 'list_item_end' });
+          prevNumber = currentNumber;
         }
         this.tokens.push({ type: 'list_end' });
         continue;

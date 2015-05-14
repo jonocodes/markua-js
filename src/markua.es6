@@ -59,6 +59,7 @@ class Markua {
         let tokens = Lexer.lex(chapter, this.options);
         cb(null, Parser.parse(tokens, this.options));
       } catch (e) {
+        console.error(e)
         cb(e);
       }
     }, (error, results) => {

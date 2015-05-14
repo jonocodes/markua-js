@@ -143,13 +143,14 @@ var Parser = (function () {
         case "list_start":
           {
             var body = "",
-                ordered = this.token.ordered;
+                ordered = this.token.ordered,
+                start = this.token.start;
 
             while (this.next().type !== "list_end") {
               body += this.tok();
             }
 
-            return this.renderer.list(body, ordered);
+            return this.renderer.list(body, ordered, start);
           }
         case "list_item_start":
           {
