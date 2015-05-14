@@ -1,4 +1,5 @@
 import { block } from "./constants"
+import { characterIsNext } from "./util"
 let _ = require("underscore")
 
 // Class for lexing block elements of markua
@@ -154,44 +155,74 @@ class Lexer {
       }
 
       // list
-      if (cap = this.rules.list.exec(src)) {
+      if (cap = this.rules.list.definition.exec(src)) {
         src = src.substring(cap[0].length);
         let bull = cap[2];
 
         // Determine what number the list will start with -- if it's a numbered
         // list
-        let startingToken = this.rules.number.exec(cap[0])
-        let startingNumber = startingToken ? parseInt(startingToken[0]) : null
+        let listType;
+
+        if (this.rules.list.number.exec(bull)) {
+          listType = "number";
+        }
+        else if (this.rules.list.alphabetized.exec(bull)) {
+          listType = "alphabetized";
+        }
+        else if (this.rules.list.numeral.exec(bull))
+          listType = "numeral";
+        else if (this.rules.list.bullet.exec(bull))
+          listType = "bullet";
 
         this.tokens.push({
           type: 'list_start',
-          start: startingNumber,
-          ordered: bull.length > 1
+          listType: listType,
+          start: bull
         });
 
         // Get each top-level item.
         cap = cap[0].match(this.rules.item);
 
-        var prevNumber = null;
-        var nextNumber = null;
+        var prevIndex = null;
         let next = false;
         let l = cap.length;
 
         for (let i = 0; i < l;i++) {
           let item = cap[i];
 
-          // If the list is numbered, and we aren't at the start, ensure that
-          // the current number is one greater than the previous
-          let currentNumber = this.rules.number.exec(item) ? parseInt(this.rules.number.exec(item)[0]) : null
+          // If the list order matters, and we aren't at the start, ensure that
+          // the current index is one greater than the previous
+          let currentIndex = (() => {
+            let current;
+            warning = `List indices should be consecutive, automatically increasing near ${cap[0]}`
+            switch (listType) {
+              case 'number':
+                current = parseInt(this.rules.number.exec(item)[1])
 
-          if (startingNumber !== null && currentNumber !== startingNumber && currentNumber !== 1 + prevNumber) {
-            this.warnings.push(`List numbers should be consecutive, automatically incrementing near ${cap[0]}`);
-          }
+                // Warn for numeric lists
+                if (prevIndex !== null && current !== 1 + prevIndex)
+                  this.warnings.push(warning)
+
+                return current
+              case 'alphabetized':
+                current = this.rules.list.alphabetized.exec(item)[1];
+
+                // Warn for alpha list
+                if (prevIndex !== null && !characterIsNext(current, prevIndex))
+                  this.warnings.push(warning)
+
+                return current;
+              case 'numeral':
+                return this.rules.list.numeral.exec(item)[1];
+              case 'bullet':
+                return null;
+            }
+          })();
 
           // Remove the list item's bullet
           // so it is seen as the next token.
           let space = item.length;
-          item = item.replace(/^ *([*]|\d+\.) +/, '');
+          item = item.replace(/^ *([*]|[a-zA-Z\d]+(\.|\))) +/, '');
 
           // Outdent whatever the
           // list item contains. Hacky.
@@ -224,7 +255,7 @@ class Lexer {
           // Recurse.
           this.token(item, false, bq);
           this.tokens.push({ type: 'list_item_end' });
-          prevNumber = currentNumber;
+          prevIndex = currentIndex;
         }
         this.tokens.push({ type: 'list_end' });
         continue;

@@ -77,9 +77,20 @@ var Renderer = (function () {
     }
   }, {
     key: "list",
-    value: function list(body, ordered, start) {
-      var type = ordered ? "ol" : "ul";
-      var startAttr = "";
+    value: function list(body, listType, start) {
+      var type,
+          startAttr = "";
+      switch (listType) {
+        case "bullet":
+          type = "ul";
+          break;
+        case "alphabetized":
+          type = "ol type=\"" + (start === start.toUpperCase() ? "A" : "a") + "\"";
+          break;
+        default:
+          type = "ol";
+      }
+
       if (type === "ol" && start) startAttr = " start=" + start;
 
       return "<" + type + "" + startAttr + ">\n" + body + "</" + type + ">\n";

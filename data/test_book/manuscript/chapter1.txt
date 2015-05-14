@@ -7,5 +7,6 @@ Chapter 2 has a quick introduction to Markdown. Click on "Chapter 2" on the left
 * some bullet List
 * another item
 
+
 A) an uppercase alphabetized list
 B) another list item

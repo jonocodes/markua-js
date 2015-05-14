@@ -118,14 +118,14 @@ class Parser {
       }
       case 'list_start': {
         var body = ''
-          , ordered = this.token.ordered
+          , listType = this.token.listType
           , start = this.token.start;
 
         while (this.next().type !== 'list_end') {
           body += this.tok();
         }
 
-        return this.renderer.list(body, ordered, start);
+        return this.renderer.list(body, listType, start);
       }
       case 'list_item_start': {
         var body = '';

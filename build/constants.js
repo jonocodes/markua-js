@@ -73,7 +73,13 @@ var block = {
   hr: /^( *[-*_]){3,} *(?:\n+|$)/,
   heading: /^ *(#{1,6}) *([^\n]+) */,
   blockquote: /^( *>[^\n]+(\n(?!def)[^\n]+)*\n*)+/,
-  list: /^( *)(bull) [\s\S]+?(?:hr|def|\n{2,}(?! )(?!\1bull )\n*|\s*$)/,
+  list: {
+    definition: /^( *)(bull) [\s\S]+?(?:hr|def|\n{2,}(?! )(?!\1bull )\n*|\s*$)/,
+    number: /^([0-9]+)(?:\.)/,
+    alphabetized: /^([a-zA-Z]+)(?:[\)\.])/,
+    numeral: /^(?=[MDCLXVI])M*(?:C[MD]|D?C{0,3})(?:X[CL]|L?X{0,3})(I[XV]|V?I{0,3})(?:\)|\.)/i,
+    bullet: /^\*/
+  },
   def: /^ *\[([^\]]+)\]: *<?([^\s>]+)>?(?: +["(]([^\n]+)[")])? *(?:\n+|$)/,
   table: /^ *\|(.+)\n *\|( *[-:]+[-| :]*)\n((?: *\|.*(?:\n|$))*)\n*/,
   paragraph: /^((?:[^\n]+\n?(?!hr|heading|blockquote))+)\n*/,
@@ -87,11 +93,11 @@ var block = {
 };
 
 exports.block = block;
-block.bullet = /(?:[*]|\d+\.)/;
+block.bullet = /([*]|[a-zA-Z\d]+(?:\.|\)))/;
 block.item = /^( *)(bull) [^\n]*(?:\n(?!\1bull )[^\n]*)*/;
 block.item = replace(block.item, 'gm')(/bull/g, block.bullet)();
 
-block.list = replace(block.list)(/bull/g, block.bullet)('hr', '\\n+(?=\\1?(?:[-*_] *){3,}(?:\\n+|$))')('def', '\\n+(?=' + block.def.source + ')')();
+block.list.definition = replace(block.list.definition)(/bull/g, block.bullet)('hr', '\\n+(?=\\1?(?:[-*_] *){3,}(?:\\n+|$))')('def', '\\n+(?=' + block.def.source + ')')();
 
 block.blockquote = replace(block.blockquote)('def', block.def)();
 

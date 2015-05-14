@@ -10,6 +10,8 @@ Object.defineProperty(exports, "__esModule", {
 
 var _block = require("./constants");
 
+var _characterIsNext = require("./util");
+
 var _ = require("underscore");
 
 // Class for lexing block elements of markua
@@ -39,6 +41,8 @@ var Lexer = (function () {
   }, {
     key: "token",
     value: function token(src, top, bq) {
+      var _this = this;
+
       var cap = undefined;
       src = src.replace(/^ +$/gm, "");
 
@@ -160,78 +164,113 @@ var Lexer = (function () {
         }
 
         // list
-        if (cap = this.rules.list.exec(src)) {
-          src = src.substring(cap[0].length);
-          var bull = cap[2];
+        if (cap = this.rules.list.definition.exec(src)) {
+          var prevIndex;
 
-          // Determine what number the list will start with -- if it's a numbered
-          // list
-          var startingToken = this.rules.number.exec(cap[0]);
-          var startingNumber = startingToken ? parseInt(startingToken[0]) : null;
+          var _ret = (function () {
+            src = src.substring(cap[0].length);
+            var bull = cap[2];
 
-          this.tokens.push({
-            type: "list_start",
-            start: startingNumber,
-            ordered: bull.length > 1
-          });
+            // Determine what number the list will start with -- if it's a numbered
+            // list
+            var listType = undefined;
 
-          // Get each top-level item.
-          cap = cap[0].match(this.rules.item);
+            if (_this.rules.list.number.exec(bull)) {
+              listType = "number";
+            } else if (_this.rules.list.alphabetized.exec(bull)) {
+              listType = "alphabetized";
+            } else if (_this.rules.list.numeral.exec(bull)) listType = "numeral";else if (_this.rules.list.bullet.exec(bull)) listType = "bullet";
 
-          var prevNumber = null;
-          var nextNumber = null;
-          var next = false;
-          var l = cap.length;
+            _this.tokens.push({
+              type: "list_start",
+              listType: listType,
+              start: bull
+            });
 
-          for (var i = 0; i < l; i++) {
-            var item = cap[i];
+            // Get each top-level item.
+            cap = cap[0].match(_this.rules.item);
 
-            // If the list is numbered, and we aren't at the start, ensure that
-            // the current number is one greater than the previous
-            var currentNumber = this.rules.number.exec(item) ? parseInt(this.rules.number.exec(item)[0]) : null;
+            prevIndex = null;
 
-            if (startingNumber !== null && currentNumber !== startingNumber && currentNumber !== 1 + prevNumber) {
-              this.warnings.push("List numbers should be consecutive, automatically incrementing near " + cap[0]);
+            var next = false;
+            var l = cap.length;
+
+            var _loop = function (_i) {
+              var item = cap[_i];
+
+              // If the list order matters, and we aren't at the start, ensure that
+              // the current index is one greater than the previous
+              var currentIndex = (function () {
+                var current = undefined;
+                warning = "List indices should be consecutive, automatically increasing near " + cap[0];
+                switch (listType) {
+                  case "number":
+                    current = parseInt(_this.rules.number.exec(item)[1]);
+
+                    // Warn for numeric lists
+                    if (prevIndex !== null && current !== 1 + prevIndex) _this.warnings.push(warning);
+
+                    return current;
+                  case "alphabetized":
+                    current = _this.rules.list.alphabetized.exec(item)[1];
+
+                    // Warn for alpha list
+                    if (prevIndex !== null && !_characterIsNext.characterIsNext(current, prevIndex)) _this.warnings.push(warning);
+
+                    return current;
+                  case "numeral":
+                    return _this.rules.list.numeral.exec(item)[1];
+                  case "bullet":
+                    return null;
+                }
+              })();
+
+              // Remove the list item's bullet
+              // so it is seen as the next token.
+              var space = item.length;
+              item = item.replace(/^ *([*]|[a-zA-Z\d]+(\.|\))) +/, "");
+
+              // Outdent whatever the
+              // list item contains. Hacky.
+              if (~item.indexOf("\n ")) {
+                space -= item.length;
+                item = item.replace(/^ {1,4}/gm, "");
+              }
+              // Determine whether the next list item belongs here.
+              // Backpedal if it does not belong in this list.
+              if (_this.options.smartLists && _i != l - 1) {
+                var b = _block.block.bullet.exec(cap[_i + 1])[0];
+                if (bull != b && !(bull.length > 1 && b.length > 1)) src = cap.slice(_i + 1).join("\n") + src;
+                _i = l - 1;
+              }
+
+              // Determine whether item is loose or not.
+              // Use: /(^|\n)(?! )[^\n]+\n\n(?!\s*$)/
+              // for discount behavior.
+              var loose = next || /\n\n(?!\s*$)/.test(item);
+
+              if (_i != l - 1) {
+                next = item.charAt(item.length - 1) == "\n";
+                if (!loose) loose = next;
+              }
+
+              _this.tokens.push({ type: loose ? "loose_item_start" : "list_item_start" });
+
+              // Recurse.
+              _this.token(item, false, bq);
+              _this.tokens.push({ type: "list_item_end" });
+              prevIndex = currentIndex;
+              i = _i;
+            };
+
+            for (var i = 0; i < l; i++) {
+              _loop(i);
             }
+            _this.tokens.push({ type: "list_end" });
+            return "continue";
+          })();
 
-            // Remove the list item's bullet
-            // so it is seen as the next token.
-            var space = item.length;
-            item = item.replace(/^ *([*]|\d+\.) +/, "");
-
-            // Outdent whatever the
-            // list item contains. Hacky.
-            if (~item.indexOf("\n ")) {
-              space -= item.length;
-              item = item.replace(/^ {1,4}/gm, "");
-            }
-            // Determine whether the next list item belongs here.
-            // Backpedal if it does not belong in this list.
-            if (this.options.smartLists && i != l - 1) {
-              var b = _block.block.bullet.exec(cap[i + 1])[0];
-              if (bull != b && !(bull.length > 1 && b.length > 1)) src = cap.slice(i + 1).join("\n") + src;
-              i = l - 1;
-            }
-
-            // Determine whether item is loose or not.
-            // Use: /(^|\n)(?! )[^\n]+\n\n(?!\s*$)/
-            // for discount behavior.
-            var loose = next || /\n\n(?!\s*$)/.test(item);
-
-            if (i != l - 1) {
-              next = item.charAt(item.length - 1) == "\n";
-              if (!loose) loose = next;
-            }
-
-            this.tokens.push({ type: loose ? "loose_item_start" : "list_item_start" });
-
-            // Recurse.
-            this.token(item, false, bq);
-            this.tokens.push({ type: "list_item_end" });
-            prevNumber = currentNumber;
-          }
-          this.tokens.push({ type: "list_end" });
-          continue;
+          if (_ret === "continue") continue;
         }
 
         // def

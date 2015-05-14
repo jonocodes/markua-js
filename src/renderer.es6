@@ -37,11 +37,11 @@ class Renderer {
       + '">'
       + (escaped ? code : escape(code, true))
       + '\n</code></pre>\n';
-  };
+  }
 
   blockquote(quote) {
     return `<blockquote>\n${quote}</blockquote>\n`;
-  };
+  }
 
   heading(text, level, raw) {
     return '<h'
@@ -52,28 +52,38 @@ class Renderer {
       + '</h'
       + level
       + '>\n';
-  };
+  }
 
   hr() {
     return '<hr>\n';
-  };
+  }
 
-  list(body, ordered, start) {
-    var type = ordered ? 'ol' : 'ul';
-    var startAttr = ``;
+  list(body, listType, start) {
+    var type, startAttr = ``;
+    switch (listType) {
+      case 'bullet':
+        type = `ul`;
+        break;
+      case 'alphabetized':
+        type = `ol type="${start === start.toUpperCase() ? 'A' : 'a'}"`;
+        break;
+      default:
+        type = `ol`;
+    }
+
     if (type === "ol" && start)
       startAttr = ` start=${start}`;
 
     return `<${type}${startAttr}>\n${body}</${type}>\n`;
-  };
+  }
 
   listitem(text) {
     return `<li>${text}</li>\n`;
-  };
+  }
 
   paragraph(text) {
     return `<p>${text}</p>\n`;
-  };
+  }
 
   table(header, body) {
     return '<table>\n'
@@ -84,11 +94,11 @@ class Renderer {
       + body
       + '</tbody>\n'
       + '</table>\n';
-  };
+  }
 
   tablerow(content) {
     return `<tr>\n${content}</tr>\n`;
-  };
+  }
 
   tablecell(content, flags) {
     var type = flags.header ? 'th' : 'td';

@@ -75,7 +75,13 @@ var block = {
   hr: /^( *[-*_]){3,} *(?:\n+|$)/,
   heading: /^ *(#{1,6}) *([^\n]+) */,
   blockquote: /^( *>[^\n]+(\n(?!def)[^\n]+)*\n*)+/,
-  list: /^( *)(bull) [\s\S]+?(?:hr|def|\n{2,}(?! )(?!\1bull )\n*|\s*$)/,
+  list: {
+    definition: /^( *)(bull) [\s\S]+?(?:hr|def|\n{2,}(?! )(?!\1bull )\n*|\s*$)/,
+    number: /^([0-9]+)(?:\.)/,
+    alphabetized: /^([a-zA-Z]+)(?:[\)\.])/,
+    numeral: /^(?=[MDCLXVI])M*(?:C[MD]|D?C{0,3})(?:X[CL]|L?X{0,3})(I[XV]|V?I{0,3})(?:\)|\.)/i,
+    bullet: /^\*/
+  },
   def: /^ *\[([^\]]+)\]: *<?([^\s>]+)>?(?: +["(]([^\n]+)[")])? *(?:\n+|$)/,
   table: /^ *\|(.+)\n *\|( *[-:]+[-| :]*)\n((?: *\|.*(?:\n|$))*)\n*/,
   paragraph: /^((?:[^\n]+\n?(?!hr|heading|blockquote))+)\n*/,
@@ -89,11 +95,11 @@ var block = {
 };
 
 exports.block = block;
-block.bullet = /(?:[*]|\d+\.)/;
+block.bullet = /([*]|[a-zA-Z\d]+(?:\.|\)))/;
 block.item = /^( *)(bull) [^\n]*(?:\n(?!\1bull )[^\n]*)*/;
 block.item = replace(block.item, 'gm')(/bull/g, block.bullet)();
 
-block.list = replace(block.list)(/bull/g, block.bullet)('hr', '\\n+(?=\\1?(?:[-*_] *){3,}(?:\\n+|$))')('def', '\\n+(?=' + block.def.source + ')')();
+block.list.definition = replace(block.list.definition)(/bull/g, block.bullet)('hr', '\\n+(?=\\1?(?:[-*_] *){3,}(?:\\n+|$))')('def', '\\n+(?=' + block.def.source + ')')();
 
 block.blockquote = replace(block.blockquote)('def', block.def)();
 
@@ -185,7 +191,7 @@ var HEADING_DOCUMENT_CLASS_MAP = {
 };
 exports.HEADING_DOCUMENT_CLASS_MAP = HEADING_DOCUMENT_CLASS_MAP;
 }).call(this,require("1YiZ5S"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/constants.js","/")
-},{"1YiZ5S":17,"buffer":13,"object-assign":18}],2:[function(require,module,exports){
+},{"1YiZ5S":18,"buffer":14,"object-assign":19}],2:[function(require,module,exports){
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
 "use strict";
 
@@ -200,8 +206,8 @@ var _WebFileAccessor = require("./web_file_accessor");
 var _WebFileAccessor2 = _interopRequireWildcard(_WebFileAccessor);
 
 if (typeof window !== "undefined") window.markua = new _Markua2["default"]("/data/test_book", { fileAccessor: _WebFileAccessor2["default"], debug: true });
-}).call(this,require("1YiZ5S"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/fake_d3ac3ac3.js","/")
-},{"./markua":6,"./web_file_accessor":10,"1YiZ5S":17,"buffer":13}],3:[function(require,module,exports){
+}).call(this,require("1YiZ5S"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/fake_bd842106.js","/")
+},{"./markua":6,"./web_file_accessor":11,"1YiZ5S":18,"buffer":14}],3:[function(require,module,exports){
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
 "use strict";
 
@@ -233,7 +239,7 @@ var FileAccessor = (function () {
 exports["default"] = FileAccessor;
 module.exports = exports["default"];
 }).call(this,require("1YiZ5S"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/file_accessor.js","/")
-},{"1YiZ5S":17,"buffer":13}],4:[function(require,module,exports){
+},{"1YiZ5S":18,"buffer":14}],4:[function(require,module,exports){
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
 "use strict";
 
@@ -435,7 +441,7 @@ InlineLexer.rules = _inline$escape.inline;
 exports["default"] = InlineLexer;
 module.exports = exports["default"];
 }).call(this,require("1YiZ5S"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/inline_lexer.js","/")
-},{"./constants":1,"./renderer":9,"1YiZ5S":17,"buffer":13}],5:[function(require,module,exports){
+},{"./constants":1,"./renderer":9,"1YiZ5S":18,"buffer":14}],5:[function(require,module,exports){
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
 "use strict";
 
@@ -448,6 +454,8 @@ Object.defineProperty(exports, "__esModule", {
 });
 
 var _block = require("./constants");
+
+var _characterIsNext = require("./util");
 
 var _ = require("underscore");
 
@@ -478,6 +486,8 @@ var Lexer = (function () {
   }, {
     key: "token",
     value: function token(src, top, bq) {
+      var _this = this;
+
       var cap = undefined;
       src = src.replace(/^ +$/gm, "");
 
@@ -599,78 +609,113 @@ var Lexer = (function () {
         }
 
         // list
-        if (cap = this.rules.list.exec(src)) {
-          src = src.substring(cap[0].length);
-          var bull = cap[2];
+        if (cap = this.rules.list.definition.exec(src)) {
+          var prevIndex;
 
-          // Determine what number the list will start with -- if it's a numbered
-          // list
-          var startingToken = this.rules.number.exec(cap[0]);
-          var startingNumber = startingToken ? parseInt(startingToken[0]) : null;
+          var _ret = (function () {
+            src = src.substring(cap[0].length);
+            var bull = cap[2];
 
-          this.tokens.push({
-            type: "list_start",
-            start: startingNumber,
-            ordered: bull.length > 1
-          });
+            // Determine what number the list will start with -- if it's a numbered
+            // list
+            var listType = undefined;
 
-          // Get each top-level item.
-          cap = cap[0].match(this.rules.item);
+            if (_this.rules.list.number.exec(bull)) {
+              listType = "number";
+            } else if (_this.rules.list.alphabetized.exec(bull)) {
+              listType = "alphabetized";
+            } else if (_this.rules.list.numeral.exec(bull)) listType = "numeral";else if (_this.rules.list.bullet.exec(bull)) listType = "bullet";
 
-          var prevNumber = null;
-          var nextNumber = null;
-          var next = false;
-          var l = cap.length;
+            _this.tokens.push({
+              type: "list_start",
+              listType: listType,
+              start: bull
+            });
 
-          for (var i = 0; i < l; i++) {
-            var item = cap[i];
+            // Get each top-level item.
+            cap = cap[0].match(_this.rules.item);
 
-            // If the list is numbered, and we aren't at the start, ensure that
-            // the current number is one greater than the previous
-            var currentNumber = this.rules.number.exec(item) ? parseInt(this.rules.number.exec(item)[0]) : null;
+            prevIndex = null;
 
-            if (startingNumber !== null && currentNumber !== startingNumber && currentNumber !== 1 + prevNumber) {
-              this.warnings.push("List numbers should be consecutive, automatically incrementing near " + cap[0]);
+            var next = false;
+            var l = cap.length;
+
+            var _loop = function (_i) {
+              var item = cap[_i];
+
+              // If the list order matters, and we aren't at the start, ensure that
+              // the current index is one greater than the previous
+              var currentIndex = (function () {
+                var current = undefined;
+                warning = "List indices should be consecutive, automatically increasing near " + cap[0];
+                switch (listType) {
+                  case "number":
+                    current = parseInt(_this.rules.number.exec(item)[1]);
+
+                    // Warn for numeric lists
+                    if (prevIndex !== null && current !== 1 + prevIndex) _this.warnings.push(warning);
+
+                    return current;
+                  case "alphabetized":
+                    current = _this.rules.list.alphabetized.exec(item)[1];
+
+                    // Warn for alpha list
+                    if (prevIndex !== null && !_characterIsNext.characterIsNext(current, prevIndex)) _this.warnings.push(warning);
+
+                    return current;
+                  case "numeral":
+                    return _this.rules.list.numeral.exec(item)[1];
+                  case "bullet":
+                    return null;
+                }
+              })();
+
+              // Remove the list item's bullet
+              // so it is seen as the next token.
+              var space = item.length;
+              item = item.replace(/^ *([*]|[a-zA-Z\d]+(\.|\))) +/, "");
+
+              // Outdent whatever the
+              // list item contains. Hacky.
+              if (~item.indexOf("\n ")) {
+                space -= item.length;
+                item = item.replace(/^ {1,4}/gm, "");
+              }
+              // Determine whether the next list item belongs here.
+              // Backpedal if it does not belong in this list.
+              if (_this.options.smartLists && _i != l - 1) {
+                var b = _block.block.bullet.exec(cap[_i + 1])[0];
+                if (bull != b && !(bull.length > 1 && b.length > 1)) src = cap.slice(_i + 1).join("\n") + src;
+                _i = l - 1;
+              }
+
+              // Determine whether item is loose or not.
+              // Use: /(^|\n)(?! )[^\n]+\n\n(?!\s*$)/
+              // for discount behavior.
+              var loose = next || /\n\n(?!\s*$)/.test(item);
+
+              if (_i != l - 1) {
+                next = item.charAt(item.length - 1) == "\n";
+                if (!loose) loose = next;
+              }
+
+              _this.tokens.push({ type: loose ? "loose_item_start" : "list_item_start" });
+
+              // Recurse.
+              _this.token(item, false, bq);
+              _this.tokens.push({ type: "list_item_end" });
+              prevIndex = currentIndex;
+              i = _i;
+            };
+
+            for (var i = 0; i < l; i++) {
+              _loop(i);
             }
+            _this.tokens.push({ type: "list_end" });
+            return "continue";
+          })();
 
-            // Remove the list item's bullet
-            // so it is seen as the next token.
-            var space = item.length;
-            item = item.replace(/^ *([*]|\d+\.) +/, "");
-
-            // Outdent whatever the
-            // list item contains. Hacky.
-            if (~item.indexOf("\n ")) {
-              space -= item.length;
-              item = item.replace(/^ {1,4}/gm, "");
-            }
-            // Determine whether the next list item belongs here.
-            // Backpedal if it does not belong in this list.
-            if (this.options.smartLists && i != l - 1) {
-              var b = _block.block.bullet.exec(cap[i + 1])[0];
-              if (bull != b && !(bull.length > 1 && b.length > 1)) src = cap.slice(i + 1).join("\n") + src;
-              i = l - 1;
-            }
-
-            // Determine whether item is loose or not.
-            // Use: /(^|\n)(?! )[^\n]+\n\n(?!\s*$)/
-            // for discount behavior.
-            var loose = next || /\n\n(?!\s*$)/.test(item);
-
-            if (i != l - 1) {
-              next = item.charAt(item.length - 1) == "\n";
-              if (!loose) loose = next;
-            }
-
-            this.tokens.push({ type: loose ? "loose_item_start" : "list_item_start" });
-
-            // Recurse.
-            this.token(item, false, bq);
-            this.tokens.push({ type: "list_item_end" });
-            prevNumber = currentNumber;
-          }
-          this.tokens.push({ type: "list_end" });
-          continue;
+          if (_ret === "continue") continue;
         }
 
         // def
@@ -776,7 +821,7 @@ var Lexer = (function () {
 exports["default"] = Lexer;
 module.exports = exports["default"];
 }).call(this,require("1YiZ5S"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/lexer.js","/")
-},{"./constants":1,"1YiZ5S":17,"buffer":13,"underscore":19}],6:[function(require,module,exports){
+},{"./constants":1,"./util":10,"1YiZ5S":18,"buffer":14,"underscore":20}],6:[function(require,module,exports){
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
 "use strict";
 
@@ -889,7 +934,7 @@ var Markua = (function () {
 exports["default"] = Markua;
 module.exports = exports["default"];
 }).call(this,require("1YiZ5S"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/markua.js","/")
-},{"./lexer":5,"./native_file_accessor":7,"./parser":8,"1YiZ5S":17,"async":11,"buffer":13,"object-assign":18,"underscore":19}],7:[function(require,module,exports){
+},{"./lexer":5,"./native_file_accessor":7,"./parser":8,"1YiZ5S":18,"async":12,"buffer":14,"object-assign":19,"underscore":20}],7:[function(require,module,exports){
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
 "use strict";
 
@@ -942,7 +987,7 @@ var NativeFileAccessor = (function (_FileAccessor) {
 exports["default"] = NativeFileAccessor;
 module.exports = exports["default"];
 }).call(this,require("1YiZ5S"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/native_file_accessor.js","/")
-},{"./file_accessor":3,"1YiZ5S":17,"buffer":13,"fs":12,"path":16}],8:[function(require,module,exports){
+},{"./file_accessor":3,"1YiZ5S":18,"buffer":14,"fs":13,"path":17}],8:[function(require,module,exports){
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
 "use strict";
 
@@ -1089,14 +1134,14 @@ var Parser = (function () {
         case "list_start":
           {
             var body = "",
-                ordered = this.token.ordered,
+                listType = this.token.listType,
                 start = this.token.start;
 
             while (this.next().type !== "list_end") {
               body += this.tok();
             }
 
-            return this.renderer.list(body, ordered, start);
+            return this.renderer.list(body, listType, start);
           }
         case "list_item_start":
           {
@@ -1146,7 +1191,7 @@ var Parser = (function () {
 exports["default"] = Parser;
 module.exports = exports["default"];
 }).call(this,require("1YiZ5S"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/parser.js","/")
-},{"./inline_lexer":4,"./renderer":9,"1YiZ5S":17,"buffer":13}],9:[function(require,module,exports){
+},{"./inline_lexer":4,"./renderer":9,"1YiZ5S":18,"buffer":14}],9:[function(require,module,exports){
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
 "use strict";
 
@@ -1227,9 +1272,20 @@ var Renderer = (function () {
     }
   }, {
     key: "list",
-    value: function list(body, ordered, start) {
-      var type = ordered ? "ol" : "ul";
-      var startAttr = "";
+    value: function list(body, listType, start) {
+      var type,
+          startAttr = "";
+      switch (listType) {
+        case "bullet":
+          type = "ul";
+          break;
+        case "alphabetized":
+          type = "ol type=\"" + (start === start.toUpperCase() ? "A" : "a") + "\"";
+          break;
+        default:
+          type = "ol";
+      }
+
       if (type === "ol" && start) startAttr = " start=" + start;
 
       return "<" + type + "" + startAttr + ">\n" + body + "</" + type + ">\n";
@@ -1326,7 +1382,21 @@ var Renderer = (function () {
 exports["default"] = Renderer;
 module.exports = exports["default"];
 }).call(this,require("1YiZ5S"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/renderer.js","/")
-},{"./constants":1,"1YiZ5S":17,"buffer":13}],10:[function(require,module,exports){
+},{"./constants":1,"1YiZ5S":18,"buffer":14}],10:[function(require,module,exports){
+(function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
+'use strict';
+
+Object.defineProperty(exports, '__esModule', {
+  value: true
+});
+var ALPHABET = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z'];
+
+var characterIsNext = function characterIsNext(character, previous) {
+  return ALPHABET[ALPHABET.indexOf(character) - 1] === previous;
+};
+exports.characterIsNext = characterIsNext;
+}).call(this,require("1YiZ5S"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/util.js","/")
+},{"1YiZ5S":18,"buffer":14}],11:[function(require,module,exports){
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
 "use strict";
 
@@ -1375,7 +1445,7 @@ var WebFileAccessor = (function (_FileAccessor) {
 exports["default"] = WebFileAccessor;
 module.exports = exports["default"];
 }).call(this,require("1YiZ5S"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/web_file_accessor.js","/")
-},{"./file_accessor":3,"1YiZ5S":17,"buffer":13}],11:[function(require,module,exports){
+},{"./file_accessor":3,"1YiZ5S":18,"buffer":14}],12:[function(require,module,exports){
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
 /*!
  * async
@@ -2502,9 +2572,9 @@ module.exports = exports["default"];
 }());
 
 }).call(this,require("1YiZ5S"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/../node_modules/async/lib/async.js","/../node_modules/async/lib")
-},{"1YiZ5S":17,"buffer":13}],12:[function(require,module,exports){
+},{"1YiZ5S":18,"buffer":14}],13:[function(require,module,exports){
 
-},{"1YiZ5S":17,"buffer":13}],13:[function(require,module,exports){
+},{"1YiZ5S":18,"buffer":14}],14:[function(require,module,exports){
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
 /*!
  * The buffer module from node.js, for the browser.
@@ -3617,7 +3687,7 @@ function assert (test, message) {
 }
 
 }).call(this,require("1YiZ5S"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/../node_modules/gulp-browserify/node_modules/browserify/node_modules/buffer/index.js","/../node_modules/gulp-browserify/node_modules/browserify/node_modules/buffer")
-},{"1YiZ5S":17,"base64-js":14,"buffer":13,"ieee754":15}],14:[function(require,module,exports){
+},{"1YiZ5S":18,"base64-js":15,"buffer":14,"ieee754":16}],15:[function(require,module,exports){
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
 var lookup = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
 
@@ -3745,7 +3815,7 @@ var lookup = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
 }(typeof exports === 'undefined' ? (this.base64js = {}) : exports))
 
 }).call(this,require("1YiZ5S"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/../node_modules/gulp-browserify/node_modules/browserify/node_modules/buffer/node_modules/base64-js/lib/b64.js","/../node_modules/gulp-browserify/node_modules/browserify/node_modules/buffer/node_modules/base64-js/lib")
-},{"1YiZ5S":17,"buffer":13}],15:[function(require,module,exports){
+},{"1YiZ5S":18,"buffer":14}],16:[function(require,module,exports){
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
 exports.read = function(buffer, offset, isLE, mLen, nBytes) {
   var e, m,
@@ -3833,7 +3903,7 @@ exports.write = function(buffer, value, offset, isLE, mLen, nBytes) {
 };
 
 }).call(this,require("1YiZ5S"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/../node_modules/gulp-browserify/node_modules/browserify/node_modules/buffer/node_modules/ieee754/index.js","/../node_modules/gulp-browserify/node_modules/browserify/node_modules/buffer/node_modules/ieee754")
-},{"1YiZ5S":17,"buffer":13}],16:[function(require,module,exports){
+},{"1YiZ5S":18,"buffer":14}],17:[function(require,module,exports){
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
 // Copyright Joyent, Inc. and other Node contributors.
 //
@@ -4061,7 +4131,7 @@ var substr = 'ab'.substr(-1) === 'b'
 ;
 
 }).call(this,require("1YiZ5S"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/../node_modules/gulp-browserify/node_modules/browserify/node_modules/path-browserify/index.js","/../node_modules/gulp-browserify/node_modules/browserify/node_modules/path-browserify")
-},{"1YiZ5S":17,"buffer":13}],17:[function(require,module,exports){
+},{"1YiZ5S":18,"buffer":14}],18:[function(require,module,exports){
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
 // shim for using process in browser
 
@@ -4128,7 +4198,7 @@ process.chdir = function (dir) {
 };
 
 }).call(this,require("1YiZ5S"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/../node_modules/gulp-browserify/node_modules/browserify/node_modules/process/browser.js","/../node_modules/gulp-browserify/node_modules/browserify/node_modules/process")
-},{"1YiZ5S":17,"buffer":13}],18:[function(require,module,exports){
+},{"1YiZ5S":18,"buffer":14}],19:[function(require,module,exports){
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
 'use strict';
 
@@ -4158,7 +4228,7 @@ module.exports = Object.assign || function (target, source) {
 };
 
 }).call(this,require("1YiZ5S"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/../node_modules/object-assign/index.js","/../node_modules/object-assign")
-},{"1YiZ5S":17,"buffer":13}],19:[function(require,module,exports){
+},{"1YiZ5S":18,"buffer":14}],20:[function(require,module,exports){
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
 //     Underscore.js 1.8.3
 //     http://underscorejs.org
@@ -5710,4 +5780,4 @@ module.exports = Object.assign || function (target, source) {
 }.call(this));
 
 }).call(this,require("1YiZ5S"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/../node_modules/underscore/underscore.js","/../node_modules/underscore")
-},{"1YiZ5S":17,"buffer":13}]},{},[2])
+},{"1YiZ5S":18,"buffer":14}]},{},[2])
