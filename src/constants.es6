@@ -74,9 +74,9 @@ export let block = {
   list: {
     body: /^( *)(bull) [\s\S]+?(?:hr|def|\n{2,}(?! )(?!\1bull )\n*|\s*$)/u,
     definition: /^(?:(?:([^\n]*)(?:\n:(?: *))))/,
-    number: /^([0-9]+)(?:\.)/,
-    alphabetized: /^([\w]+)(?:[\)\.])/u,
-    numeral: /^(?=[MDCLXVI])M*(?:C[MD]|D?C{0,3})(?:X[CL]|L?X{0,3})(I[XV]|V?I{0,3})(?:\)|\.)/i,
+    number: /^([0-9]+)(?:\.|\))/,
+    alphabetized: /^([a-zA-Z]+)(?:[\)\.])/u,
+    numeral: /^(?=[MDCLXVI])M*(?:(C)[MD]|D?C{0,3})(?:X[CL]|L?X{0,3})(I[XV]|V?I{0,3}(?:\)|\.))/i,
     bullet: /^\*/
   },
   def: /^ *\[([^\]]+)\]: *<?([^\s>]+)>?(?: +["(]([^\n]+)[")])? *(?:\n+|$)/,
@@ -91,7 +91,7 @@ export let block = {
   number: /([0-9]+)/
 };
 
-block.bullet = /(?:([*])|([a-zA-Z\d]+(?:\.|\))|([^\n]+\n(?::))))/u;
+block.bullet = /(?:([*])|([a-zA-Z\d]+)(?:\)|\.)|([^\n]+)(?:\n(?::)))/ui;
 block.item = /^( *)(bull) [^\n]*(?:\n(?!\1bull )[^\n]*)*/u;
 block.item = replace(block.item, 'gm')(/bull/g, block.bullet)();
 

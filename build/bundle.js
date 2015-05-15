@@ -78,9 +78,9 @@ var block = {
   list: {
     body: /^( *)(bull) (?:[\0-\uD7FF\uE000-\uFFFF]|[\uD800-\uDBFF][\uDC00-\uDFFF]|[\uD800-\uDBFF](?![\uDC00-\uDFFF])|(?:[^\uD800-\uDBFF]|^)[\uDC00-\uDFFF])+?(?:hr|def|\n{2,}(?! )(?!\1bull )\n*|[\t-\r \xA0\u1680\u180E\u2000-\u200A\u2028\u2029\u202F\u205F\u3000\uFEFF]*$)/,
     definition: /^(?:(?:([^\n]*)(?:\n:(?: *))))/,
-    number: /^([0-9]+)(?:\.)/,
-    alphabetized: /^([0-9A-Z_a-z]+)(?:[\)\.])/,
-    numeral: /^(?=[MDCLXVI])M*(?:C[MD]|D?C{0,3})(?:X[CL]|L?X{0,3})(I[XV]|V?I{0,3})(?:\)|\.)/i,
+    number: /^([0-9]+)(?:\.|\))/,
+    alphabetized: /^([A-Za-z]+)(?:[\)\.])/,
+    numeral: /^(?=[MDCLXVI])M*(?:(C)[MD]|D?C{0,3})(?:X[CL]|L?X{0,3})(I[XV]|V?I{0,3}(?:\)|\.))/i,
     bullet: /^\*/
   },
   def: /^ *\[([^\]]+)\]: *<?([^\s>]+)>?(?: +["(]([^\n]+)[")])? *(?:\n+|$)/,
@@ -96,7 +96,7 @@ var block = {
 };
 
 exports.block = block;
-block.bullet = /(?:(\*)|([0-9A-Za-z]+(?:\.|\))|((?:[\0-\t\x0B-\uD7FF\uE000-\uFFFF]|[\uD800-\uDBFF][\uDC00-\uDFFF]|[\uD800-\uDBFF](?![\uDC00-\uDFFF])|(?:[^\uD800-\uDBFF]|^)[\uDC00-\uDFFF])+\n(?::))))/;
+block.bullet = /(?:(\*)|([0-9A-Za-z\u017F\u212A]+)(?:\)|\.)|((?:[\0-\t\x0B-\uD7FF\uE000-\uFFFF]|[\uD800-\uDBFF][\uDC00-\uDFFF]|[\uD800-\uDBFF](?![\uDC00-\uDFFF])|(?:[^\uD800-\uDBFF]|^)[\uDC00-\uDFFF])+)(?:\n(?::)))/i;
 block.item = /^( *)(bull) (?:[\0-\t\x0B-\uD7FF\uE000-\uFFFF]|[\uD800-\uDBFF][\uDC00-\uDFFF]|[\uD800-\uDBFF](?![\uDC00-\uDFFF])|(?:[^\uD800-\uDBFF]|^)[\uDC00-\uDFFF])*(?:\n(?!\1bull )(?:[\0-\t\x0B-\uD7FF\uE000-\uFFFF]|[\uD800-\uDBFF][\uDC00-\uDFFF]|[\uD800-\uDBFF](?![\uDC00-\uDFFF])|(?:[^\uD800-\uDBFF]|^)[\uDC00-\uDFFF])*)*/;
 block.item = replace(block.item, 'gm')(/bull/g, block.bullet)();
 
@@ -207,7 +207,7 @@ var _WebFileAccessor = require("./web_file_accessor");
 var _WebFileAccessor2 = _interopRequireWildcard(_WebFileAccessor);
 
 if (typeof window !== "undefined") window.markua = new _Markua2["default"]("/data/test_book", { fileAccessor: _WebFileAccessor2["default"], debug: true });
-}).call(this,require("1YiZ5S"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/fake_b24336bb.js","/")
+}).call(this,require("1YiZ5S"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/fake_818a2fb3.js","/")
 },{"./markua":6,"./web_file_accessor":11,"1YiZ5S":18,"buffer":14}],3:[function(require,module,exports){
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
 "use strict";
@@ -615,13 +615,15 @@ var Lexer = (function () {
 
           var _ret = (function () {
             src = src.substring(cap[0].length);
-            var bull = cap[2];
+            var bull = cap[2],
+                listType = undefined;
 
             // Determine what number the list will start with -- if it's a numbered
             // list
-            var listType = undefined;
-
-            if (_this.rules.list.number.exec(bull)) listType = "number";else if (_this.rules.list.alphabetized.exec(bull)) listType = "alphabetized";else if (_this.rules.list.numeral.exec(bull)) listType = "numeral";else if (_this.rules.list.bullet.exec(bull)) listType = "bullet";else if (_this.rules.list.definition.exec(bull)) listType = "definition";
+            if (_this.rules.list.number.exec(bull)) listType = "number";else if (_this.rules.list.numeral.exec(bull)) listType = "numeral";else if (_this.rules.list.alphabetized.exec(bull)) listType = "alphabetized";else if (_this.rules.list.bullet.exec(bull)) listType = "bullet";else if (_this.rules.list.definition.exec(bull)) listType = "definition";else {
+              _this.warnings.push("Undefined list type for " + src);
+              return "continue";
+            }
 
             _this.tokens.push({
               type: "list_start",
@@ -643,32 +645,40 @@ var Lexer = (function () {
               // If the list order matters, and we aren't at the start, ensure that
               // the current index is one greater than the previous
               var currentIndex = (function () {
-                var current = undefined;
+                var current = undefined,
+                    matches = undefined;
                 warning = "List indices should be consecutive, automatically increasing near " + cap[0];
                 switch (listType) {
                   case "number":
-                    current = parseInt(_this.rules.number.exec(item)[1]);
+                    current = _this.rules.number.exec(item) && parseInt(_this.rules.number.exec(item)[1]) || null;
 
                     // Warn for numeric lists
                     if (prevIndex !== null && current !== 1 + prevIndex) _this.warnings.push(warning);
 
                     return current;
                   case "alphabetized":
-                    current = _this.rules.list.alphabetized.exec(item)[1];
+                    current = _this.rules.alphabetized.exec(item) && _this.rules.alphabetized.exec(item)[1] || null;
 
                     // Warn for alpha list
                     if (prevIndex !== null && !_characterIsNext.characterIsNext(current, prevIndex)) _this.warnings.push(warning);
 
                     return current;
                   case "numeral":
-                    return _this.rules.list.numeral.exec(item)[1];
+                    current = _this.rules.numeral.exec(item) && _this.rules.numeral.exec(item)[2] || null;
+                    if (current) bull = current;
+                    return current;
                   case "bullet":
-                    return null;
+                    return true;
                   case "definition":
-                    definitionTitle = item.match(_this.rules.bullet)[2];
-                    return null;
+                    definitionTitle = item.match(_this.rules.bullet)[3];
+                    return true;
                 }
               })();
+
+              if (!currentIndex) {
+                _this.warnings.push("Invalid list item at " + item);
+                return "continue";
+              }
 
               // Remove the list item's bullet
               // so it is seen as the next token.
@@ -691,7 +701,9 @@ var Lexer = (function () {
             };
 
             for (var i = 0; i < l; i++) {
-              _loop(i);
+              var _ret2 = _loop(i);
+
+              if (_ret2 === "continue") continue;
             }
             _this.tokens.push({ type: "list_end" });
             return "continue";
@@ -1184,6 +1196,8 @@ Object.defineProperty(exports, "__esModule", {
 
 var _escape$unescape$HEADING_BOOK_CLASS_MAP$HEADING_MULTI_PART_CLASS_MAP$HEADING_DOCUMENT_CLASS_MAP = require("./constants");
 
+var _decimalize$ALPHABET = require("./util");
+
 var Renderer = (function () {
   function Renderer() {
     var options = arguments[0] === undefined ? {} : arguments[0];
@@ -1254,21 +1268,30 @@ var Renderer = (function () {
     value: function list(body, listType, start) {
       var type,
           startAttr = "";
+      start = start.substr(0, start.length - 1);
+
       switch (listType) {
         case "bullet":
           type = "ul";
           break;
         case "alphabetized":
           type = "ol type=\"" + (start === start.toUpperCase() ? "A" : "a") + "\"";
+          startAttr = " start='" + (_decimalize$ALPHABET.ALPHABET.indexOf(start.toUpperCase()) + 1) + "'";
           break;
         case "definition":
           type = "dl";
           break;
+        case "numeral":
+          type = "ol type=\"" + (start === start.toUpperCase() ? "I" : "i") + "\"";
+          start = _decimalize$ALPHABET.decimalize(start) || 0;
+          break;
+        case "number":
+          type = "ol";
+          startAttr = " start='" + start + "'";
+          break;
         default:
           type = "ol";
       }
-
-      if (type === "ol" && start) startAttr = " start=" + start;
 
       return "<" + type + "" + startAttr + ">\n" + body + "</" + type + ">\n";
     }
@@ -1369,7 +1392,7 @@ var Renderer = (function () {
 exports["default"] = Renderer;
 module.exports = exports["default"];
 }).call(this,require("1YiZ5S"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/renderer.js","/")
-},{"./constants":1,"1YiZ5S":18,"buffer":14}],10:[function(require,module,exports){
+},{"./constants":1,"./util":10,"1YiZ5S":18,"buffer":14}],10:[function(require,module,exports){
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
 'use strict';
 
@@ -1378,10 +1401,53 @@ Object.defineProperty(exports, '__esModule', {
 });
 var ALPHABET = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z'];
 
+exports.ALPHABET = ALPHABET;
 var characterIsNext = function characterIsNext(character, previous) {
   return ALPHABET[ALPHABET.indexOf(character) - 1] === previous;
 };
+
 exports.characterIsNext = characterIsNext;
+var romanize = function romanize(decimalNumber) {
+  var num = Math.floor(decimalNumber),
+      val,
+      s = '',
+      i = 0,
+      v = [1000, 900, 500, 400, 100, 90, 50, 40, 10, 9, 5, 4, 1],
+      r = ['M', 'CM', 'D', 'CD', 'C', 'XC', 'L', 'XL', 'X', 'IX', 'V', 'IV', 'I'];
+  if (this - num || num < 1) num = 0;
+  while (num) {
+    val = v[i];
+    while (num >= val) {
+      num -= val;
+      s += r[i];
+    }
+    ++i;
+  }
+  return s;
+};
+
+exports.romanize = romanize;
+var decimalize = function decimalize(romanNumeral) {
+  var s = romanNumeral.toUpperCase().replace(/ +/g, ''),
+      L = s.length,
+      sum = 0,
+      i = 0,
+      next,
+      val,
+      R = { M: 1000, D: 500, C: 100, L: 50, X: 10, V: 5, I: 1 };
+  if (/^[MDCLXVI)(]+$/.test(s)) {
+    while (i < L) {
+      val = R[s.charAt(i++)];
+      next = R[s.charAt(i)] || 0;
+
+      if (next - val > 0) val *= -1;
+      sum += val;
+    }
+    return sum;
+  }
+  return NaN;
+};
+exports.decimalize = decimalize;
 }).call(this,require("1YiZ5S"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/util.js","/")
 },{"1YiZ5S":18,"buffer":14}],11:[function(require,module,exports){
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){

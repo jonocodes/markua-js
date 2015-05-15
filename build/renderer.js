@@ -10,6 +10,8 @@ Object.defineProperty(exports, "__esModule", {
 
 var _escape$unescape$HEADING_BOOK_CLASS_MAP$HEADING_MULTI_PART_CLASS_MAP$HEADING_DOCUMENT_CLASS_MAP = require("./constants");
 
+var _decimalize$ALPHABET = require("./util");
+
 var Renderer = (function () {
   function Renderer() {
     var options = arguments[0] === undefined ? {} : arguments[0];
@@ -80,21 +82,30 @@ var Renderer = (function () {
     value: function list(body, listType, start) {
       var type,
           startAttr = "";
+      start = start.substr(0, start.length - 1);
+
       switch (listType) {
         case "bullet":
           type = "ul";
           break;
         case "alphabetized":
           type = "ol type=\"" + (start === start.toUpperCase() ? "A" : "a") + "\"";
+          startAttr = " start='" + (_decimalize$ALPHABET.ALPHABET.indexOf(start.toUpperCase()) + 1) + "'";
           break;
         case "definition":
           type = "dl";
           break;
+        case "numeral":
+          type = "ol type=\"" + (start === start.toUpperCase() ? "I" : "i") + "\"";
+          start = _decimalize$ALPHABET.decimalize(start) || 0;
+          break;
+        case "number":
+          type = "ol";
+          startAttr = " start='" + start + "'";
+          break;
         default:
           type = "ol";
       }
-
-      if (type === "ol" && start) startAttr = " start=" + start;
 
       return "<" + type + "" + startAttr + ">\n" + body + "</" + type + ">\n";
     }

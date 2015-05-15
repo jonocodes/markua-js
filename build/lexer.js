@@ -169,13 +169,15 @@ var Lexer = (function () {
 
           var _ret = (function () {
             src = src.substring(cap[0].length);
-            var bull = cap[2];
+            var bull = cap[2],
+                listType = undefined;
 
             // Determine what number the list will start with -- if it's a numbered
             // list
-            var listType = undefined;
-
-            if (_this.rules.list.number.exec(bull)) listType = "number";else if (_this.rules.list.alphabetized.exec(bull)) listType = "alphabetized";else if (_this.rules.list.numeral.exec(bull)) listType = "numeral";else if (_this.rules.list.bullet.exec(bull)) listType = "bullet";else if (_this.rules.list.definition.exec(bull)) listType = "definition";
+            if (_this.rules.list.number.exec(bull)) listType = "number";else if (_this.rules.list.numeral.exec(bull)) listType = "numeral";else if (_this.rules.list.alphabetized.exec(bull)) listType = "alphabetized";else if (_this.rules.list.bullet.exec(bull)) listType = "bullet";else if (_this.rules.list.definition.exec(bull)) listType = "definition";else {
+              _this.warnings.push("Undefined list type for " + src);
+              return "continue";
+            }
 
             _this.tokens.push({
               type: "list_start",
@@ -197,32 +199,40 @@ var Lexer = (function () {
               // If the list order matters, and we aren't at the start, ensure that
               // the current index is one greater than the previous
               var currentIndex = (function () {
-                var current = undefined;
+                var current = undefined,
+                    matches = undefined;
                 warning = "List indices should be consecutive, automatically increasing near " + cap[0];
                 switch (listType) {
                   case "number":
-                    current = parseInt(_this.rules.number.exec(item)[1]);
+                    current = _this.rules.number.exec(item) && parseInt(_this.rules.number.exec(item)[1]) || null;
 
                     // Warn for numeric lists
                     if (prevIndex !== null && current !== 1 + prevIndex) _this.warnings.push(warning);
 
                     return current;
                   case "alphabetized":
-                    current = _this.rules.list.alphabetized.exec(item)[1];
+                    current = _this.rules.alphabetized.exec(item) && _this.rules.alphabetized.exec(item)[1] || null;
 
                     // Warn for alpha list
                     if (prevIndex !== null && !_characterIsNext.characterIsNext(current, prevIndex)) _this.warnings.push(warning);
 
                     return current;
                   case "numeral":
-                    return _this.rules.list.numeral.exec(item)[1];
+                    current = _this.rules.numeral.exec(item) && _this.rules.numeral.exec(item)[2] || null;
+                    if (current) bull = current;
+                    return current;
                   case "bullet":
-                    return null;
+                    return true;
                   case "definition":
-                    definitionTitle = item.match(_this.rules.bullet)[2];
-                    return null;
+                    definitionTitle = item.match(_this.rules.bullet)[3];
+                    return true;
                 }
               })();
+
+              if (!currentIndex) {
+                _this.warnings.push("Invalid list item at " + item);
+                return "continue";
+              }
 
               // Remove the list item's bullet
               // so it is seen as the next token.
@@ -245,7 +255,9 @@ var Lexer = (function () {
             };
 
             for (var i = 0; i < l; i++) {
-              _loop(i);
+              var _ret2 = _loop(i);
+
+              if (_ret2 === "continue") continue;
             }
             _this.tokens.push({ type: "list_end" });
             return "continue";

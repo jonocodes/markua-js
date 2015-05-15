@@ -151,28 +151,30 @@ class Lexer {
         // how markdown.pl works.
         this.token(cap, top, true);
         this.tokens.push({ type: 'blockquote_end' });
-        continue
+        continue;
       }
 
       // list
       if (cap = this.rules.list.body.exec(src)) {
         src = src.substring(cap[0].length);
-        let bull = cap[2];
+        let bull = cap[2], listType;
 
         // Determine what number the list will start with -- if it's a numbered
         // list
-        let listType;
-
         if (this.rules.list.number.exec(bull))
           listType = "number";
-        else if (this.rules.list.alphabetized.exec(bull))
-          listType = "alphabetized";
         else if (this.rules.list.numeral.exec(bull))
           listType = "numeral";
+        else if (this.rules.list.alphabetized.exec(bull))
+          listType = "alphabetized";
         else if (this.rules.list.bullet.exec(bull))
           listType = "bullet";
         else if (this.rules.list.definition.exec(bull))
           listType = "definition";
+        else {
+          this.warnings.push(`Undefined list type for ${src}`);
+          continue;
+        }
 
         this.tokens.push({
           type: 'list_start',
@@ -194,11 +196,11 @@ class Lexer {
           // If the list order matters, and we aren't at the start, ensure that
           // the current index is one greater than the previous
           let currentIndex = (() => {
-            let current;
+            let current, matches;
             warning = `List indices should be consecutive, automatically increasing near ${cap[0]}`
             switch (listType) {
               case 'number':
-                current = parseInt(this.rules.number.exec(item)[1])
+                current = (this.rules.number.exec(item) && parseInt(this.rules.number.exec(item)[1])) || null
 
                 // Warn for numeric lists
                 if (prevIndex !== null && current !== 1 + prevIndex)
@@ -206,7 +208,7 @@ class Lexer {
 
                 return current
               case 'alphabetized':
-                current = this.rules.list.alphabetized.exec(item)[1];
+                current = (this.rules.alphabetized.exec(item) && this.rules.alphabetized.exec(item)[1]) || null
 
                 // Warn for alpha list
                 if (prevIndex !== null && !characterIsNext(current, prevIndex))
@@ -214,14 +216,21 @@ class Lexer {
 
                 return current;
               case 'numeral':
-                return this.rules.list.numeral.exec(item)[1];
+                current = (this.rules.numeral.exec(item) && this.rules.numeral.exec(item)[2]) || null
+                if (current) bull = current;
+                return current;
               case 'bullet':
-                return null;
+                return true;
               case 'definition':
-                definitionTitle = item.match(this.rules.bullet)[2]
-                return null;
+                definitionTitle = item.match(this.rules.bullet)[3]
+                return true;
             }
           })();
+
+          if (!currentIndex) {
+            this.warnings.push(`Invalid list item at ${item}`);
+            continue;
+          }
 
           // Remove the list item's bullet
           // so it is seen as the next token.
@@ -253,7 +262,7 @@ class Lexer {
           href: cap[2],
           title: cap[3]
         }
-        continue
+        continue;
       }
 
       // table (gfm)
