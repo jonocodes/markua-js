@@ -94,7 +94,7 @@ var block = {
 };
 
 exports.block = block;
-block.bullet = /(?:(\*)|([0-9A-Z_a-z]+)(?:\.|\)|\n(?::)))/;
+block.bullet = /(?:(\*)|([ 0-9A-Z_a-z]+)(?:\.|\)|\n(?::)))/;
 block.item = /^( *)(bull) (?:[\0-\t\x0B-\uD7FF\uE000-\uFFFF]|[\uD800-\uDBFF][\uDC00-\uDFFF]|[\uD800-\uDBFF](?![\uDC00-\uDFFF])|(?:[^\uD800-\uDBFF]|^)[\uDC00-\uDFFF])*(?:\n(?!\1bull )(?:[\0-\t\x0B-\uD7FF\uE000-\uFFFF]|[\uD800-\uDBFF][\uDC00-\uDFFF]|[\uD800-\uDBFF](?![\uDC00-\uDFFF])|(?:[^\uD800-\uDBFF]|^)[\uDC00-\uDFFF])*)*/;
 block.item = replace(block.item, 'gm')(/bull/g, block.bullet)();
 
