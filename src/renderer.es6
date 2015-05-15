@@ -59,13 +59,16 @@ class Renderer {
   }
 
   list(body, listType, start) {
-    var type, startAttr = ``;
+    var type, startAttr = '';
     switch (listType) {
       case 'bullet':
         type = `ul`;
         break;
       case 'alphabetized':
         type = `ol type="${start === start.toUpperCase() ? 'A' : 'a'}"`;
+        break;
+      case 'definition':
+        type = `dl`;
         break;
       default:
         type = `ol`;
@@ -75,6 +78,10 @@ class Renderer {
       startAttr = ` start=${start}`;
 
     return `<${type}${startAttr}>\n${body}</${type}>\n`;
+  }
+
+  definitionListItem(text, title) {
+    return `<dt>${title}</dt>\n<dd>${text}</dd>\n`;
   }
 
   listitem(text) {

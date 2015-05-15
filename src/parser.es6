@@ -130,22 +130,18 @@ class Parser {
       case 'list_item_start': {
         var body = '';
 
+        let listType = this.token.listType, title = this.token.bullet;
+
         while (this.next().type !== 'list_item_end') {
           body += this.token.type === 'text'
             ? this.parseText()
             : this.tok();
         }
 
-        return this.renderer.listitem(body);
-      }
-      case 'loose_item_start': {
-        var body = '';
-
-        while (this.next().type !== 'list_item_end') {
-          body += this.tok();
-        }
-
-        return this.renderer.listitem(body);
+        if (listType === 'definition')
+          return this.renderer.definitionListItem(body, title);
+        else
+          return this.renderer.listitem(body);
       }
       case 'html': {
         var html = !this.token.pre && !this.options.pedantic

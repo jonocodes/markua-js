@@ -164,8 +164,8 @@ var Lexer = (function () {
         }
 
         // list
-        if (cap = this.rules.list.definition.exec(src)) {
-          var prevIndex;
+        if (cap = this.rules.list.body.exec(src)) {
+          var prevIndex, next, l, definitionTitle;
 
           var _ret = (function () {
             src = src.substring(cap[0].length);
@@ -175,11 +175,7 @@ var Lexer = (function () {
             // list
             var listType = undefined;
 
-            if (_this.rules.list.number.exec(bull)) {
-              listType = "number";
-            } else if (_this.rules.list.alphabetized.exec(bull)) {
-              listType = "alphabetized";
-            } else if (_this.rules.list.numeral.exec(bull)) listType = "numeral";else if (_this.rules.list.bullet.exec(bull)) listType = "bullet";
+            if (_this.rules.list.number.exec(bull)) listType = "number";else if (_this.rules.list.alphabetized.exec(bull)) listType = "alphabetized";else if (_this.rules.list.numeral.exec(bull)) listType = "numeral";else if (_this.rules.list.bullet.exec(bull)) listType = "bullet";else if (_this.rules.list.definition.exec(bull)) listType = "definition";
 
             _this.tokens.push({
               type: "list_start",
@@ -191,12 +187,12 @@ var Lexer = (function () {
             cap = cap[0].match(_this.rules.item);
 
             prevIndex = null;
+            next = false;
+            l = cap.length;
+            definitionTitle = null;
 
-            var next = false;
-            var l = cap.length;
-
-            var _loop = function (_i) {
-              var item = cap[_i];
+            var _loop = function (i) {
+              var item = cap[i];
 
               // If the list order matters, and we aren't at the start, ensure that
               // the current index is one greater than the previous
@@ -222,13 +218,16 @@ var Lexer = (function () {
                     return _this.rules.list.numeral.exec(item)[1];
                   case "bullet":
                     return null;
+                  case "definition":
+                    definitionTitle = item.match(_this.rules.bullet)[2];
+                    return null;
                 }
               })();
 
               // Remove the list item's bullet
               // so it is seen as the next token.
               var space = item.length;
-              item = item.replace(/^ *([*]|[a-zA-Z\d]+(\.|\))) +/, "");
+              item = item.replace(_this.rules.bullet, "");
 
               // Outdent whatever the
               // list item contains. Hacky.
@@ -236,31 +235,13 @@ var Lexer = (function () {
                 space -= item.length;
                 item = item.replace(/^ {1,4}/gm, "");
               }
-              // Determine whether the next list item belongs here.
-              // Backpedal if it does not belong in this list.
-              if (_this.options.smartLists && _i != l - 1) {
-                var b = _block.block.bullet.exec(cap[_i + 1])[0];
-                if (bull != b && !(bull.length > 1 && b.length > 1)) src = cap.slice(_i + 1).join("\n") + src;
-                _i = l - 1;
-              }
 
-              // Determine whether item is loose or not.
-              // Use: /(^|\n)(?! )[^\n]+\n\n(?!\s*$)/
-              // for discount behavior.
-              var loose = next || /\n\n(?!\s*$)/.test(item);
-
-              if (_i != l - 1) {
-                next = item.charAt(item.length - 1) == "\n";
-                if (!loose) loose = next;
-              }
-
-              _this.tokens.push({ type: loose ? "loose_item_start" : "list_item_start" });
+              _this.tokens.push({ type: "list_item_start", listType: listType, bullet: listType === "definition" ? definitionTitle : bull });
 
               // Recurse.
               _this.token(item, false, bq);
               _this.tokens.push({ type: "list_item_end" });
               prevIndex = currentIndex;
-              i = _i;
             };
 
             for (var i = 0; i < l; i++) {

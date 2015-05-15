@@ -20,7 +20,7 @@
 // THE SOFTWARE.
 
 // Need this polyfill for Object.assign for now...
-let ObjectAssign = require("object-assign")
+let ObjectAssign = require("object-assign");
 
 let noop = () => {}
 noop.exec = noop
@@ -72,9 +72,10 @@ export let block = {
   heading: /^ *(#{1,6}) *([^\n]+) */,
   blockquote: /^( *>[^\n]+(\n(?!def)[^\n]+)*\n*)+/,
   list: {
-    definition: /^( *)(bull) [\s\S]+?(?:hr|def|\n{2,}(?! )(?!\1bull )\n*|\s*$)/,
+    body: /^( *)(bull) [\s\S]+?(?:hr|def|\n{2,}(?! )(?!\1bull )\n*|\s*$)/u,
+    definition: /^(?:(?:([^\n]*)(?:\n:(?: *))))/,
     number: /^([0-9]+)(?:\.)/,
-    alphabetized: /^([a-zA-Z]+)(?:[\)\.])/,
+    alphabetized: /^([\w]+)(?:[\)\.])/u,
     numeral: /^(?=[MDCLXVI])M*(?:C[MD]|D?C{0,3})(?:X[CL]|L?X{0,3})(I[XV]|V?I{0,3})(?:\)|\.)/i,
     bullet: /^\*/
   },
@@ -90,11 +91,11 @@ export let block = {
   number: /([0-9]+)/
 };
 
-block.bullet = /([*]|[a-zA-Z\d]+(?:\.|\)))/;
-block.item = /^( *)(bull) [^\n]*(?:\n(?!\1bull )[^\n]*)*/;
+block.bullet = /(?:([*])|([\w\d]+)(?:\.|\)|\n(?::)))/u;
+block.item = /^( *)(bull) [^\n]*(?:\n(?!\1bull )[^\n]*)*/u;
 block.item = replace(block.item, 'gm')(/bull/g, block.bullet)();
 
-block.list.definition = replace(block.list.definition)(/bull/g, block.bullet)
+block.list.body = replace(block.list.body)(/bull/g, block.bullet)
   ('hr', '\\n+(?=\\1?(?:[-*_] *){3,}(?:\\n+|$))')
   ('def', `\\n+(?=${block.def.source})`)
   ();

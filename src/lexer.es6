@@ -155,7 +155,7 @@ class Lexer {
       }
 
       // list
-      if (cap = this.rules.list.definition.exec(src)) {
+      if (cap = this.rules.list.body.exec(src)) {
         src = src.substring(cap[0].length);
         let bull = cap[2];
 
@@ -163,16 +163,16 @@ class Lexer {
         // list
         let listType;
 
-        if (this.rules.list.number.exec(bull)) {
+        if (this.rules.list.number.exec(bull))
           listType = "number";
-        }
-        else if (this.rules.list.alphabetized.exec(bull)) {
+        else if (this.rules.list.alphabetized.exec(bull))
           listType = "alphabetized";
-        }
         else if (this.rules.list.numeral.exec(bull))
           listType = "numeral";
         else if (this.rules.list.bullet.exec(bull))
           listType = "bullet";
+        else if (this.rules.list.definition.exec(bull))
+          listType = "definition"
 
         this.tokens.push({
           type: 'list_start',
@@ -183,9 +183,10 @@ class Lexer {
         // Get each top-level item.
         cap = cap[0].match(this.rules.item);
 
-        var prevIndex = null;
-        let next = false;
-        let l = cap.length;
+        var prevIndex = null,
+            next = false,
+            l = cap.length,
+            definitionTitle = null;
 
         for (let i = 0; i < l;i++) {
           let item = cap[i];
@@ -216,13 +217,16 @@ class Lexer {
                 return this.rules.list.numeral.exec(item)[1];
               case 'bullet':
                 return null;
+              case 'definition':
+                definitionTitle = item.match(this.rules.bullet)[2]
+                return null;
             }
           })();
 
           // Remove the list item's bullet
           // so it is seen as the next token.
           let space = item.length;
-          item = item.replace(/^ *([*]|[a-zA-Z\d]+(\.|\))) +/, '');
+          item = item.replace(this.rules.bullet, '');
 
           // Outdent whatever the
           // list item contains. Hacky.
@@ -230,27 +234,8 @@ class Lexer {
             space -= item.length;
             item = item.replace(/^ {1,4}/gm, '');
           }
-          // Determine whether the next list item belongs here.
-          // Backpedal if it does not belong in this list.
-          if (this.options.smartLists && i != l - 1) {
-            let b = block.bullet.exec(cap[i + 1])[0]
-            if (bull != b && !(bull.length > 1 && b.length > 1))
-              src = cap.slice(i + 1).join('\n') + src
-              i = l - 1;
-          }
 
-          // Determine whether item is loose or not.
-          // Use: /(^|\n)(?! )[^\n]+\n\n(?!\s*$)/
-          // for discount behavior.
-          let loose = next || /\n\n(?!\s*$)/.test(item)
-
-          if (i != l - 1) {
-            next = item.charAt(item.length - 1) == '\n'
-            if (!loose)
-              loose = next;
-          }
-
-          this.tokens.push({ type: loose ? 'loose_item_start' : 'list_item_start' });
+          this.tokens.push({ type: 'list_item_start', listType: listType, bullet: listType === 'definition' ? definitionTitle : bull });
 
           // Recurse.
           this.token(item, false, bq);

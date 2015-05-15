@@ -76,9 +76,10 @@ var block = {
   heading: /^ *(#{1,6}) *([^\n]+) */,
   blockquote: /^( *>[^\n]+(\n(?!def)[^\n]+)*\n*)+/,
   list: {
-    definition: /^( *)(bull) [\s\S]+?(?:hr|def|\n{2,}(?! )(?!\1bull )\n*|\s*$)/,
+    body: /^( *)(bull) (?:[\0-\uD7FF\uE000-\uFFFF]|[\uD800-\uDBFF][\uDC00-\uDFFF]|[\uD800-\uDBFF](?![\uDC00-\uDFFF])|(?:[^\uD800-\uDBFF]|^)[\uDC00-\uDFFF])+?(?:hr|def|\n{2,}(?! )(?!\1bull )\n*|[\t-\r \xA0\u1680\u180E\u2000-\u200A\u2028\u2029\u202F\u205F\u3000\uFEFF]*$)/,
+    definition: /^(?:(?:([^\n]*)(?:\n:(?: *))))/,
     number: /^([0-9]+)(?:\.)/,
-    alphabetized: /^([a-zA-Z]+)(?:[\)\.])/,
+    alphabetized: /^([0-9A-Z_a-z]+)(?:[\)\.])/,
     numeral: /^(?=[MDCLXVI])M*(?:C[MD]|D?C{0,3})(?:X[CL]|L?X{0,3})(I[XV]|V?I{0,3})(?:\)|\.)/i,
     bullet: /^\*/
   },
@@ -95,11 +96,11 @@ var block = {
 };
 
 exports.block = block;
-block.bullet = /([*]|[a-zA-Z\d]+(?:\.|\)))/;
-block.item = /^( *)(bull) [^\n]*(?:\n(?!\1bull )[^\n]*)*/;
+block.bullet = /(?:(\*)|([0-9A-Z_a-z]+)(?:\.|\)|\n(?::)))/;
+block.item = /^( *)(bull) (?:[\0-\t\x0B-\uD7FF\uE000-\uFFFF]|[\uD800-\uDBFF][\uDC00-\uDFFF]|[\uD800-\uDBFF](?![\uDC00-\uDFFF])|(?:[^\uD800-\uDBFF]|^)[\uDC00-\uDFFF])*(?:\n(?!\1bull )(?:[\0-\t\x0B-\uD7FF\uE000-\uFFFF]|[\uD800-\uDBFF][\uDC00-\uDFFF]|[\uD800-\uDBFF](?![\uDC00-\uDFFF])|(?:[^\uD800-\uDBFF]|^)[\uDC00-\uDFFF])*)*/;
 block.item = replace(block.item, 'gm')(/bull/g, block.bullet)();
 
-block.list.definition = replace(block.list.definition)(/bull/g, block.bullet)('hr', '\\n+(?=\\1?(?:[-*_] *){3,}(?:\\n+|$))')('def', '\\n+(?=' + block.def.source + ')')();
+block.list.body = replace(block.list.body)(/bull/g, block.bullet)('hr', '\\n+(?=\\1?(?:[-*_] *){3,}(?:\\n+|$))')('def', '\\n+(?=' + block.def.source + ')')();
 
 block.blockquote = replace(block.blockquote)('def', block.def)();
 
@@ -206,7 +207,7 @@ var _WebFileAccessor = require("./web_file_accessor");
 var _WebFileAccessor2 = _interopRequireWildcard(_WebFileAccessor);
 
 if (typeof window !== "undefined") window.markua = new _Markua2["default"]("/data/test_book", { fileAccessor: _WebFileAccessor2["default"], debug: true });
-}).call(this,require("1YiZ5S"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/fake_bd842106.js","/")
+}).call(this,require("1YiZ5S"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/fake_d09b2127.js","/")
 },{"./markua":6,"./web_file_accessor":11,"1YiZ5S":18,"buffer":14}],3:[function(require,module,exports){
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
 "use strict";
@@ -609,8 +610,8 @@ var Lexer = (function () {
         }
 
         // list
-        if (cap = this.rules.list.definition.exec(src)) {
-          var prevIndex;
+        if (cap = this.rules.list.body.exec(src)) {
+          var prevIndex, next, l, definitionTitle;
 
           var _ret = (function () {
             src = src.substring(cap[0].length);
@@ -620,11 +621,7 @@ var Lexer = (function () {
             // list
             var listType = undefined;
 
-            if (_this.rules.list.number.exec(bull)) {
-              listType = "number";
-            } else if (_this.rules.list.alphabetized.exec(bull)) {
-              listType = "alphabetized";
-            } else if (_this.rules.list.numeral.exec(bull)) listType = "numeral";else if (_this.rules.list.bullet.exec(bull)) listType = "bullet";
+            if (_this.rules.list.number.exec(bull)) listType = "number";else if (_this.rules.list.alphabetized.exec(bull)) listType = "alphabetized";else if (_this.rules.list.numeral.exec(bull)) listType = "numeral";else if (_this.rules.list.bullet.exec(bull)) listType = "bullet";else if (_this.rules.list.definition.exec(bull)) listType = "definition";
 
             _this.tokens.push({
               type: "list_start",
@@ -636,12 +633,12 @@ var Lexer = (function () {
             cap = cap[0].match(_this.rules.item);
 
             prevIndex = null;
+            next = false;
+            l = cap.length;
+            definitionTitle = null;
 
-            var next = false;
-            var l = cap.length;
-
-            var _loop = function (_i) {
-              var item = cap[_i];
+            var _loop = function (i) {
+              var item = cap[i];
 
               // If the list order matters, and we aren't at the start, ensure that
               // the current index is one greater than the previous
@@ -667,13 +664,16 @@ var Lexer = (function () {
                     return _this.rules.list.numeral.exec(item)[1];
                   case "bullet":
                     return null;
+                  case "definition":
+                    definitionTitle = item.match(_this.rules.bullet)[2];
+                    return null;
                 }
               })();
 
               // Remove the list item's bullet
               // so it is seen as the next token.
               var space = item.length;
-              item = item.replace(/^ *([*]|[a-zA-Z\d]+(\.|\))) +/, "");
+              item = item.replace(_this.rules.bullet, "");
 
               // Outdent whatever the
               // list item contains. Hacky.
@@ -681,31 +681,13 @@ var Lexer = (function () {
                 space -= item.length;
                 item = item.replace(/^ {1,4}/gm, "");
               }
-              // Determine whether the next list item belongs here.
-              // Backpedal if it does not belong in this list.
-              if (_this.options.smartLists && _i != l - 1) {
-                var b = _block.block.bullet.exec(cap[_i + 1])[0];
-                if (bull != b && !(bull.length > 1 && b.length > 1)) src = cap.slice(_i + 1).join("\n") + src;
-                _i = l - 1;
-              }
 
-              // Determine whether item is loose or not.
-              // Use: /(^|\n)(?! )[^\n]+\n\n(?!\s*$)/
-              // for discount behavior.
-              var loose = next || /\n\n(?!\s*$)/.test(item);
-
-              if (_i != l - 1) {
-                next = item.charAt(item.length - 1) == "\n";
-                if (!loose) loose = next;
-              }
-
-              _this.tokens.push({ type: loose ? "loose_item_start" : "list_item_start" });
+              _this.tokens.push({ type: "list_item_start", listType: listType, bullet: listType === "definition" ? definitionTitle : bull });
 
               // Recurse.
               _this.token(item, false, bq);
               _this.tokens.push({ type: "list_item_end" });
               prevIndex = currentIndex;
-              i = _i;
             };
 
             for (var i = 0; i < l; i++) {
@@ -1147,21 +1129,18 @@ var Parser = (function () {
           {
             var body = "";
 
+            var _listType = this.token.listType,
+                title = this.token.bullet;
+
             while (this.next().type !== "list_item_end") {
               body += this.token.type === "text" ? this.parseText() : this.tok();
             }
 
-            return this.renderer.listitem(body);
-          }
-        case "loose_item_start":
-          {
-            var body = "";
-
-            while (this.next().type !== "list_item_end") {
-              body += this.tok();
+            if (_listType === "definition") {
+              return this.renderer.definitionListItem(body, title);
+            } else {
+              return this.renderer.listitem(body);
             }
-
-            return this.renderer.listitem(body);
           }
         case "html":
           {
@@ -1282,6 +1261,9 @@ var Renderer = (function () {
         case "alphabetized":
           type = "ol type=\"" + (start === start.toUpperCase() ? "A" : "a") + "\"";
           break;
+        case "definition":
+          type = "dl";
+          break;
         default:
           type = "ol";
       }
@@ -1289,6 +1271,11 @@ var Renderer = (function () {
       if (type === "ol" && start) startAttr = " start=" + start;
 
       return "<" + type + "" + startAttr + ">\n" + body + "</" + type + ">\n";
+    }
+  }, {
+    key: "definitionListItem",
+    value: function definitionListItem(text, title) {
+      return "<dt>" + title + "</dt>\n<dd>" + text + "</dd>\n";
     }
   }, {
     key: "listitem",
