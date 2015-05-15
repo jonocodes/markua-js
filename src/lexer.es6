@@ -172,7 +172,7 @@ class Lexer {
         else if (this.rules.list.bullet.exec(bull))
           listType = "bullet";
         else if (this.rules.list.definition.exec(bull))
-          listType = "definition"
+          listType = "definition";
 
         this.tokens.push({
           type: 'list_start',

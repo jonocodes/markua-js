@@ -91,7 +91,7 @@ export let block = {
   number: /([0-9]+)/
 };
 
-block.bullet = /(?:([*])|([\w\d ]+)(?:\.|\)|\n(?::)))/u;
+block.bullet = /(?:([*])|([a-zA-Z\d]+(?:\.|\))|([^\n]+\n(?::))))/u;
 block.item = /^( *)(bull) [^\n]*(?:\n(?!\1bull )[^\n]*)*/u;
 block.item = replace(block.item, 'gm')(/bull/g, block.bullet)();
 
