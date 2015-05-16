@@ -35,7 +35,6 @@ var NativeFileAccessor = (function (_FileAccessor) {
 
     // Override
     value: function get(filePath, cb) {
-      console.log("[NativeFileAccessor] Accessing file " + path.join(this.projectPath, filePath));
       fs.readFile(path.join(this.projectPath, filePath), { encoding: "utf8" }, function (error, contents) {
         if (error) return cb(error);
         cb(null, contents);

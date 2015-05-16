@@ -64,7 +64,7 @@ class Markua {
       }
     }, (error, results) => {
       // Concat it
-      done(null, results.join("\n\n"))
+      done(null, results.join("\n"))
     })
   }
 };

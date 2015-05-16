@@ -61,7 +61,7 @@ class Renderer {
 
   list(body, listType, start) {
     var type, startAttr = '';
-    start = start.substr(0, start.length - 1)
+    start = start.substr(0, start.length - 1);
 
     switch (listType) {
       case 'bullet':
