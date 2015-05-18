@@ -15,3 +15,13 @@ of [nodejs](http://nodejs.org).
 
 #### Installation
 
+* `npm install`
+* `gulp build-js`
+
+
+#### Running
+
+Run the markua executable by running `./markua`, symlink it to somewhere like
+`usr/local/bin` for ease of use.
+
+TODO: installation for web projects
