@@ -29,28 +29,51 @@ class Markua {
 
   run (cb) {
     // First, get all the chapters in the book using book.txt
-    async.waterfall([this.loadBook.bind(this), this.loadChapters.bind(this), this.processChapters.bind(this)], (error, result) => {
+    async.waterfall([this.determineType.bind(this), this.loadBook.bind(this), this.loadChapters.bind(this), this.processChapters.bind(this)], (error, result) => {
       if (error) {
         // There was an error, report it
         console.log("Error when generating the markua document. ", error);
-        return cb(error)
+        return cb(error);
       }
       cb(error, result);
     });
   }
 
-  loadBook(done) {
-    this.fileAccessor.get("book.txt", (error, bookString) => {
-      if (error) return done(error);
-      let lines = _.compact(bookString.split("\n"));
-      done(null, lines);
+  determineType(done) {
+    this.fileAccessor.get('book.txt', (error, bookText) => {
+      if (/ENOENT/.test(error))
+        done(null, 'single');
+      else
+        done(null, 'multi');
     });
   }
 
-  loadChapters(chapters, done) {
-    async.map(chapters, (chapter, cb) => {
-      this.fileAccessor.get(`manuscript/${chapter}`, cb)
-    }, done)
+  loadBook(projectType, done) {
+    if (projectType === 'single') {
+      // We have just a manuscript.txt file, just process it
+      done(null, projectType, []);
+    }
+    else {
+      this.fileAccessor.get("book.txt", (error, bookString) => {
+        if (error) return done(error);
+        let lines = _.compact(bookString.split("\n"));
+        done(null, projectType, lines);
+      });
+    }
+  }
+
+  loadChapters(projectType, chapters, done) {
+    if (projectType === 'single') {
+      this.fileAccessor.get('manuscript.txt', (error, contents) => {
+        if (error) return done(error);
+        done(null, [contents]);
+      });
+    }
+    else {
+      async.map(chapters, (chapter, cb) => {
+        this.fileAccessor.get(`manuscript/${chapter}`, cb);
+      }, done);
+    }
   }
 
   processChapters(chapters, done) {
@@ -59,14 +82,14 @@ class Markua {
         let tokens = Lexer.lex(chapter, this.options);
         cb(null, Parser.parse(tokens, this.options));
       } catch (e) {
-        console.error(e)
+        console.error(e);
         cb(e);
       }
     }, (error, results) => {
       // Concat it
-      done(null, results.join("\n"))
-    })
+      done(null, results.join("\n"));
+    });
   }
-};
+}
 
 export default Markua;
