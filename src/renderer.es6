@@ -9,11 +9,11 @@ class Renderer {
   getHeadingClass(level) {
     switch (this.options.bookType) {
       case "book":
-        return HEADING_BOOK_CLASS_MAP[level]
+        return HEADING_BOOK_CLASS_MAP[level];
       case "multi-part-book":
-        return HEADING_MULTI_PART_CLASS_MAP[level]
+        return HEADING_MULTI_PART_CLASS_MAP[level];
       case "document":
-        return HEADING_DOCUMENT_CLASS_MAP[level]
+        return HEADING_DOCUMENT_CLASS_MAP[level];
       default:
         return "";
     }
@@ -22,7 +22,7 @@ class Renderer {
   code(code, lang, escaped) {
     if (this.options.highlight) {
       var out = this.options.highlight(code, lang);
-      if (out != null && out !== code) {
+      if (out !== null && out !== code) {
         escaped = true;
         code = out;
       }
@@ -42,6 +42,19 @@ class Renderer {
 
   blockquote(quote) {
     return `<blockquote>\n${quote}</blockquote>\n`;
+  }
+
+  figure(alt, image, caption, attributes) {
+    let div = "<div class='figure'>\n  " +
+          this.image(image, null, alt) +
+          '\n' +
+          this.caption(caption) +
+          '</div>\n';
+    return div;
+  }
+
+  caption(text) {
+    return text ? `  <p class='caption'>${text}</p>\n` : '';
   }
 
   heading(text, level, raw) {
@@ -122,28 +135,28 @@ class Renderer {
       ? `<${type} style="text-align: ${flags.align}">`
       : `<${type}>`;
     return tag + content + '</' + type + '>\n';
-  };
+  }
 
   // span level renderer
   strong(text) {
     return `<strong>${text}</strong>`;
-  };
+  }
 
   em(text) {
     return `<em>${text}</em>`;
-  };
+  }
 
   codespan(text) {
     return `<code>${text}</code>`;
-  };
+  }
 
   br() {
     return '<br>';
-  };
+  }
 
   del(text) {
     return `<del>${text}</del>`;
-  };
+  }
 
   link(href, title, text) {
     if (this.options.sanitize) {
@@ -164,16 +177,19 @@ class Renderer {
     }
     out += `>${text}</a>`;
     return out;
-  };
+  }
 
   image(href, title, text) {
+    if (!/http:|https:/.test(href))
+      href = `/images/${href}`;
+
     var out = `<img src="${href}" alt="${text}"`;
     if (title) {
       out += ` title="${title}"`;
     }
-    out += '>';
+    out += '/>';
     return out;
-  };
+  }
 }
 
 export default Renderer;

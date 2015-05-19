@@ -50,7 +50,7 @@ var Renderer = (function () {
     })(function (code, lang, escaped) {
       if (this.options.highlight) {
         var out = this.options.highlight(code, lang);
-        if (out != null && out !== code) {
+        if (out !== null && out !== code) {
           escaped = true;
           code = out;
         }
@@ -66,6 +66,17 @@ var Renderer = (function () {
     key: "blockquote",
     value: function blockquote(quote) {
       return "<blockquote>\n" + quote + "</blockquote>\n";
+    }
+  }, {
+    key: "figure",
+    value: function figure(alt, image, caption, attributes) {
+      var div = "<div class='figure'>\n  " + this.image(image, null, alt) + "\n" + this.caption(caption) + "</div>\n";
+      return div;
+    }
+  }, {
+    key: "caption",
+    value: function caption(text) {
+      return text ? "  <p class='caption'>" + text + "</p>\n" : "";
     }
   }, {
     key: "heading",
@@ -191,11 +202,13 @@ var Renderer = (function () {
   }, {
     key: "image",
     value: function image(href, title, text) {
+      if (!/http:|https:/.test(href)) href = "/images/" + href;
+
       var out = "<img src=\"" + href + "\" alt=\"" + text + "\"";
       if (title) {
         out += " title=\"" + title + "\"";
       }
-      out += ">";
+      out += "/>";
       return out;
     }
   }]);

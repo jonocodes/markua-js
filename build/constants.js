@@ -62,57 +62,13 @@ var replace = function replace(regex, opt) {
 
 exports.replace = replace;
 /**
- * Block level constants.  Mostly regexes to match what text to turn into
- * tokens during the lexing process
- */
-var block = {
-  newline: /^\n+/,
-  code: /^( {4}[^\n]+\n*)+/,
-  fences: /^ *(`{3,}|~{3,}) *(\S+)? *\n([\s\S]+?)\s*\1 *(?:\n+|$)/,
-  nptable: /^ *(\S.*\|.*)\n *([-:]+ *\|[-| :]*)\n((?:.*\|.*(?:\n|$))*)\n*/,
-  hr: /^( *[-*_]){3,} *(?:\n+|$)/,
-  heading: /^ *(#{1,6}) *([^\n]+) */,
-  blockquote: /^( *>[^\n]+(\n(?!def)[^\n]+)*\n*)+/,
-  list: {
-    body: /^( *)(bull) (?:[\0-\uD7FF\uE000-\uFFFF]|[\uD800-\uDBFF][\uDC00-\uDFFF]|[\uD800-\uDBFF](?![\uDC00-\uDFFF])|(?:[^\uD800-\uDBFF]|^)[\uDC00-\uDFFF])+?(?:hr|def|\n{2,}(?! )(?!\1bull )\n*|[\t-\r \xA0\u1680\u180E\u2000-\u200A\u2028\u2029\u202F\u205F\u3000\uFEFF]*$)/,
-    definition: /^(?:(?:([^\n]*)(?:\n:(?: *))))/,
-    number: /^([0-9]+)(?:\.|\))/,
-    alphabetized: /^([A-Za-z]+)(?:[\)\.])/,
-    numeral: /^(?=[MDCLXVI])M*(?:(C)[MD]|D?C{0,3})(?:X[CL]|L?X{0,3})(I[XV]|V?I{0,3}(?:\)|\.))/i,
-    bullet: /^\*/
-  },
-  def: /^ *\[([^\]]+)\]: *<?([^\s>]+)>?(?: +["(]([^\n]+)[")])? *(?:\n+|$)/,
-  table: /^ *\|(.+)\n *\|( *[-:]+[-| :]*)\n((?: *\|.*(?:\n|$))*)\n*/,
-  paragraph: /^((?:[^\n]+\n?(?!hr|heading|blockquote))+)\n*/,
-  text: /^[^\n]+/,
-  'break': /^ *[\n]{2,}/,
-  attribute: {
-    group: /^(?:{)(?: *(?:("(?:[^\s"]|[ ])+")|('(?:[^\s']|[ ])+')|((?:[^\s])+))(?:: *)(?:("(?:[^\s"]|[ ])+")|('(?:[^\s']|[ ])+')|((?:[^\s])+)))(?:(?: *, *)(?: *(?:("(?:[^\s"]|[ ])+")|('(?:[^\s']|[ ])+')|((?:[^\s])+))(?:: *)(?:("(?:[^\s"]|[ ])+")|('(?:[^\s']|[ ])+')|((?:[^\s,])+))))*(?: *)(?:})/,
-    value: /(?: *(?:("(?:[^\s"]|[ ])+")|('(?:[^\s']|[ ])+')|((?:[^\s,])+))(?:: *)(?:("(?:[^\s"]|[ ])+")|('(?:[^\s']|[ ])+')|((?:[^\s,])+)))/g
-  },
-  number: /([0-9]+)/
-};
-
-exports.block = block;
-block.bullet = /(?:(\*)|([0-9A-Za-z\u017F\u212A]+)(?:\)|\.)|((?:[\0-\t\x0B-\uD7FF\uE000-\uFFFF]|[\uD800-\uDBFF][\uDC00-\uDFFF]|[\uD800-\uDBFF](?![\uDC00-\uDFFF])|(?:[^\uD800-\uDBFF]|^)[\uDC00-\uDFFF])+)(?:\n(?::)))/i;
-block.item = /^( *)(bull) (?:[\0-\t\x0B-\uD7FF\uE000-\uFFFF]|[\uD800-\uDBFF][\uDC00-\uDFFF]|[\uD800-\uDBFF](?![\uDC00-\uDFFF])|(?:[^\uD800-\uDBFF]|^)[\uDC00-\uDFFF])*(?:\n(?!\1bull )(?:[\0-\t\x0B-\uD7FF\uE000-\uFFFF]|[\uD800-\uDBFF][\uDC00-\uDFFF]|[\uD800-\uDBFF](?![\uDC00-\uDFFF])|(?:[^\uD800-\uDBFF]|^)[\uDC00-\uDFFF])*)*/;
-block.item = replace(block.item, 'gm')(/bull/g, block.bullet)();
-
-block.list.body = replace(block.list.body)(/bull/g, block.bullet)('hr', '\\n+(?=\\1?(?:[-*_] *){3,}(?:\\n+|$))')('def', '\\n+(?=' + block.def.source + ')')();
-
-block.blockquote = replace(block.blockquote)('def', block.def)();
-
-block.paragraph = replace(block.paragraph)('heading', block.heading)('blockquote', block.blockquote)();
-
-block.normal = ObjectAssign({}, block);
-
-/**
  * Inline level constants
  */
 var inline = {
   escape: /^\\([\\`*{}\[\]()#+\-.!_>])/,
   autolink: /^<([^ >]+(@|:\/)[^ >]+)>/,
   url: noop,
+  image: /^!\[(inside)\]\(href\)/,
   link: /^!?\[(inside)\]\(href\)/,
   reflink: /^!?\[(inside)\]\s*\[([^\]]*)\]/,
   nolink: /^!?\[((?:\[[^\]]*\]|[^\[\]])*)\]/,
@@ -126,9 +82,11 @@ var inline = {
 
 exports.inline = inline;
 inline._inside = /(?:\[[^\]]*\]|[^\[\]]|\](?=[^\[]*\]))*/;
-inline._href = /\s*<?([\s\S]*?)>?(?:\s+['"]([\s\S]*?)['"])?\s*/;
+inline._href = /\s*([\s\S]*?)(?:\s+['"]([\s\S]*?)['"])?\s*/;
 
 inline.link = replace(inline.link)('inside', inline._inside)('href', inline._href)();
+
+inline.image = replace(inline.image)('inside', inline._inside)('href', inline._href)();
 
 inline.reflink = replace(inline.reflink)('inside', inline._inside)();
 
@@ -155,6 +113,54 @@ inline.breaks = ObjectAssign({}, inline.gfm, {
   br: replace(inline.br)('{2,}', '*')(),
   text: replace(inline.gfm.text)('{2,}', '*')()
 });
+
+/**
+ * Block level constants.  Mostly regexes to match what text to turn into
+ * tokens during the lexing process
+ */
+var block = {
+  newline: /^\n+/,
+  code: /^( {4}[^\n]+\n*)+/,
+  fences: /^ *(`{3,}|~{3,}) *(\S+)? *\n([\s\S]+?)\s*\1 *(?:\n+|$)/,
+  nptable: /^ *(\S.*\|.*)\n *([-:]+ *\|[-| :]*)\n((?:.*\|.*(?:\n|$))*)\n*/,
+  hr: /^( *[-*_]){3,} *(?:\n+|$)/,
+  heading: /^ *(#{1,6}) *([^\n]+) */,
+  blockquote: /^( *>[^\n]+(\n(?!def)[^\n]+)*\n*)+/,
+  list: {
+    body: /^( *)(bull) (?:[\0-\uD7FF\uE000-\uFFFF]|[\uD800-\uDBFF][\uDC00-\uDFFF]|[\uD800-\uDBFF](?![\uDC00-\uDFFF])|(?:[^\uD800-\uDBFF]|^)[\uDC00-\uDFFF])+?(?:hr|def|\n{2,}(?! )(?!\1bull )\n*|[\t-\r \xA0\u1680\u180E\u2000-\u200A\u2028\u2029\u202F\u205F\u3000\uFEFF]*$)/,
+    definition: /^(?:(?:([^\n]*)(?:\n:(?: *))))/,
+    number: /^([0-9]+)(?:\.|\))/,
+    alphabetized: /^([A-Za-z]+)(?:[\)\.])/,
+    numeral: /^(?=[MDCLXVI])M*(?:(C)[MD]|D?C{0,3})(?:X[CL]|L?X{0,3})(I[XV]|V?I{0,3}(?:\)|\.))/i,
+    bullet: /^\*/
+  },
+  def: /^ *\[([^\]]+)\]: *<?([^\s>]+)>?(?: +["(]([^\n]+)[")])? *(?:\n+|$)/,
+  table: /^ *\|(.+)\n *\|( *[-:]+[-| :]*)\n((?: *\|.*(?:\n|$))*)\n*/,
+  paragraph: /^((?:[^\n]+\n?(?!hr|heading|blockquote))+)\n*/,
+  figure: /^((?:figure+\n?)+)\n*/,
+  text: /^[^\n]+/,
+  'break': /^ *[\n]{2,}/,
+  attribute: {
+    group: /^(?:{)(?: *(?:("(?:[^\s"]|[ ])+")|('(?:[^\s']|[ ])+')|((?:[^\s])+))(?:: *)(?:("(?:[^\s"]|[ ])+")|('(?:[^\s']|[ ])+')|((?:[^\s])+)))(?:(?: *, *)(?: *(?:("(?:[^\s"]|[ ])+")|('(?:[^\s']|[ ])+')|((?:[^\s])+))(?:: *)(?:("(?:[^\s"]|[ ])+")|('(?:[^\s']|[ ])+')|((?:[^\s,])+))))*(?: *)(?:})/,
+    value: /(?: *(?:("(?:[^\s"]|[ ])+")|('(?:[^\s']|[ ])+')|((?:[^\s,])+))(?:: *)(?:("(?:[^\s"]|[ ])+")|('(?:[^\s']|[ ])+')|((?:[^\s,])+)))/g
+  },
+  number: /([0-9]+)/
+};
+
+exports.block = block;
+block.figure = replace(block.figure)(/figure/g, inline.image)();
+
+block.bullet = /(?:(\*)|([0-9A-Za-z\u017F\u212A]+)(?:\)|\.)|((?:[\0-\t\x0B-\uD7FF\uE000-\uFFFF]|[\uD800-\uDBFF][\uDC00-\uDFFF]|[\uD800-\uDBFF](?![\uDC00-\uDFFF])|(?:[^\uD800-\uDBFF]|^)[\uDC00-\uDFFF])+)(?:\n(?::)))/i;
+block.item = /^( *)(bull) (?:[\0-\t\x0B-\uD7FF\uE000-\uFFFF]|[\uD800-\uDBFF][\uDC00-\uDFFF]|[\uD800-\uDBFF](?![\uDC00-\uDFFF])|(?:[^\uD800-\uDBFF]|^)[\uDC00-\uDFFF])*(?:\n(?!\1bull )(?:[\0-\t\x0B-\uD7FF\uE000-\uFFFF]|[\uD800-\uDBFF][\uDC00-\uDFFF]|[\uD800-\uDBFF](?![\uDC00-\uDFFF])|(?:[^\uD800-\uDBFF]|^)[\uDC00-\uDFFF])*)*/;
+block.item = replace(block.item, 'gm')(/bull/g, block.bullet)();
+
+block.list.body = replace(block.list.body)(/bull/g, block.bullet)('hr', '\\n+(?=\\1?(?:[-*_] *){3,}(?:\\n+|$))')('def', '\\n+(?=' + block.def.source + ')')();
+
+block.blockquote = replace(block.blockquote)('def', block.def)();
+
+block.paragraph = replace(block.paragraph)('heading', block.heading)('blockquote', block.blockquote)();
+
+block.normal = ObjectAssign({}, block);
 
 /**
  * Renderer constants

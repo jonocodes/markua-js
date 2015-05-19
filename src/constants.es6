@@ -60,64 +60,13 @@ export let replace = (regex, opt) => {
 };
 
 /**
- * Block level constants.  Mostly regexes to match what text to turn into
- * tokens during the lexing process
- */
-export let block = {
-  newline: /^\n+/,
-  code: /^( {4}[^\n]+\n*)+/,
-  fences: /^ *(`{3,}|~{3,}) *(\S+)? *\n([\s\S]+?)\s*\1 *(?:\n+|$)/,
-  nptable: /^ *(\S.*\|.*)\n *([-:]+ *\|[-| :]*)\n((?:.*\|.*(?:\n|$))*)\n*/,
-  hr: /^( *[-*_]){3,} *(?:\n+|$)/,
-  heading: /^ *(#{1,6}) *([^\n]+) */,
-  blockquote: /^( *>[^\n]+(\n(?!def)[^\n]+)*\n*)+/,
-  list: {
-    body: /^( *)(bull) [\s\S]+?(?:hr|def|\n{2,}(?! )(?!\1bull )\n*|\s*$)/u,
-    definition: /^(?:(?:([^\n]*)(?:\n:(?: *))))/,
-    number: /^([0-9]+)(?:\.|\))/,
-    alphabetized: /^([a-zA-Z]+)(?:[\)\.])/u,
-    numeral: /^(?=[MDCLXVI])M*(?:(C)[MD]|D?C{0,3})(?:X[CL]|L?X{0,3})(I[XV]|V?I{0,3}(?:\)|\.))/i,
-    bullet: /^\*/
-  },
-  def: /^ *\[([^\]]+)\]: *<?([^\s>]+)>?(?: +["(]([^\n]+)[")])? *(?:\n+|$)/,
-  table: /^ *\|(.+)\n *\|( *[-:]+[-| :]*)\n((?: *\|.*(?:\n|$))*)\n*/,
-  paragraph: /^((?:[^\n]+\n?(?!hr|heading|blockquote))+)\n*/,
-  text: /^[^\n]+/,
-  break: /^ *[\n]{2,}/,
-  attribute: {
-    group: /^(?:{)(?: *(?:("(?:[^\s"]|[ ])+")|('(?:[^\s']|[ ])+')|((?:[^\s])+))(?:: *)(?:("(?:[^\s"]|[ ])+")|('(?:[^\s']|[ ])+')|((?:[^\s])+)))(?:(?: *, *)(?: *(?:("(?:[^\s"]|[ ])+")|('(?:[^\s']|[ ])+')|((?:[^\s])+))(?:: *)(?:("(?:[^\s"]|[ ])+")|('(?:[^\s']|[ ])+')|((?:[^\s,])+))))*(?: *)(?:})/,
-    value: /(?: *(?:("(?:[^\s"]|[ ])+")|('(?:[^\s']|[ ])+')|((?:[^\s,])+))(?:: *)(?:("(?:[^\s"]|[ ])+")|('(?:[^\s']|[ ])+')|((?:[^\s,])+)))/g
-  },
-  number: /([0-9]+)/
-};
-
-block.bullet = /(?:([*])|([a-zA-Z\d]+)(?:\)|\.)|([^\n]+)(?:\n(?::)))/ui;
-block.item = /^( *)(bull) [^\n]*(?:\n(?!\1bull )[^\n]*)*/u;
-block.item = replace(block.item, 'gm')(/bull/g, block.bullet)();
-
-block.list.body = replace(block.list.body)(/bull/g, block.bullet)
-  ('hr', '\\n+(?=\\1?(?:[-*_] *){3,}(?:\\n+|$))')
-  ('def', `\\n+(?=${block.def.source})`)
-  ();
-
-block.blockquote = replace(block.blockquote)
-  ('def', block.def)
-  ();
-
-block.paragraph = replace(block.paragraph)
-  ('heading', block.heading)
-  ('blockquote', block.blockquote)
-  ();
-
-block.normal = ObjectAssign({}, block);
-
-/**
  * Inline level constants
  */
 export let inline = {
   escape: /^\\([\\`*{}\[\]()#+\-.!_>])/,
   autolink: /^<([^ >]+(@|:\/)[^ >]+)>/,
   url: noop,
+  image: /^!\[(inside)\]\(href\)/,
   link: /^!?\[(inside)\]\(href\)/,
   reflink: /^!?\[(inside)\]\s*\[([^\]]*)\]/,
   nolink: /^!?\[((?:\[[^\]]*\]|[^\[\]])*)\]/,
@@ -130,12 +79,17 @@ export let inline = {
 };
 
 inline._inside = /(?:\[[^\]]*\]|[^\[\]]|\](?=[^\[]*\]))*/;
-inline._href = /\s*<?([\s\S]*?)>?(?:\s+['"]([\s\S]*?)['"])?\s*/;
+inline._href = /\s*([\s\S]*?)(?:\s+['"]([\s\S]*?)['"])?\s*/;
 
 inline.link = replace(inline.link)
  ('inside', inline._inside)
  ('href', inline._href)
  ();
+
+inline.image = replace(inline.image)
+  ('inside', inline._inside)
+  ('href', inline._href)
+  ();
 
 inline.reflink = replace(inline.reflink)
  ('inside', inline._inside)
@@ -169,6 +123,60 @@ inline.breaks = ObjectAssign({}, inline.gfm, {
  text: replace(inline.gfm.text)('{2,}', '*')()
 });
 
+/**
+ * Block level constants.  Mostly regexes to match what text to turn into
+ * tokens during the lexing process
+ */
+export let block = {
+  newline: /^\n+/,
+  code: /^( {4}[^\n]+\n*)+/,
+  fences: /^ *(`{3,}|~{3,}) *(\S+)? *\n([\s\S]+?)\s*\1 *(?:\n+|$)/,
+  nptable: /^ *(\S.*\|.*)\n *([-:]+ *\|[-| :]*)\n((?:.*\|.*(?:\n|$))*)\n*/,
+  hr: /^( *[-*_]){3,} *(?:\n+|$)/,
+  heading: /^ *(#{1,6}) *([^\n]+) */,
+  blockquote: /^( *>[^\n]+(\n(?!def)[^\n]+)*\n*)+/,
+  list: {
+    body: /^( *)(bull) [\s\S]+?(?:hr|def|\n{2,}(?! )(?!\1bull )\n*|\s*$)/u,
+    definition: /^(?:(?:([^\n]*)(?:\n:(?: *))))/,
+    number: /^([0-9]+)(?:\.|\))/,
+    alphabetized: /^([a-zA-Z]+)(?:[\)\.])/u,
+    numeral: /^(?=[MDCLXVI])M*(?:(C)[MD]|D?C{0,3})(?:X[CL]|L?X{0,3})(I[XV]|V?I{0,3}(?:\)|\.))/i,
+    bullet: /^\*/
+  },
+  def: /^ *\[([^\]]+)\]: *<?([^\s>]+)>?(?: +["(]([^\n]+)[")])? *(?:\n+|$)/,
+  table: /^ *\|(.+)\n *\|( *[-:]+[-| :]*)\n((?: *\|.*(?:\n|$))*)\n*/,
+  paragraph: /^((?:[^\n]+\n?(?!hr|heading|blockquote))+)\n*/,
+  figure: /^((?:figure+\n?)+)\n*/,
+  text: /^[^\n]+/,
+  break: /^ *[\n]{2,}/,
+  attribute: {
+    group: /^(?:{)(?: *(?:("(?:[^\s"]|[ ])+")|('(?:[^\s']|[ ])+')|((?:[^\s])+))(?:: *)(?:("(?:[^\s"]|[ ])+")|('(?:[^\s']|[ ])+')|((?:[^\s])+)))(?:(?: *, *)(?: *(?:("(?:[^\s"]|[ ])+")|('(?:[^\s']|[ ])+')|((?:[^\s])+))(?:: *)(?:("(?:[^\s"]|[ ])+")|('(?:[^\s']|[ ])+')|((?:[^\s,])+))))*(?: *)(?:})/,
+    value: /(?: *(?:("(?:[^\s"]|[ ])+")|('(?:[^\s']|[ ])+')|((?:[^\s,])+))(?:: *)(?:("(?:[^\s"]|[ ])+")|('(?:[^\s']|[ ])+')|((?:[^\s,])+)))/g
+  },
+  number: /([0-9]+)/
+};
+
+block.figure = replace(block.figure)(/figure/g, inline.image)();
+
+block.bullet = /(?:([*])|([a-zA-Z\d]+)(?:\)|\.)|([^\n]+)(?:\n(?::)))/ui;
+block.item = /^( *)(bull) [^\n]*(?:\n(?!\1bull )[^\n]*)*/u;
+block.item = replace(block.item, 'gm')(/bull/g, block.bullet)();
+
+block.list.body = replace(block.list.body)(/bull/g, block.bullet)
+  ('hr', '\\n+(?=\\1?(?:[-*_] *){3,}(?:\\n+|$))')
+  ('def', `\\n+(?=${block.def.source})`)
+  ();
+
+block.blockquote = replace(block.blockquote)
+  ('def', block.def)
+  ();
+
+block.paragraph = replace(block.paragraph)
+  ('heading', block.heading)
+  ('blockquote', block.blockquote)
+  ();
+
+block.normal = ObjectAssign({}, block);
 
 /**
  * Renderer constants

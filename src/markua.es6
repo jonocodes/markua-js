@@ -17,7 +17,7 @@ const DEFAULT_OPTIONS = {
   headerPrefix: '',
   debug: false,
   bookType: "book"
-}
+};
 
 class Markua {
   // Run the markua book generator on a given project path.

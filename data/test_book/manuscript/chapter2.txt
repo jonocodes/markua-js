@@ -18,3 +18,7 @@ Chapter 3 tells you how to make a preview of your book.
 
 beer
 : something delicious
+
+![The markua logo](markua_logo.svg)
+
+![Tommorrowland](http://images.8tracks.com/cover/i/002/108/766/469351_10150975303909177_370383145_o-500x500-9070.jpg?rect=0,0,500,500&q=98&fm=jpg&fit=max)

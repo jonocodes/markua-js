@@ -72,6 +72,12 @@ class Parser {
         this.attributes = this.token.attributes;
         return '';
       }
+      case 'figure': {
+        return this.renderer.figure(this.token.alt,
+          this.token.image,
+          this.token.caption,
+          this.attributes);
+      }
       case 'table': {
         var header = ''
           , body = ''

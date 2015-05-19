@@ -71,6 +71,17 @@ var Lexer = (function () {
           continue;
         }
 
+        // Figure
+        if (cap = this.rules.figure.exec(src)) {
+          src = src.substring(cap[0].length);
+          this.tokens.push({
+            type: "figure",
+            alt: cap[2],
+            image: cap[3],
+            caption: cap[4]
+          });
+        }
+
         // code
         if (cap = this.rules.code.exec(src)) {
           src = src.substring(cap[0].length);
