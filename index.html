@@ -30,6 +30,10 @@
           output = function() {
             markua.run(function(error, result) {
               $("#output").html(result)
+              $("#output img").each(function() {
+                currentSrc = $(this).attr('src');
+                $(this).attr('src', "/data/test_book" + currentSrc);
+              });
             });
           };
 
