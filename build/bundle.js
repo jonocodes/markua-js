@@ -144,7 +144,7 @@ var block = {
   'break': /^ *[\n]{2,}/,
   attribute: {
     group: /^(?:{)(?: *(?:("(?:[^\s"]|[ ])+")|('(?:[^\s']|[ ])+')|((?:[^\s])+))(?:: *)(?:("(?:[^\s"]|[ ])+")|('(?:[^\s']|[ ])+')|((?:[^\s])+)))(?:(?: *, *)(?: *(?:("(?:[^\s"]|[ ])+")|('(?:[^\s']|[ ])+')|((?:[^\s])+))(?:: *)(?:("(?:[^\s"]|[ ])+")|('(?:[^\s']|[ ])+')|((?:[^\s,])+))))*(?: *)(?:})/,
-    value: /(?: *(?:("(?:[^\s"]|[ ])+")|('(?:[^\s']|[ ])+')|((?:[^\s,])+))(?:: *)(?:("(?:[^\s"]|[ ])+")|('(?:[^\s']|[ ])+')|((?:[^\s,])+)))/g
+    value: /(?: *(?:(?:"((?:[^\s"]|[ ])+)")|(?:'((?:[^\s']|[ ])+)')|((?:[^\s])+))(?:: *)(?:(?:"((?:[^\s"]|[ ])+)")|(?:'(?:[^\s']|[ ])+')|((?:[^\s])+)))/g
   },
   number: /([0-9]+)/
 };
@@ -213,7 +213,7 @@ var _WebFileAccessor = require("./web_file_accessor");
 var _WebFileAccessor2 = _interopRequireWildcard(_WebFileAccessor);
 
 if (typeof window !== "undefined") window.markua = new _Markua2["default"]("/data/test_book", { fileAccessor: _WebFileAccessor2["default"], debug: true });
-}).call(this,require("1YiZ5S"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/fake_138934fb.js","/")
+}).call(this,require("1YiZ5S"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/fake_44b18d65.js","/")
 },{"./markua":6,"./web_file_accessor":11,"1YiZ5S":18,"buffer":14}],3:[function(require,module,exports){
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
 "use strict";
@@ -1036,6 +1036,8 @@ var _InlineLexer = require("./inline_lexer");
 
 var _InlineLexer2 = _interopRequireWildcard(_InlineLexer);
 
+var _ = require("underscore");
+
 var Parser = (function () {
   function Parser() {
     var options = arguments[0] === undefined ? {} : arguments[0];
@@ -1115,7 +1117,7 @@ var Parser = (function () {
         case "attribute":
           {
             // Set the attributes for the next tag
-            this.attributes = this.token.attributes;
+            this.attributes = _.object(_.pluck(this.token.attributes, "key"), _.pluck(this.token.attributes, "value"));
             return "";
           }
         case "figure":
@@ -1219,7 +1221,7 @@ var Parser = (function () {
 exports["default"] = Parser;
 module.exports = exports["default"];
 }).call(this,require("1YiZ5S"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/parser.js","/")
-},{"./inline_lexer":4,"./renderer":9,"1YiZ5S":18,"buffer":14}],9:[function(require,module,exports){
+},{"./inline_lexer":4,"./renderer":9,"1YiZ5S":18,"buffer":14,"underscore":20}],9:[function(require,module,exports){
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
 "use strict";
 
@@ -1292,8 +1294,20 @@ var Renderer = (function () {
     }
   }, {
     key: "figure",
-    value: function figure(alt, image, caption, attributes) {
-      var div = "<div class='figure'>\n  " + this.image(image, null, alt) + "\n" + this.caption(caption) + "</div>\n";
+    value: function figure(altText, image, captionText, attributes) {
+      var _ref = attributes || {};
+
+      var align = _ref.align;
+      var alt = _ref.alt;
+      var caption = _ref.caption;
+
+      var attrs = "class='figure";
+      attrs += align ? " " + align + "'" : "'";
+
+      alt = altText || alt || "";
+      caption = captionText || caption;
+
+      var div = "<div " + attrs + ">\n  " + this.image(image, null, alt) + "\n" + this.caption(caption) + "</div>\n";
       return div;
     }
   }, {
@@ -1425,7 +1439,7 @@ var Renderer = (function () {
   }, {
     key: "image",
     value: function image(href, title, text) {
-      if (!/http:|https:/.test(href)) href = "/images/" + href;
+      if (!/http:|https:/.test(href)) href = "images/" + href;
 
       var out = "<img src=\"" + href + "\" alt=\"" + text + "\"";
       if (title) {

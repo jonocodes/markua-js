@@ -18,6 +18,8 @@ var _InlineLexer = require("./inline_lexer");
 
 var _InlineLexer2 = _interopRequireWildcard(_InlineLexer);
 
+var _ = require("underscore");
+
 var Parser = (function () {
   function Parser() {
     var options = arguments[0] === undefined ? {} : arguments[0];
@@ -97,7 +99,7 @@ var Parser = (function () {
         case "attribute":
           {
             // Set the attributes for the next tag
-            this.attributes = this.token.attributes;
+            this.attributes = _.object(_.pluck(this.token.attributes, "key"), _.pluck(this.token.attributes, "value"));
             return "";
           }
         case "figure":

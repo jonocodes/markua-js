@@ -1,6 +1,8 @@
 import Renderer from "./renderer";
 import InlineLexer from "./inline_lexer";
 
+var _ = require("underscore")
+
 class Parser {
   constructor(options = {}) {
     this.options = options;
@@ -69,7 +71,7 @@ class Parser {
       }
       case 'attribute': {
         // Set the attributes for the next tag
-        this.attributes = this.token.attributes;
+        this.attributes = _.object(_.pluck(this.token.attributes, "key"), _.pluck(this.token.attributes, "value"));
         return '';
       }
       case 'figure': {

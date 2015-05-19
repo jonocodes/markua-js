@@ -69,8 +69,20 @@ var Renderer = (function () {
     }
   }, {
     key: "figure",
-    value: function figure(alt, image, caption, attributes) {
-      var div = "<div class='figure'>\n  " + this.image(image, null, alt) + "\n" + this.caption(caption) + "</div>\n";
+    value: function figure(altText, image, captionText, attributes) {
+      var _ref = attributes || {};
+
+      var align = _ref.align;
+      var alt = _ref.alt;
+      var caption = _ref.caption;
+
+      var attrs = "class='figure";
+      attrs += align ? " " + align + "'" : "'";
+
+      alt = altText || alt || "";
+      caption = captionText || caption;
+
+      var div = "<div " + attrs + ">\n  " + this.image(image, null, alt) + "\n" + this.caption(caption) + "</div>\n";
       return div;
     }
   }, {
@@ -202,7 +214,7 @@ var Renderer = (function () {
   }, {
     key: "image",
     value: function image(href, title, text) {
-      if (!/http:|https:/.test(href)) href = "/images/" + href;
+      if (!/http:|https:/.test(href)) href = "images/" + href;
 
       var out = "<img src=\"" + href + "\" alt=\"" + text + "\"";
       if (title) {

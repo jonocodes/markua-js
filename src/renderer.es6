@@ -44,8 +44,16 @@ class Renderer {
     return `<blockquote>\n${quote}</blockquote>\n`;
   }
 
-  figure(alt, image, caption, attributes) {
-    let div = "<div class='figure'>\n  " +
+  figure(altText, image, captionText, attributes) {
+    let { align, alt, caption } = attributes || {};
+
+    let attrs = `class='figure`;
+    attrs += align ? ` ${align}'` : '\'';
+
+    alt = altText || alt || "";
+    caption = captionText || caption;
+
+    let div = `<div ${attrs}>\n  ` +
           this.image(image, null, alt) +
           '\n' +
           this.caption(caption) +
@@ -181,7 +189,7 @@ class Renderer {
 
   image(href, title, text) {
     if (!/http:|https:/.test(href))
-      href = `/images/${href}`;
+      href = `images/${href}`;
 
     var out = `<img src="${href}" alt="${text}"`;
     if (title) {

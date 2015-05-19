@@ -33,7 +33,7 @@
               $("#output img").each(function() {
                 currentSrc = $(this).attr('src');
                 if (!/http:|https:/.test(currentSrc))
-                  $(this).attr('src', "/data/test_book" + currentSrc);
+                  $(this).attr('src', "/data/test_book/" + currentSrc);
               });
             });
           };
