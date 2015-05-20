@@ -211,7 +211,7 @@ class Lexer {
             warning = `List indices should be consecutive, automatically increasing near ${cap[0]}`
             switch (listType) {
               case 'number':
-                current = (this.rules.number.exec(item) && parseInt(this.rules.number.exec(item)[1])) || null
+                current = (this.rules.list.number.exec(item) && parseInt(this.rules.list.number.exec(item)[1])) || null
 
                 // Warn for numeric lists
                 if (prevIndex !== null && current !== 1 + prevIndex)
@@ -219,7 +219,7 @@ class Lexer {
 
                 return current
               case 'alphabetized':
-                current = (this.rules.alphabetized.exec(item) && this.rules.alphabetized.exec(item)[1]) || null
+                current = (this.rules.list.alphabetized.exec(item) && this.rules.list.alphabetized.exec(item)[1]) || null
 
                 // Warn for alpha list
                 if (prevIndex !== null && !characterIsNext(current, prevIndex))

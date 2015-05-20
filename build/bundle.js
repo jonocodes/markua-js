@@ -213,7 +213,7 @@ var _WebFileAccessor = require("./web_file_accessor");
 var _WebFileAccessor2 = _interopRequireWildcard(_WebFileAccessor);
 
 if (typeof window !== "undefined") window.markua = new _Markua2["default"]("/data/test_book", { fileAccessor: _WebFileAccessor2["default"], debug: true });
-}).call(this,require("1YiZ5S"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/fake_596a3068.js","/")
+}).call(this,require("1YiZ5S"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/fake_f841b884.js","/")
 },{"./markua":6,"./web_file_accessor":11,"1YiZ5S":18,"buffer":14}],3:[function(require,module,exports){
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
 "use strict";
@@ -667,14 +667,14 @@ var Lexer = (function () {
                 warning = "List indices should be consecutive, automatically increasing near " + cap[0];
                 switch (listType) {
                   case "number":
-                    current = _this.rules.number.exec(item) && parseInt(_this.rules.number.exec(item)[1]) || null;
+                    current = _this.rules.list.number.exec(item) && parseInt(_this.rules.list.number.exec(item)[1]) || null;
 
                     // Warn for numeric lists
                     if (prevIndex !== null && current !== 1 + prevIndex) _this.warnings.push(warning);
 
                     return current;
                   case "alphabetized":
-                    current = _this.rules.alphabetized.exec(item) && _this.rules.alphabetized.exec(item)[1] || null;
+                    current = _this.rules.list.alphabetized.exec(item) && _this.rules.list.alphabetized.exec(item)[1] || null;
 
                     // Warn for alpha list
                     if (prevIndex !== null && !_characterIsNext$decimalize.characterIsNext(current, prevIndex)) _this.warnings.push(warning);
@@ -1332,34 +1332,37 @@ var Renderer = (function () {
   }, {
     key: "list",
     value: function list(body, listType, start) {
-      var type,
+      var typeTag,
+          typeAttribute = "",
           startAttr = "";
       start = start.substr(0, start.length - 1);
 
       switch (listType) {
         case "bullet":
-          type = "ul";
+          typeTag = "ul";
           break;
         case "alphabetized":
-          type = "ol type=\"" + (start === start.toUpperCase() ? "A" : "a") + "\"";
+          typeTag = "ol";
+          typeAttribute = " type=\"" + (start === start.toUpperCase() ? "A" : "a") + "\"";
           startAttr = start.toUpperCase() === "A" ? "" : " start='" + (_decimalize$ALPHABET.ALPHABET.indexOf(start.toUpperCase()) + 1) + "'";
           break;
         case "definition":
-          type = "dl";
+          typeTag = "dl";
           break;
         case "numeral":
-          type = "ol type=\"" + (start === start.toUpperCase() ? "I" : "i") + "\"";
-          start = _decimalize$ALPHABET.decimalize(start) || 0;
+          typeTag = "ol";
+          typeAttribute = " type=\"" + (start === start.toUpperCase() ? "I" : "i") + "\"";
+          startAttr = (start = _decimalize$ALPHABET.decimalize(start) || 0) && start !== 1 ? " start=\"" + start + "\"" : "";
           break;
         case "number":
-          type = "ol";
+          typeTag = "ol";
           startAttr = start && start !== "1" ? " start='" + start + "'" : "";
           break;
         default:
-          type = "ol";
+          typeTag = "ol";
       }
 
-      return "<" + type + "" + startAttr + ">\n" + body + "</" + type + ">\n";
+      return "<" + typeTag + "" + typeAttribute + "" + startAttr + ">\n" + body + "</" + typeTag + ">\n";
     }
   }, {
     key: "definitionListItem",

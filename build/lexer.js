@@ -215,14 +215,14 @@ var Lexer = (function () {
                 warning = "List indices should be consecutive, automatically increasing near " + cap[0];
                 switch (listType) {
                   case "number":
-                    current = _this.rules.number.exec(item) && parseInt(_this.rules.number.exec(item)[1]) || null;
+                    current = _this.rules.list.number.exec(item) && parseInt(_this.rules.list.number.exec(item)[1]) || null;
 
                     // Warn for numeric lists
                     if (prevIndex !== null && current !== 1 + prevIndex) _this.warnings.push(warning);
 
                     return current;
                   case "alphabetized":
-                    current = _this.rules.alphabetized.exec(item) && _this.rules.alphabetized.exec(item)[1] || null;
+                    current = _this.rules.list.alphabetized.exec(item) && _this.rules.list.alphabetized.exec(item)[1] || null;
 
                     // Warn for alpha list
                     if (prevIndex !== null && !_characterIsNext$decimalize.characterIsNext(current, prevIndex)) _this.warnings.push(warning);

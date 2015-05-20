@@ -81,33 +81,35 @@ class Renderer {
   }
 
   list(body, listType, start) {
-    var type, startAttr = '';
+    var typeTag, typeAttribute = '', startAttr = '';
     start = start.substr(0, start.length - 1);
 
     switch (listType) {
       case 'bullet':
-        type = `ul`;
+        typeTag = `ul`;
         break;
       case 'alphabetized':
-        type = `ol type="${start === start.toUpperCase() ? 'A' : 'a'}"`;
+        typeTag = `ol`
+        typeAttribute = ` type="${start === start.toUpperCase() ? 'A' : 'a'}"`;
         startAttr = start.toUpperCase() === "A" ? '' : ` start='${ALPHABET.indexOf(start.toUpperCase()) + 1}'`;
         break;
       case 'definition':
-        type = `dl`;
+        typeTag = `dl`;
         break;
       case 'numeral':
-        type = `ol type="${start === start.toUpperCase() ? 'I': 'i'}"`;
-        start = decimalize(start) || 0;
+        typeTag = `ol`
+        typeAttribute = ` type="${start === start.toUpperCase() ? 'I': 'i'}"`;
+        startAttr = (start = decimalize(start) || 0) && start !== 1 ? ` start="${start}"` : '';
         break;
       case 'number':
-        type = `ol`;
+        typeTag = `ol`;
         startAttr = start && start !== '1' ? ` start='${start}'` : '';
         break;
       default:
-        type = `ol`;
+        typeTag = `ol`;
     }
 
-    return `<${type}${startAttr}>\n${body}</${type}>\n`;
+    return `<${typeTag}${typeAttribute}${startAttr}>\n${body}</${typeTag}>\n`;
   }
 
   definitionListItem(text, title) {
