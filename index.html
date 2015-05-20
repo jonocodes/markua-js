@@ -23,21 +23,8 @@
     <script src="build/bundle.js" type="text/javascript"></script>
     <script>
       $(function() {
-        filesToGet = [
-          "book.txt",
-          "manuscript/philosophy.txt",
-          "manuscript/structure.txt",
-          "manuscript/images.txt",
-          "manuscript/block.txt",
-          "manuscript/span.txt",
-          "manuscript/whitespace.txt",
-          "manuscript/metadata.txt",
-          "manuscript/implementation.txt",
-          "manuscript/appendices.txt",
-          "manuscript/acknowledgments.txt"
-        ]
         window.fileData = {}
-        var currentFile = "/data/test_book/manuscript/philosophy.txt"
+        var filesToGet, currentFile;
         setup = function() {
           output = function() {
             markua.run(function(error, result) {
@@ -81,10 +68,10 @@
           // Take it away from what we need to get
           filesToGet.splice(filesToGet.indexOf(this.value), 1)
 
-          $(".files.list").append("<li><a data-target='/data/test_book/" + this.value + "'>" + this.value + "</a></li>");
+          $(".files.list").append("<li><a data-target='/data/test_book/manuscript/" + this.value + "'>" + this.value + "</a></li>");
 
           // Stash the value of this file somewhere
-          window.fileData["/data/test_book/" + this.value] = contents
+          window.fileData["/data/test_book/manuscript/" + this.value] = contents
 
           if (filesToGet.length === 0) {
             setup()
@@ -92,9 +79,16 @@
         }
 
         // Once we've loaded the page, start loading our text data.
-        for (fileIndex in filesToGet) {
-          $.get("/data/test_book/" + filesToGet[fileIndex], onReceiveFile.bind({ value: filesToGet[fileIndex]}))
-        }
+        $.get("/data/test_book/book.txt", function(lines) {
+          window.fileData["/data/test_book/book.txt"] = lines;
+          $(".files.list").append("<li><a data-target='/data/test_book/book.txt'>book.txt</a></li>");
+          filesToGet = lines.split("\n")
+          filesToGet = filesToGet.slice(0, filesToGet.length - 1);
+          currentFile = "/data/test_book/manuscript/" + filesToGet[0];
+          for (fileIndex in filesToGet) {
+            $.get("/data/test_book/manuscript/" + filesToGet[fileIndex], onReceiveFile.bind({ value: filesToGet[fileIndex] }));
+          }
+        });
       });
     </script>
   </body>
