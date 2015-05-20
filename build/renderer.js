@@ -113,7 +113,7 @@ var Renderer = (function () {
           break;
         case "alphabetized":
           type = "ol type=\"" + (start === start.toUpperCase() ? "A" : "a") + "\"";
-          startAttr = " start='" + (_decimalize$ALPHABET.ALPHABET.indexOf(start.toUpperCase()) + 1) + "'";
+          startAttr = start.toUpperCase() === "A" ? "" : " start='" + (_decimalize$ALPHABET.ALPHABET.indexOf(start.toUpperCase()) + 1) + "'";
           break;
         case "definition":
           type = "dl";
@@ -124,7 +124,7 @@ var Renderer = (function () {
           break;
         case "number":
           type = "ol";
-          startAttr = " start='" + start + "'";
+          startAttr = start && start !== "1" ? " start='" + start + "'" : "";
           break;
         default:
           type = "ol";

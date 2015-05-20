@@ -90,7 +90,7 @@ class Renderer {
         break;
       case 'alphabetized':
         type = `ol type="${start === start.toUpperCase() ? 'A' : 'a'}"`;
-        startAttr = ` start='${ALPHABET.indexOf(start.toUpperCase()) + 1}'`;
+        startAttr = start.toUpperCase() === "A" ? '' : ` start='${ALPHABET.indexOf(start.toUpperCase()) + 1}'`;
         break;
       case 'definition':
         type = `dl`;
@@ -101,7 +101,7 @@ class Renderer {
         break;
       case 'number':
         type = `ol`;
-        startAttr = ` start='${start}'`;
+        startAttr = start && start !== '1' ? ` start='${start}'` : '';
         break;
       default:
         type = `ol`;

@@ -106,13 +106,13 @@ var Markua = (function () {
       var _this2 = this;
 
       async.map(_.compact(chapters), function (chapter, cb) {
-        try {
-          var tokens = _Lexer2["default"].lex(chapter, _this2.options);
-          cb(null, _Parser2["default"].parse(tokens, _this2.options));
-        } catch (e) {
-          console.error(e);
-          cb(e);
-        }
+        // try {
+        var tokens = _Lexer2["default"].lex(chapter, _this2.options);
+        cb(null, _Parser2["default"].parse(tokens, _this2.options));
+        // } catch (e) {
+        // console.error(e);
+        // cb(e);
+        // }
       }, function (error, results) {
         // Concat it
         done(null, results.join("\n"));

@@ -158,7 +158,7 @@ export let block = {
 
 block.figure = replace(block.figure)(/figure/g, inline.image)();
 
-block.bullet = /(?:([*])|([a-zA-Z\d]+)(?:\)|\.)|([^\n]+)(?:\n(?::)))/ui;
+block.bullet = /(?:([*])|([a-zA-Z\d]+)(?:\)|\.)|([^\n]+)(?:\n(?::)))( *)/ui;
 block.item = /^( *)(bull) [^\n]*(?:\n(?!\1bull )[^\n]*)*/u;
 block.item = replace(block.item, 'gm')(/bull/g, block.bullet)();
 

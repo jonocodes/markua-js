@@ -12,12 +12,8 @@ Here is a [link to the leanpub home-page](https://leanpub.com).
 
 Chapter 3 tells you how to make a preview of your book.
 
-1) osmethinga
-2) aoseuhaoseu
-
-
-beer
-: something delicious
+* something
+* something else
 
 { align: right }
 ![The markua logo](markua_logo.svg)

@@ -152,7 +152,7 @@ var block = {
 exports.block = block;
 block.figure = replace(block.figure)(/figure/g, inline.image)();
 
-block.bullet = /(?:(\*)|([0-9A-Za-z\u017F\u212A]+)(?:\)|\.)|((?:[\0-\t\x0B-\uD7FF\uE000-\uFFFF]|[\uD800-\uDBFF][\uDC00-\uDFFF]|[\uD800-\uDBFF](?![\uDC00-\uDFFF])|(?:[^\uD800-\uDBFF]|^)[\uDC00-\uDFFF])+)(?:\n(?::)))/i;
+block.bullet = /(?:(\*)|([0-9A-Za-z\u017F\u212A]+)(?:\)|\.)|((?:[\0-\t\x0B-\uD7FF\uE000-\uFFFF]|[\uD800-\uDBFF][\uDC00-\uDFFF]|[\uD800-\uDBFF](?![\uDC00-\uDFFF])|(?:[^\uD800-\uDBFF]|^)[\uDC00-\uDFFF])+)(?:\n(?::)))( *)/i;
 block.item = /^( *)(bull) (?:[\0-\t\x0B-\uD7FF\uE000-\uFFFF]|[\uD800-\uDBFF][\uDC00-\uDFFF]|[\uD800-\uDBFF](?![\uDC00-\uDFFF])|(?:[^\uD800-\uDBFF]|^)[\uDC00-\uDFFF])*(?:\n(?!\1bull )(?:[\0-\t\x0B-\uD7FF\uE000-\uFFFF]|[\uD800-\uDBFF][\uDC00-\uDFFF]|[\uD800-\uDBFF](?![\uDC00-\uDFFF])|(?:[^\uD800-\uDBFF]|^)[\uDC00-\uDFFF])*)*/;
 block.item = replace(block.item, 'gm')(/bull/g, block.bullet)();
 
@@ -213,7 +213,7 @@ var _WebFileAccessor = require("./web_file_accessor");
 var _WebFileAccessor2 = _interopRequireWildcard(_WebFileAccessor);
 
 if (typeof window !== "undefined") window.markua = new _Markua2["default"]("/data/test_book", { fileAccessor: _WebFileAccessor2["default"], debug: true });
-}).call(this,require("1YiZ5S"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/fake_44b18d65.js","/")
+}).call(this,require("1YiZ5S"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/fake_596a3068.js","/")
 },{"./markua":6,"./web_file_accessor":11,"1YiZ5S":18,"buffer":14}],3:[function(require,module,exports){
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
 "use strict";
@@ -462,7 +462,7 @@ Object.defineProperty(exports, "__esModule", {
 
 var _block = require("./constants");
 
-var _characterIsNext = require("./util");
+var _characterIsNext$decimalize = require("./util");
 
 var _ = require("underscore");
 
@@ -677,12 +677,16 @@ var Lexer = (function () {
                     current = _this.rules.alphabetized.exec(item) && _this.rules.alphabetized.exec(item)[1] || null;
 
                     // Warn for alpha list
-                    if (prevIndex !== null && !_characterIsNext.characterIsNext(current, prevIndex)) _this.warnings.push(warning);
+                    if (prevIndex !== null && !_characterIsNext$decimalize.characterIsNext(current, prevIndex)) _this.warnings.push(warning);
 
                     return current;
                   case "numeral":
-                    current = _this.rules.numeral.exec(item) && _this.rules.numeral.exec(item)[2] || null;
-                    if (current) bull = current;
+                    current = _this.rules.list.numeral.exec(item) && _this.rules.list.numeral.exec(item)[2] || null;
+                    if (current) bull = current = current.substr(0, current.length - 1);
+
+                    // Warn for roman numerals
+                    if (prevIndex && _characterIsNext$decimalize.decimalize(current) !== _characterIsNext$decimalize.decimalize(prevIndex) + 1) _this.warnings.push(warning);
+
                     return current;
                   case "bullet":
                     return true;
@@ -942,13 +946,13 @@ var Markua = (function () {
       var _this2 = this;
 
       async.map(_.compact(chapters), function (chapter, cb) {
-        try {
-          var tokens = _Lexer2["default"].lex(chapter, _this2.options);
-          cb(null, _Parser2["default"].parse(tokens, _this2.options));
-        } catch (e) {
-          console.error(e);
-          cb(e);
-        }
+        // try {
+        var tokens = _Lexer2["default"].lex(chapter, _this2.options);
+        cb(null, _Parser2["default"].parse(tokens, _this2.options));
+        // } catch (e) {
+        // console.error(e);
+        // cb(e);
+        // }
       }, function (error, results) {
         // Concat it
         done(null, results.join("\n"));
@@ -1338,7 +1342,7 @@ var Renderer = (function () {
           break;
         case "alphabetized":
           type = "ol type=\"" + (start === start.toUpperCase() ? "A" : "a") + "\"";
-          startAttr = " start='" + (_decimalize$ALPHABET.ALPHABET.indexOf(start.toUpperCase()) + 1) + "'";
+          startAttr = start.toUpperCase() === "A" ? "" : " start='" + (_decimalize$ALPHABET.ALPHABET.indexOf(start.toUpperCase()) + 1) + "'";
           break;
         case "definition":
           type = "dl";
@@ -1349,7 +1353,7 @@ var Renderer = (function () {
           break;
         case "number":
           type = "ol";
-          startAttr = " start='" + start + "'";
+          startAttr = start && start !== "1" ? " start='" + start + "'" : "";
           break;
         default:
           type = "ol";

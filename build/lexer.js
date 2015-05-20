@@ -10,7 +10,7 @@ Object.defineProperty(exports, "__esModule", {
 
 var _block = require("./constants");
 
-var _characterIsNext = require("./util");
+var _characterIsNext$decimalize = require("./util");
 
 var _ = require("underscore");
 
@@ -225,12 +225,16 @@ var Lexer = (function () {
                     current = _this.rules.alphabetized.exec(item) && _this.rules.alphabetized.exec(item)[1] || null;
 
                     // Warn for alpha list
-                    if (prevIndex !== null && !_characterIsNext.characterIsNext(current, prevIndex)) _this.warnings.push(warning);
+                    if (prevIndex !== null && !_characterIsNext$decimalize.characterIsNext(current, prevIndex)) _this.warnings.push(warning);
 
                     return current;
                   case "numeral":
-                    current = _this.rules.numeral.exec(item) && _this.rules.numeral.exec(item)[2] || null;
-                    if (current) bull = current;
+                    current = _this.rules.list.numeral.exec(item) && _this.rules.list.numeral.exec(item)[2] || null;
+                    if (current) bull = current = current.substr(0, current.length - 1);
+
+                    // Warn for roman numerals
+                    if (prevIndex && _characterIsNext$decimalize.decimalize(current) !== _characterIsNext$decimalize.decimalize(prevIndex) + 1) _this.warnings.push(warning);
+
                     return current;
                   case "bullet":
                     return true;

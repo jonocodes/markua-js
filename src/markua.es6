@@ -78,13 +78,13 @@ class Markua {
 
   processChapters(chapters, done) {
     async.map(_.compact(chapters), (chapter, cb) => {
-      try {
-        let tokens = Lexer.lex(chapter, this.options);
-        cb(null, Parser.parse(tokens, this.options));
-      } catch (e) {
-        console.error(e);
-        cb(e);
-      }
+      // try {
+      let tokens = Lexer.lex(chapter, this.options);
+      cb(null, Parser.parse(tokens, this.options));
+      // } catch (e) {
+        // console.error(e);
+        // cb(e);
+      // }
     }, (error, results) => {
       // Concat it
       done(null, results.join("\n"));

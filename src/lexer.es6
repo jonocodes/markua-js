@@ -1,5 +1,5 @@
 import { block } from "./constants"
-import { characterIsNext } from "./util"
+import { characterIsNext, decimalize } from "./util"
 let _ = require("underscore")
 
 // Class for lexing block elements of markua
@@ -227,8 +227,13 @@ class Lexer {
 
                 return current;
               case 'numeral':
-                current = (this.rules.numeral.exec(item) && this.rules.numeral.exec(item)[2]) || null
-                if (current) bull = current;
+                current = (this.rules.list.numeral.exec(item) && this.rules.list.numeral.exec(item)[2]) || null
+                if (current) bull = current = current.substr(0, current.length-1);
+
+                // Warn for roman numerals
+                if (prevIndex && decimalize(current) !== decimalize(prevIndex) + 1)
+                  this.warnings.push(warning)
+
                 return current;
               case 'bullet':
                 return true;
