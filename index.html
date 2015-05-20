@@ -23,9 +23,21 @@
     <script src="build/bundle.js" type="text/javascript"></script>
     <script>
       $(function() {
-        filesToGet = ["book.txt", "manuscript/chapter1.txt", "manuscript/chapter2.txt", "manuscript/chapter3.txt"]
+        filesToGet = [
+          "book.txt",
+          "manuscript/philosophy.txt",
+          "manuscript/structure.txt",
+          "manuscript/images.txt",
+          "manuscript/block.txt",
+          "manuscript/span.txt",
+          "manuscript/whitespace.txt",
+          "manuscript/metadata.txt",
+          "manuscript/implementation.txt",
+          "manuscript/appendices.txt",
+          "manuscript/acknowledgments.txt"
+        ]
         window.fileData = {}
-        var currentFile = "/data/test_book/manuscript/chapter2.txt"
+        var currentFile = "/data/test_book/manuscript/philosophy.txt"
         setup = function() {
           output = function() {
             markua.run(function(error, result) {

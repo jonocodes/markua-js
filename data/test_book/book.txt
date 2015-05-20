@@ -1,3 +1,10 @@
-chapter1.txt
-chapter2.txt
-chapter3.txt
+philosophy.txt
+structure.txt
+images.txt
+block.txt
+span.txt
+whitespace.txt
+metadata.txt
+implementation.txt
+appendices.txt
+acknowledgments.txt
