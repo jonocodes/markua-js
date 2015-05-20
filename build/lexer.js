@@ -48,6 +48,7 @@ var Lexer = (function () {
 
       while (src) {
         // newline
+        // jshint boss:true
         if (cap = this.rules.newline.exec(src)) {
           src = src.substring(cap[0].length);
           if (cap[0].length > 1) this.tokens.push({ type: "space" });

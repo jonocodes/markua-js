@@ -1,6 +1,6 @@
-import { block } from "./constants"
-import { characterIsNext, decimalize } from "./util"
-let _ = require("underscore")
+import { block } from "./constants";
+import { characterIsNext, decimalize } from "./util";
+let _ = require("underscore");
 
 // Class for lexing block elements of markua
 class Lexer {
@@ -9,7 +9,7 @@ class Lexer {
     this.tokens.links = {};
     this.options = options;
     this.rules = block.normal;
-    this.warnings = []
+    this.warnings = [];
   }
 
   static lex(src, options) {
@@ -35,6 +35,7 @@ class Lexer {
 
     while(src) {
       // newline
+      // jshint boss:true
       if (cap = this.rules.newline.exec(src)) {
         src = src.substring(cap[0].length);
         if (cap[0].length > 1)
@@ -45,11 +46,11 @@ class Lexer {
       if (cap = this.rules.attribute.group.exec(src)) {
         src = src.substring(cap[0].length);
 
-        let attributes = []
+        let attributes = [];
         let pair;
 
         while ((pair = _.compact(this.rules.attribute.value.exec(cap[0]))).length) {
-          attributes.push({ key: pair[1], value: pair[2] })
+          attributes.push({ key: pair[1], value: pair[2] });
         }
 
         this.tokens.push({
@@ -72,8 +73,8 @@ class Lexer {
 
       // code
       if (cap = this.rules.code.exec(src)) {
-        src = src.substring(cap[0].length)
-        cap = cap[0].replace(/^ {4}/gm, '')
+        src = src.substring(cap[0].length);
+        cap = cap[0].replace(/^ {4}/gm, '');
         this.tokens.push({
           type: 'code',
           text: cap
@@ -83,7 +84,7 @@ class Lexer {
 
       // fences (gfm)
       if (cap = this.rules.fences.exec(src)) {
-        src = src.substring(cap[0].length)
+        src = src.substring(cap[0].length);
         this.tokens.push({
           type: 'code',
           lang: cap[2],
@@ -94,7 +95,7 @@ class Lexer {
 
       // heading
       if (cap = this.rules.heading.exec(src)){
-        src = src.substring(cap[0].length)
+        src = src.substring(cap[0].length);
 
         // Check to make sure there is another newline under this thing
         if (!this.rules.break.exec(src)) {
@@ -111,42 +112,42 @@ class Lexer {
 
       // table no leading pipe (gfm)
       if (top && (cap = this.rules.nptable.exec(src))) {
-        src = src.substring(cap[0].length)
+        src = src.substring(cap[0].length);
         let item = {
           type: 'table',
           header: cap[1].replace(/^ *| *\| *$/g, '').split(RegExp(' *\\| *')),
           align: cap[2].replace(/^ *|\| *$/g, '').split(RegExp(' *\\| *')),
           cells: cap[3].replace(/\n$/, '').split('\n')
-        }
+        };
 
         for (let i = 0; i < item.align.length; i++) {
           if (/^ *-+: *$/.test(item.align[i])){
-            item.align[i] = 'right'
+            item.align[i] = 'right';
           }
           else if (/^ *:-+: *$/.test(item.align[i])){
-            item.align[i] = 'center'
+            item.align[i] = 'center';
           }
           else if (/^ *:-+ *$/.test(item.align[i])) {
-            item.align[i] = 'left'
+            item.align[i] = 'left';
           }
           else {
-            item.align[i] = null
+            item.align[i] = null;
           }
         }
 
         for (let i = 0; i < item.cells.length; i++) {
-          item.cells[i] = item.cells[i].split(RegExp(' *\\| *'))
+          item.cells[i] = item.cells[i].split(RegExp(' *\\| *'));
         }
 
         this.tokens.push(item);
-        continue
+        continue;
       }
 
       // hr
       if (cap = this.rules.hr.exec(src)) {
         src = src.substring(cap[0].length);
         this.tokens.push({ type: 'hr' });
-        continue
+        continue;
       }
 
       // blockquote
@@ -208,37 +209,37 @@ class Lexer {
           // the current index is one greater than the previous
           let currentIndex = (() => {
             let current, matches;
-            warning = `List indices should be consecutive, automatically increasing near ${cap[0]}`
+            warning = `List indices should be consecutive, automatically increasing near ${cap[0]}`;
             switch (listType) {
               case 'number':
-                current = (this.rules.list.number.exec(item) && parseInt(this.rules.list.number.exec(item)[1])) || null
+                current = (this.rules.list.number.exec(item) && parseInt(this.rules.list.number.exec(item)[1])) || null;
 
                 // Warn for numeric lists
                 if (prevIndex !== null && current !== 1 + prevIndex)
-                  this.warnings.push(warning)
+                  this.warnings.push(warning);
 
-                return current
+                return current;
               case 'alphabetized':
-                current = (this.rules.list.alphabetized.exec(item) && this.rules.list.alphabetized.exec(item)[1]) || null
+                current = (this.rules.list.alphabetized.exec(item) && this.rules.list.alphabetized.exec(item)[1]) || null;
 
                 // Warn for alpha list
                 if (prevIndex !== null && !characterIsNext(current, prevIndex))
-                  this.warnings.push(warning)
+                  this.warnings.push(warning);
 
                 return current;
               case 'numeral':
-                current = (this.rules.list.numeral.exec(item) && this.rules.list.numeral.exec(item)[2]) || null
+                current = (this.rules.list.numeral.exec(item) && this.rules.list.numeral.exec(item)[2]) || null;
                 if (current) bull = current = current.substr(0, current.length-1);
 
                 // Warn for roman numerals
                 if (prevIndex && decimalize(current) !== decimalize(prevIndex) + 1)
-                  this.warnings.push(warning)
+                  this.warnings.push(warning);
 
                 return current;
               case 'bullet':
                 return true;
               case 'definition':
-                definitionTitle = item.match(this.rules.bullet)[3]
+                definitionTitle = item.match(this.rules.bullet)[3];
                 return true;
             }
           })();
@@ -273,33 +274,33 @@ class Lexer {
 
       // def
       if (!bq && top && (cap = this.rules.def.exec(src))) {
-        src = src.substring(cap[0].length)
+        src = src.substring(cap[0].length);
         this.tokens.links[cap[1].toLowerCase()] = {
           href: cap[2],
           title: cap[3]
-        }
+        };
         continue;
       }
 
       // table (gfm)
       if (top && (cap = this.rules.table.exec(src))) {
-        src = src.substring(cap[0].length)
+        src = src.substring(cap[0].length);
         let item = {
           type: 'table',
           header: cap[1].replace(/^ *| *\| *$/g, '').split(RegExp(' *\\| *')),
           align: cap[2].replace(/^ *|\| *$/g, '').split(RegExp(' *\\| *')),
           cells: cap[3].replace(/(?: *\| *)?\n$/, '').split('\n')
-        }
+        };
 
         for (let i = 0; i < item.align.length; i++) {
           if (/^ *-+: *$/.test(item.align[i]))
-            item.align[i] = 'right'
+            item.align[i] = 'right';
           else if (/^ *:-+: *$/.test(item.align[i]))
-            item.align[i] = 'center'
+            item.align[i] = 'center';
           else if (/^ *:-+ *$/.test(item.align[i]))
-            item.align[i] = 'left'
+            item.align[i] = 'left';
           else
-            item.align[i] = null
+            item.align[i] = null;
         }
 
         for (let i = 0; i < item.cells.length; i++) {
@@ -312,7 +313,7 @@ class Lexer {
 
       // top-level paragraph
       if (top && (cap = this.rules.paragraph.exec(src))) {
-        src = src.substring(cap[0].length)
+        src = src.substring(cap[0].length);
         this.tokens.push({
           type: 'paragraph',
           text: cap[1].charAt(cap[1].length - 1) == '\n' ? cap[1].slice(0, -1) : cap[1]
@@ -339,11 +340,11 @@ class Lexer {
       for (var warning of this.warnings) {
         console.warn(warning);
       }
-      this.warnings = []
+      this.warnings = [];
     }
 
     return this.tokens;
   }
-};
+}
 
 export default Lexer;
