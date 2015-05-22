@@ -29,7 +29,7 @@ class Lexer {
     return this.token(src, true);
   }
 
-  token(src, top, bq) {
+  token(src, top, list) {
     let cap;
     src = src.replace(/^ +$/gm, '');
 
@@ -69,17 +69,6 @@ class Lexer {
           image: cap[3],
           caption: cap[4]
         });
-      }
-
-      // code
-      if (cap = this.rules.code.exec(src)) {
-        src = src.substring(cap[0].length);
-        cap = cap[0].replace(/^ {4}/gm, '');
-        this.tokens.push({
-          type: 'code',
-          text: cap
-        });
-        continue;
       }
 
       // fences (gfm)
@@ -163,6 +152,25 @@ class Lexer {
         // how markdown.pl works.
         this.token(cap, top, true);
         this.tokens.push({ type: 'blockquote_end' });
+        continue;
+      }
+
+      // Code import
+      if (cap = this.rules.codeimport.exec(src)) {
+        src = src.substring(cap[0].length);
+        let fileWithoutExt = cap[1],
+            ext = cap[2];
+
+        // Read the file, output a codeblock with that file's language
+        let file = ext ? `${fileWithoutExt}.${ext}` : fileWithoutExt
+
+        let code = this.options.fileAccessor.getSync(`code/${file}`);
+
+        this.tokens.push({
+          type: 'code',
+          lang: cap[2] || "text",
+          text: code
+        });
         continue;
       }
 
@@ -264,7 +272,7 @@ class Lexer {
           this.tokens.push({ type: 'list_item_start', listType: listType, bullet: listType === 'definition' ? definitionTitle : bull });
 
           // Recurse.
-          this.token(item, false, bq);
+          this.token(item, false, true);
           this.tokens.push({ type: 'list_item_end' });
           prevIndex = currentIndex;
         }
@@ -273,7 +281,7 @@ class Lexer {
       }
 
       // def
-      if (!bq && top && (cap = this.rules.def.exec(src))) {
+      if (!list && top && (cap = this.rules.def.exec(src))) {
         src = src.substring(cap[0].length);
         this.tokens.links[cap[1].toLowerCase()] = {
           href: cap[2],
@@ -322,6 +330,8 @@ class Lexer {
       }
 
       // text
+      // FIXME: These should insert break tags where there are newlines when we are in
+      // a list. See https://dashcube.com/app/m/1343038
       if (cap = this.rules.text.exec(src)) {
         // Top-level should never reach here.
         src = src.substring(cap[0].length);

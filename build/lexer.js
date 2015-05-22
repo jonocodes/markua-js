@@ -40,7 +40,7 @@ var Lexer = (function () {
     }
   }, {
     key: "token",
-    value: function token(src, top, bq) {
+    value: function token(src, top, list) {
       var _this = this;
 
       var cap = undefined;
@@ -81,17 +81,6 @@ var Lexer = (function () {
             image: cap[3],
             caption: cap[4]
           });
-        }
-
-        // code
-        if (cap = this.rules.code.exec(src)) {
-          src = src.substring(cap[0].length);
-          cap = cap[0].replace(/^ {4}/gm, "");
-          this.tokens.push({
-            type: "code",
-            text: cap
-          });
-          continue;
         }
 
         // fences (gfm)
@@ -172,6 +161,25 @@ var Lexer = (function () {
           // how markdown.pl works.
           this.token(cap, top, true);
           this.tokens.push({ type: "blockquote_end" });
+          continue;
+        }
+
+        // Code import
+        if (cap = this.rules.codeimport.exec(src)) {
+          src = src.substring(cap[0].length);
+          var fileWithoutExt = cap[1],
+              ext = cap[2];
+
+          // Read the file, output a codeblock with that file's language
+          var file = ext ? "" + fileWithoutExt + "." + ext : fileWithoutExt;
+
+          var code = this.options.fileAccessor.getSync("code/" + file);
+
+          this.tokens.push({
+            type: "code",
+            lang: cap[2] || "text",
+            text: code
+          });
           continue;
         }
 
@@ -265,7 +273,7 @@ var Lexer = (function () {
               _this.tokens.push({ type: "list_item_start", listType: listType, bullet: listType === "definition" ? definitionTitle : bull });
 
               // Recurse.
-              _this.token(item, false, bq);
+              _this.token(item, false, true);
               _this.tokens.push({ type: "list_item_end" });
               prevIndex = currentIndex;
             };
@@ -283,7 +291,7 @@ var Lexer = (function () {
         }
 
         // def
-        if (!bq && top && (cap = this.rules.def.exec(src))) {
+        if (!list && top && (cap = this.rules.def.exec(src))) {
           src = src.substring(cap[0].length);
           this.tokens.links[cap[1].toLowerCase()] = {
             href: cap[2],
@@ -325,6 +333,8 @@ var Lexer = (function () {
         }
 
         // text
+        // FIXME: These should insert break tags where there are newlines when we are in
+        // a list. See https://dashcube.com/app/m/1343038
         if (cap = this.rules.text.exec(src)) {
           // Top-level should never reach here.
           src = src.substring(cap[0].length);
@@ -379,8 +389,6 @@ var Lexer = (function () {
 
   return Lexer;
 })();
-
-;
 
 exports["default"] = Lexer;
 module.exports = exports["default"];

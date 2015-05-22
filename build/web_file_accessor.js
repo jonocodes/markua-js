@@ -35,12 +35,18 @@ var WebFileAccessor = (function (_FileAccessor) {
       var item = window.fileData["" + this.projectPath + "/" + filePath];
       cb(null, item);
     }
+  }, {
+    key: "getSync",
+
+    // This is required for the code block imports, maybe do the file retrieval in an async method as a pre
+    // or post processing step
+    value: function getSync(filePath) {
+      return window.fileData["" + this.projectPath + "/" + filePath];
+    }
   }]);
 
   return WebFileAccessor;
 })(_FileAccessor3["default"]);
-
-;
 
 exports["default"] = WebFileAccessor;
 module.exports = exports["default"];

@@ -78,6 +78,8 @@
           }
         }
 
+        $.get("/data/test_book/code/sample.rb", function(contents) { window.fileData["/data/test_book/code/sample.rb"] = contents; });
+
         // Once we've loaded the page, start loading our text data.
         $.get("/data/test_book/book.txt", function(lines) {
           window.fileData["/data/test_book/book.txt"] = lines;

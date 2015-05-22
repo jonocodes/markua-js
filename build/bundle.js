@@ -122,12 +122,12 @@ inline.breaks = ObjectAssign({}, inline.gfm, {
  */
 var block = {
   newline: /^\n+/,
-  code: /^( {4}[^\n]+\n*)+/,
   fences: /^ *(`{3,}|~{3,}) *(\S+)? *\n([\s\S]+?)\s*\1 *(?:\n+|$)/,
   nptable: /^ *(\S.*\|.*)\n *([-:]+ *\|[-| :]*)\n((?:.*\|.*(?:\n|$))*)\n*/,
   hr: /^( *[-*_]){3,} *(?:\n+|$)/,
   heading: /^ *(#{1,6}) *([^\n]+) */,
   blockquote: /^( *>[^\n]+(\n(?!def)[^\n]+)*)+/,
+  codeimport: /^<<\(([^\n\)\.]+)(?:\.([\S]+))?\)/,
   list: {
     body: /^( *)(bull) (?:[\0-\uD7FF\uE000-\uFFFF]|[\uD800-\uDBFF][\uDC00-\uDFFF]|[\uD800-\uDBFF](?![\uDC00-\uDFFF])|(?:[^\uD800-\uDBFF]|^)[\uDC00-\uDFFF])+?(?:hr|def|\n{2,}(?! )(?!\1bull )\n*|[\t-\r \xA0\u1680\u180E\u2000-\u200A\u2028\u2029\u202F\u205F\u3000\uFEFF]*$)/,
     definition: /^(?:(?:([^\n]*)(?:\n:(?: *))))/,
@@ -213,7 +213,7 @@ var _WebFileAccessor = require("./web_file_accessor");
 var _WebFileAccessor2 = _interopRequireWildcard(_WebFileAccessor);
 
 if (typeof window !== "undefined") window.markua = new _Markua2["default"]("/data/test_book", { fileAccessor: _WebFileAccessor2["default"], debug: true });
-}).call(this,require("1YiZ5S"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/fake_b9c0c72e.js","/")
+}).call(this,require("1YiZ5S"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/fake_6dcadbdb.js","/")
 },{"./markua":6,"./web_file_accessor":11,"1YiZ5S":18,"buffer":14}],3:[function(require,module,exports){
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
 "use strict";
@@ -492,7 +492,7 @@ var Lexer = (function () {
     }
   }, {
     key: "token",
-    value: function token(src, top, bq) {
+    value: function token(src, top, list) {
       var _this = this;
 
       var cap = undefined;
@@ -533,17 +533,6 @@ var Lexer = (function () {
             image: cap[3],
             caption: cap[4]
           });
-        }
-
-        // code
-        if (cap = this.rules.code.exec(src)) {
-          src = src.substring(cap[0].length);
-          cap = cap[0].replace(/^ {4}/gm, "");
-          this.tokens.push({
-            type: "code",
-            text: cap
-          });
-          continue;
         }
 
         // fences (gfm)
@@ -624,6 +613,25 @@ var Lexer = (function () {
           // how markdown.pl works.
           this.token(cap, top, true);
           this.tokens.push({ type: "blockquote_end" });
+          continue;
+        }
+
+        // Code import
+        if (cap = this.rules.codeimport.exec(src)) {
+          src = src.substring(cap[0].length);
+          var fileWithoutExt = cap[1],
+              ext = cap[2];
+
+          // Read the file, output a codeblock with that file's language
+          var file = ext ? "" + fileWithoutExt + "." + ext : fileWithoutExt;
+
+          var code = this.options.fileAccessor.getSync("code/" + file);
+
+          this.tokens.push({
+            type: "code",
+            lang: cap[2] || "text",
+            text: code
+          });
           continue;
         }
 
@@ -717,7 +725,7 @@ var Lexer = (function () {
               _this.tokens.push({ type: "list_item_start", listType: listType, bullet: listType === "definition" ? definitionTitle : bull });
 
               // Recurse.
-              _this.token(item, false, bq);
+              _this.token(item, false, true);
               _this.tokens.push({ type: "list_item_end" });
               prevIndex = currentIndex;
             };
@@ -735,7 +743,7 @@ var Lexer = (function () {
         }
 
         // def
-        if (!bq && top && (cap = this.rules.def.exec(src))) {
+        if (!list && top && (cap = this.rules.def.exec(src))) {
           src = src.substring(cap[0].length);
           this.tokens.links[cap[1].toLowerCase()] = {
             href: cap[2],
@@ -777,6 +785,8 @@ var Lexer = (function () {
         }
 
         // text
+        // FIXME: These should insert break tags where there are newlines when we are in
+        // a list. See https://dashcube.com/app/m/1343038
         if (cap = this.rules.text.exec(src)) {
           // Top-level should never reach here.
           src = src.substring(cap[0].length);
@@ -831,8 +841,6 @@ var Lexer = (function () {
 
   return Lexer;
 })();
-
-;
 
 exports["default"] = Lexer;
 module.exports = exports["default"];
@@ -889,6 +897,7 @@ var Markua = (function () {
     this.projectPath = projectPath;
     this.options = ObjectAssign(DEFAULT_OPTIONS, options);
     this.fileAccessor = new this.options.fileAccessor(projectPath);
+    this.options.fileAccessor = this.fileAccessor;
   }
 
   _createClass(Markua, [{
@@ -1010,6 +1019,14 @@ var NativeFileAccessor = (function (_FileAccessor) {
         if (error) return cb(error);
         cb(null, contents);
       });
+    }
+  }, {
+    key: "getSync",
+
+    // This is required for the code block imports, maybe do the file retrieval in an async method as a pre
+    // or post processing step
+    value: function getSync(filePath) {
+      fs.readFileSync(path.join(this.projectPath, filePath), { encoding: "utf8" }).toString();
     }
   }]);
 
@@ -1378,6 +1395,7 @@ var Renderer = (function () {
   }, {
     key: "paragraph",
     value: function paragraph(text) {
+      text = text.replace(/\n/g, "<br/>");
       return "<p>" + text + "</p>\n";
     }
   }, {
@@ -1560,12 +1578,18 @@ var WebFileAccessor = (function (_FileAccessor) {
       var item = window.fileData["" + this.projectPath + "/" + filePath];
       cb(null, item);
     }
+  }, {
+    key: "getSync",
+
+    // This is required for the code block imports, maybe do the file retrieval in an async method as a pre
+    // or post processing step
+    value: function getSync(filePath) {
+      return window.fileData["" + this.projectPath + "/" + filePath];
+    }
   }]);
 
   return WebFileAccessor;
 })(_FileAccessor3["default"]);
-
-;
 
 exports["default"] = WebFileAccessor;
 module.exports = exports["default"];

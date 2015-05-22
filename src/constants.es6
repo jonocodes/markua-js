@@ -129,12 +129,12 @@ inline.breaks = ObjectAssign({}, inline.gfm, {
  */
 export let block = {
   newline: /^\n+/,
-  code: /^( {4}[^\n]+\n*)+/,
   fences: /^ *(`{3,}|~{3,}) *(\S+)? *\n([\s\S]+?)\s*\1 *(?:\n+|$)/,
   nptable: /^ *(\S.*\|.*)\n *([-:]+ *\|[-| :]*)\n((?:.*\|.*(?:\n|$))*)\n*/,
   hr: /^( *[-*_]){3,} *(?:\n+|$)/,
   heading: /^ *(#{1,6}) *([^\n]+) */,
   blockquote: /^( *>[^\n]+(\n(?!def)[^\n]+)*)+/,
+  codeimport: /^<<\(([^\n\)\.]+)(?:\.([\S]+))?\)/,
   list: {
     body: /^( *)(bull) [\s\S]+?(?:hr|def|\n{2,}(?! )(?!\1bull )\n*|\s*$)/u,
     definition: /^(?:(?:([^\n]*)(?:\n:(?: *))))/,

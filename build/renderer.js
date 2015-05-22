@@ -148,6 +148,7 @@ var Renderer = (function () {
   }, {
     key: "paragraph",
     value: function paragraph(text) {
+      text = text.replace(/\n/g, "<br/>");
       return "<p>" + text + "</p>\n";
     }
   }, {

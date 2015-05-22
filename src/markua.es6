@@ -1,10 +1,10 @@
 import Lexer from "./lexer";
 import Parser from "./parser";
-import nativeFileAccessor from "./native_file_accessor"
+import nativeFileAccessor from "./native_file_accessor";
 
 let ObjectAssign = require("object-assign");
-let _ = require("underscore")
-let async = require("async")
+let _ = require("underscore");
+let async = require("async");
 
 const DEFAULT_OPTIONS = {
   fileAccessor: nativeFileAccessor,
@@ -25,6 +25,7 @@ class Markua {
     this.projectPath = projectPath;
     this.options = ObjectAssign(DEFAULT_OPTIONS, options);
     this.fileAccessor = new this.options.fileAccessor(projectPath);
+    this.options.fileAccessor = this.fileAccessor;
   }
 
   run (cb) {

@@ -48,6 +48,7 @@ var Markua = (function () {
     this.projectPath = projectPath;
     this.options = ObjectAssign(DEFAULT_OPTIONS, options);
     this.fileAccessor = new this.options.fileAccessor(projectPath);
+    this.options.fileAccessor = this.fileAccessor;
   }
 
   _createClass(Markua, [{

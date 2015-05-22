@@ -121,6 +121,7 @@ class Renderer {
   }
 
   paragraph(text) {
+    text = text.replace(/\n/g, '<br/>');
     return `<p>${text}</p>\n`;
   }
 
