@@ -14,7 +14,7 @@ class NativeFileAccessor extends FileAccessor {
   // This is required for the code block imports, maybe do the file retrieval in an async method as a pre
   // or post processing step
   getSync(filePath) {
-    fs.readFileSync(path.join(this.projectPath, filePath), { encoding: "utf8" }).toString();
+    return fs.readFileSync(path.join(this.projectPath, filePath), { encoding: "utf8" }).toString();
   }
 }
 
