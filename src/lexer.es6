@@ -139,6 +139,22 @@ class Lexer {
         continue;
       }
 
+      // aside
+      if (cap = this.rules.aside.exec(src)) {
+        src = src.substring(cap[0].length);
+
+        this.tokens.push({ type: 'aside_start' });
+
+        cap = cap[0].replace(/^ *A> ?/gm, '');
+
+        // Pass `top` to keep the current
+        // "toplevel" state. This is exactly
+        // how markdown.pl works.
+        this.token(cap, top, true);
+        this.tokens.push({ type: 'aside_end' });
+        continue;
+      }
+
       // blockquote
       if (cap = this.rules.blockquote.exec(src)) {
         src = src.substring(cap[0].length);

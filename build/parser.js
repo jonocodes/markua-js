@@ -79,6 +79,8 @@ var Parser = (function () {
 
     // Parse Current Token
     value: function tok() {
+      var attributes = _.clone(this.attributes);
+      this.attributes = null;
       switch (this.token.type) {
         case "space":
           {
@@ -86,15 +88,15 @@ var Parser = (function () {
           }
         case "hr":
           {
-            return this.renderer.hr();
+            return this.renderer.hr(attributes);
           }
         case "heading":
           {
-            return this.renderer.heading(this.inline.output(this.token.text), this.token.depth, this.token.text);
+            return this.renderer.heading(this.inline.output(this.token.text), this.token.depth, this.token.text, attributes);
           }
         case "code":
           {
-            return this.renderer.code(this.token.text, this.token.lang, this.token.escaped);
+            return this.renderer.code(this.token.text, this.token.lang, this.token.escaped, attributes);
           }
         case "attribute":
           {
@@ -104,7 +106,7 @@ var Parser = (function () {
           }
         case "figure":
           {
-            return this.renderer.figure(this.token.alt, this.token.image, this.token.caption, this.attributes);
+            return this.renderer.figure(this.token.alt, this.token.image, this.token.caption, attributes);
           }
         case "table":
           {
@@ -134,7 +136,17 @@ var Parser = (function () {
 
               body += this.renderer.tablerow(cell);
             }
-            return this.renderer.table(header, body);
+            return this.renderer.table(header, body, attributes);
+          }
+        case "aside_start":
+          {
+            var body = "";
+
+            while (this.next().type !== "aside_end") {
+              body += this.tok();
+            }
+
+            return this.renderer.aside(body, attributes);
           }
         case "blockquote_start":
           {
@@ -144,7 +156,7 @@ var Parser = (function () {
               body += this.tok();
             }
 
-            return this.renderer.blockquote(body);
+            return this.renderer.blockquote(body, attributes);
           }
         case "list_start":
           {
@@ -156,7 +168,7 @@ var Parser = (function () {
               body += this.tok();
             }
 
-            return this.renderer.list(body, listType, start);
+            return this.renderer.list(body, listType, start, attributes);
           }
         case "list_item_start":
           {
@@ -170,23 +182,18 @@ var Parser = (function () {
             }
 
             if (_listType === "definition") {
-              return this.renderer.definitionListItem(body, title);
+              return this.renderer.definitionListItem(body, title, attributes);
             } else {
-              return this.renderer.listitem(body);
+              return this.renderer.listitem(body, attributes);
             }
-          }
-        case "html":
-          {
-            var html = !this.token.pre && !this.options.pedantic ? this.inline.output(this.token.text) : this.token.text;
-            return this.renderer.html(html);
           }
         case "paragraph":
           {
-            return this.renderer.paragraph(this.inline.output(this.token.text));
+            return this.renderer.paragraph(this.inline.output(this.token.text), attributes);
           }
         case "text":
           {
-            return this.renderer.paragraph(this.parseText());
+            return this.renderer.paragraph(this.parseText(), attributes);
           }
       }
     }

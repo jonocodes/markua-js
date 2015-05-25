@@ -1,11 +1,13 @@
 import { escape, unescape, HEADING_BOOK_CLASS_MAP, HEADING_MULTI_PART_CLASS_MAP, HEADING_DOCUMENT_CLASS_MAP } from "./constants";
 import { decimalize, ALPHABET } from "./util"
+let _ = require("underscore");
 
 class Renderer {
   constructor(options = {}) {
     this.options = options;
   }
 
+  // Return the correct heading class for the type of book that we are writing.
   getHeadingClass(level) {
     switch (this.options.bookType) {
       case "book":
@@ -19,7 +21,35 @@ class Renderer {
     }
   }
 
-  code(code, lang, escaped) {
+  // Take a object of attributes, and return a string that will be placed on the tag.
+  convertAttributes(attributes, className) {
+    if (!attributes) {
+      return className ? ` class="${className}"` : '';
+    }
+    let attrString = " ";
+
+    // If we have a class specified in the tag that we are rendering, then make sure to add that
+    // class as well.
+    if (className) {
+      attrString += attributes['class'] ? `class="${className} ${attributes['class']}" ` : `class="${className}"`;
+      delete attributes['class'];
+    }
+
+    _.each(_.keys(attributes), function(key, i) {
+      attrString += `${key}="${attributes[key]}"`;
+    });
+    return attrString;;
+  }
+
+  code(code, lang, escaped, attributes) {
+    // override the language from the attribute if we have to.
+    if (attributes && attributes['lang']) {
+      lang = attributes['lang']
+      delete attributes['lang'];
+    }
+
+    let attributesString = this.convertAttributes(attributes)
+
     if (this.options.highlight) {
       var out = this.options.highlight(code, lang);
       if (out !== null && out !== code) {
@@ -29,10 +59,10 @@ class Renderer {
     }
 
     if (!lang) {
-      return `<pre><code>${(escaped ? code : escape(code, true))}\n</code></pre>`;
+      return `<pre${attributesString}><code>${(escaped ? code : escape(code, true))}\n</code></pre>`;
     }
 
-    return '<pre><code class="'
+    return `<pre${attributesString}><code class="`
       + this.options.langPrefix
       + escape(lang, true)
       + '">'
@@ -40,20 +70,34 @@ class Renderer {
       + '\n</code></pre>\n';
   }
 
-  blockquote(quote) {
-    return `<blockquote>\n${quote}</blockquote>\n`;
+  aside(text, attributes) {
+    let attrs = this.convertAttributes(attributes, "aside")
+    return `<div${attrs}>\n${text}</div>\n`;
+  }
+
+  blockquote(quote, attributes) {
+    let attrs = this.convertAttributes(attributes)
+    return `<blockquote${attrs}>\n${quote}</blockquote>\n`;
   }
 
   figure(altText, image, captionText, attributes) {
     let { align, alt, caption } = attributes || {};
 
-    let attrs = `class='figure`;
-    attrs += align ? ` ${align}'` : '\'';
+    // Take em out
+    attributes = _.omit(attributes, "align", "alt", "caption")
 
+    // Determine the class
+    let className = `figure`;
+    className += align ? ` ${align}` : '';
+
+    // Figure out alt-text and caption
     alt = altText || alt || "";
     caption = captionText || caption;
 
-    let div = `<div ${attrs}>\n  ` +
+    // Get the other attributes
+    let attrs = this.convertAttributes(attributes, className);
+
+    let div = `<div${attrs}>\n  ` +
           this.image(image, null, alt) +
           '\n' +
           this.caption(caption) +
@@ -61,29 +105,44 @@ class Renderer {
     return div;
   }
 
-  caption(text) {
-    return text ? `  <p class='caption'>${text}</p>\n` : '';
+  caption(text, attributes) {
+    let attrs = this.convertAttributes(attributes, "caption");
+    return text ? `  <p${attrs}>${text}</p>\n` : '';
   }
 
-  heading(text, level, raw) {
+  heading(text, level, raw, attributes) {
+    let id;
+
+    if (attributes && attributes.id) {
+      id = attributes.id;
+      delete attributes['id'];
+    }
+    else {
+      id = this.options.headerPrefix + raw.toLowerCase().replace(/[^\w]+/g, '-');
+    }
+
+    let attrs = this.convertAttributes(attributes, this.getHeadingClass(level));
+
     return '<h'
       + level
-      + ` class="${this.getHeadingClass(level)}"`
-      + ` id="${this.options.headerPrefix}${raw.toLowerCase().replace(/[^\w]+/g, '-')}">`
+      + `${attrs}`
+      + ` id="${id}">`
       + text
       + '</h'
       + level
       + '>\n';
   }
 
-  hr() {
-    return '<hr>\n';
+  hr(attributes) {
+    let attrs = this.convertAttributes(attributes);
+    return `<hr${attrs}>\n`;
   }
 
-  list(body, listType, start) {
+  list(body, listType, start, attributes) {
     var typeTag, typeAttribute = '', startAttr = '';
     start = start.substr(0, start.length - 1);
 
+    // Figure out the type of list, add some attributes
     switch (listType) {
       case 'bullet':
         typeTag = `ul`;
@@ -109,24 +168,31 @@ class Renderer {
         typeTag = `ol`;
     }
 
-    return `<${typeTag}${typeAttribute}${startAttr}>\n${body}</${typeTag}>\n`;
+    // Get the generic attributes for the list
+    let genericAttrs = this.convertAttributes(attributes);
+
+    return `<${typeTag}${typeAttribute}${startAttr}${genericAttrs}>\n${body}</${typeTag}>\n`;
   }
 
-  definitionListItem(text, title) {
-    return `<dt>${title}</dt>\n<dd>${text}</dd>\n`;
+  definitionListItem(text, title, attributes) {
+    let attrs = this.convertAttributes(attributes);
+    return `<dt${attrs}>${title}</dt>\n<dd>${text}</dd>\n`;
   }
 
-  listitem(text) {
-    return `<li>${text}</li>\n`;
+  listitem(text, attributes) {
+    let attrs = this.convertAttributes(attributes);
+    return `<li${attrs}>${text}</li>\n`;
   }
 
-  paragraph(text) {
+  paragraph(text, attributes) {
     text = text.replace(/\n/g, '<br/>');
-    return `<p>${text}</p>\n`;
+    let attrs = this.convertAttributes(attributes);
+    return `<p${attrs}>${text}</p>\n`;
   }
 
-  table(header, body) {
-    return '<table>\n'
+  table(header, body, attributes) {
+    let attrs = this.convertAttributes(attributes);
+    return `<table${attrs}>\n`
       + '<thead>\n'
       + header
       + '</thead>\n'
@@ -136,11 +202,12 @@ class Renderer {
       + '</table>\n';
   }
 
-  tablerow(content) {
-    return `<tr>\n${content}</tr>\n`;
+  tablerow(content, attributes) {
+    let attrs = this.convertAttributes(attributes);
+    return `<tr${attrs}>\n${content}</tr>\n`;
   }
 
-  tablecell(content, flags) {
+  tablecell(content, flags, attributes) {
     var type = flags.header ? 'th' : 'td';
     var tag = flags.align
       ? `<${type} style="text-align: ${flags.align}">`
@@ -149,27 +216,30 @@ class Renderer {
   }
 
   // span level renderer
-  strong(text) {
-    return `<strong>${text}</strong>`;
+  strong(text, attributes) {
+    let attrs = this.convertAttributes(attributes);
+    return `<strong${attrs}>${text}</strong>`;
   }
 
-  em(text) {
-    return `<em>${text}</em>`;
+  em(text, attributes) {
+    let attrs = this.convertAttributes(attributes);
+    return `<em${attrs}>${text}</em>`;
   }
 
-  codespan(text) {
-    return `<code>${text}</code>`;
+  codespan(text, attributes) {
+    let attrs = this.convertAttributes(attributes);
+    return `<code${attrs}>${text}</code>`;
   }
 
   br() {
     return '<br>';
   }
 
-  del(text) {
+  del(text, attributes) {
     return `<del>${text}</del>`;
   }
 
-  link(href, title, text) {
+  link(href, title, text, attributes) {
     if (this.options.sanitize) {
       try {
         var prot = decodeURIComponent(unescape(href))
@@ -190,7 +260,7 @@ class Renderer {
     return out;
   }
 
-  image(href, title, text) {
+  image(href, title, text, attributes) {
     if (!/http:|https:/.test(href))
       href = `images/${href}`;
 

@@ -124,9 +124,11 @@ var block = {
   newline: /^\n+/,
   fences: /^ *(`{3,}|~{3,}) *(\S+)? *\n([\s\S]+?)\s*\1 *(?:\n+|$)/,
   nptable: /^ *(\S.*\|.*)\n *([-:]+ *\|[-| :]*)\n((?:.*\|.*(?:\n|$))*)\n*/,
-  hr: /^( *[-*_]){3,} *(?:\n+|$)/,
+  hr: /^( *[-]){3} *(?:\n+|$)/,
   heading: /^ *(#{1,6}) *([^\n]+) */,
   blockquote: /^( *>[^\n]+(\n(?!def)[^\n]+)*)+/,
+  aside: /^( *A>[^\n]+(\n(?!def)[^\n]+)*)+/,
+  blurb: /^( *B>[^\n]+(\n(?!def)[^\n]+)*)+/,
   codeimport: /^<<\(([^\n\)\.]+)(?:\.([\S]+))?\)/,
   list: {
     body: /^( *)(bull) (?:[\0-\uD7FF\uE000-\uFFFF]|[\uD800-\uDBFF][\uDC00-\uDFFF]|[\uD800-\uDBFF](?![\uDC00-\uDFFF])|(?:[^\uD800-\uDBFF]|^)[\uDC00-\uDFFF])+?(?:hr|def|\n{2,}(?! )(?!\1bull )\n*|[\t-\r \xA0\u1680\u180E\u2000-\u200A\u2028\u2029\u202F\u205F\u3000\uFEFF]*$)/,
@@ -143,8 +145,8 @@ var block = {
   text: /^[^\n]+/,
   'break': /^ *[\n]{2,}/,
   attribute: {
-    group: /^(?:{)(?: *(?:("(?:[^\s"]|[ ])+")|('(?:[^\s']|[ ])+')|((?:[^\s])+))(?:: *)(?:("(?:[^\s"]|[ ])+")|('(?:[^\s']|[ ])+')|((?:[^\s])+)))(?:(?: *, *)(?: *(?:("(?:[^\s"]|[ ])+")|('(?:[^\s']|[ ])+')|((?:[^\s])+))(?:: *)(?:("(?:[^\s"]|[ ])+")|('(?:[^\s']|[ ])+')|((?:[^\s,])+))))*(?: *)(?:})/,
-    value: /(?: *(?:(?:"((?:[^\s"]|[ ])+)")|(?:'((?:[^\s']|[ ])+)')|((?:[^\s])+))(?:: *)(?:(?:"((?:[^\s"]|[ ])+)")|(?:'(?:[^\s']|[ ])+')|((?:[^\s])+)))/g
+    group: /^(?:{)(?: *(?:("(?:[^\s"]|[ ])+")|('(?:[^\s']|[ ])+')|((?:[^\s])+))(?:: *)(?:("(?:[^\s"]|[ ])+")|('(?:[^\s']|[ ])+')|((?:[^\s])+)))(?:(?: *, *)(?: *(?:("(?:[^\s"]|[ ])+")|('(?:[^\s']|[ ])+')|((?:[^\s])+))(?:: *)(?:("(?:[^\s"]|[ ])+")|('(?:[^\s']|[ ])+')|((?:[^\s,])+))))*(?: *)(?:})(?: *)/,
+    value: /(?: *(?:(?:"((?:[^\s"]|[ ])+)")|(?:'((?:[^\s']|[ ])+)')|((?:[^\s])+))(?:: *)(?:(?:"((?:[^\s"]|[ ])+)")|(?:'((?:[^\s']|[ ])+)')|((?:[^\s])+)))/g
   },
   number: /([0-9]+)/
 };
@@ -213,7 +215,7 @@ var _WebFileAccessor = require("./web_file_accessor");
 var _WebFileAccessor2 = _interopRequireWildcard(_WebFileAccessor);
 
 if (typeof window !== "undefined") window.markua = new _Markua2["default"]("/data/test_book", { fileAccessor: _WebFileAccessor2["default"], debug: true });
-}).call(this,require("1YiZ5S"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/fake_52490272.js","/")
+}).call(this,require("1YiZ5S"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/fake_f124a9f3.js","/")
 },{"./markua":6,"./web_file_accessor":11,"1YiZ5S":18,"buffer":14}],3:[function(require,module,exports){
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
 "use strict";
@@ -597,6 +599,22 @@ var Lexer = (function () {
         if (cap = this.rules.hr.exec(src)) {
           src = src.substring(cap[0].length);
           this.tokens.push({ type: "hr" });
+          continue;
+        }
+
+        // aside
+        if (cap = this.rules.aside.exec(src)) {
+          src = src.substring(cap[0].length);
+
+          this.tokens.push({ type: "aside_start" });
+
+          cap = cap[0].replace(/^ *A> ?/gm, "");
+
+          // Pass `top` to keep the current
+          // "toplevel" state. This is exactly
+          // how markdown.pl works.
+          this.token(cap, top, true);
+          this.tokens.push({ type: "aside_end" });
           continue;
         }
 
@@ -1119,6 +1137,8 @@ var Parser = (function () {
 
     // Parse Current Token
     value: function tok() {
+      var attributes = _.clone(this.attributes);
+      this.attributes = null;
       switch (this.token.type) {
         case "space":
           {
@@ -1126,15 +1146,15 @@ var Parser = (function () {
           }
         case "hr":
           {
-            return this.renderer.hr();
+            return this.renderer.hr(attributes);
           }
         case "heading":
           {
-            return this.renderer.heading(this.inline.output(this.token.text), this.token.depth, this.token.text);
+            return this.renderer.heading(this.inline.output(this.token.text), this.token.depth, this.token.text, attributes);
           }
         case "code":
           {
-            return this.renderer.code(this.token.text, this.token.lang, this.token.escaped);
+            return this.renderer.code(this.token.text, this.token.lang, this.token.escaped, attributes);
           }
         case "attribute":
           {
@@ -1144,7 +1164,7 @@ var Parser = (function () {
           }
         case "figure":
           {
-            return this.renderer.figure(this.token.alt, this.token.image, this.token.caption, this.attributes);
+            return this.renderer.figure(this.token.alt, this.token.image, this.token.caption, attributes);
           }
         case "table":
           {
@@ -1174,7 +1194,17 @@ var Parser = (function () {
 
               body += this.renderer.tablerow(cell);
             }
-            return this.renderer.table(header, body);
+            return this.renderer.table(header, body, attributes);
+          }
+        case "aside_start":
+          {
+            var body = "";
+
+            while (this.next().type !== "aside_end") {
+              body += this.tok();
+            }
+
+            return this.renderer.aside(body, attributes);
           }
         case "blockquote_start":
           {
@@ -1184,7 +1214,7 @@ var Parser = (function () {
               body += this.tok();
             }
 
-            return this.renderer.blockquote(body);
+            return this.renderer.blockquote(body, attributes);
           }
         case "list_start":
           {
@@ -1196,7 +1226,7 @@ var Parser = (function () {
               body += this.tok();
             }
 
-            return this.renderer.list(body, listType, start);
+            return this.renderer.list(body, listType, start, attributes);
           }
         case "list_item_start":
           {
@@ -1210,23 +1240,18 @@ var Parser = (function () {
             }
 
             if (_listType === "definition") {
-              return this.renderer.definitionListItem(body, title);
+              return this.renderer.definitionListItem(body, title, attributes);
             } else {
-              return this.renderer.listitem(body);
+              return this.renderer.listitem(body, attributes);
             }
-          }
-        case "html":
-          {
-            var html = !this.token.pre && !this.options.pedantic ? this.inline.output(this.token.text) : this.token.text;
-            return this.renderer.html(html);
           }
         case "paragraph":
           {
-            return this.renderer.paragraph(this.inline.output(this.token.text));
+            return this.renderer.paragraph(this.inline.output(this.token.text), attributes);
           }
         case "text":
           {
-            return this.renderer.paragraph(this.parseText());
+            return this.renderer.paragraph(this.parseText(), attributes);
           }
       }
     }
@@ -1259,6 +1284,8 @@ var _escape$unescape$HEADING_BOOK_CLASS_MAP$HEADING_MULTI_PART_CLASS_MAP$HEADING
 
 var _decimalize$ALPHABET = require("./util");
 
+var _ = require("underscore");
+
 var Renderer = (function () {
   function Renderer() {
     var options = arguments[0] === undefined ? {} : arguments[0];
@@ -1270,6 +1297,8 @@ var Renderer = (function () {
 
   _createClass(Renderer, [{
     key: "getHeadingClass",
+
+    // Return the correct heading class for the type of book that we are writing.
     value: function getHeadingClass(level) {
       switch (this.options.bookType) {
         case "book":
@@ -1283,9 +1312,31 @@ var Renderer = (function () {
       }
     }
   }, {
+    key: "convertAttributes",
+
+    // Take a object of attributes, and return a string that will be placed on the tag.
+    value: function convertAttributes(attributes, className) {
+      if (!attributes) {
+        return className ? " class=\"" + className + "\"" : "";
+      }
+      var attrString = " ";
+
+      // If we have a class specified in the tag that we are rendering, then make sure to add that
+      // class as well.
+      if (className) {
+        attrString += attributes["class"] ? "class=\"" + className + " " + attributes["class"] + "\" " : "class=\"" + className + "\"";
+        delete attributes["class"];
+      }
+
+      _.each(_.keys(attributes), function (key, i) {
+        attrString += "" + key + "=\"" + attributes[key] + "\"";
+      });
+      return attrString;;
+    }
+  }, {
     key: "code",
     value: (function (_code) {
-      function code(_x, _x2, _x3) {
+      function code(_x, _x2, _x3, _x4) {
         return _code.apply(this, arguments);
       }
 
@@ -1294,7 +1345,15 @@ var Renderer = (function () {
       };
 
       return code;
-    })(function (code, lang, escaped) {
+    })(function (code, lang, escaped, attributes) {
+      // override the language from the attribute if we have to.
+      if (attributes && attributes.lang) {
+        lang = attributes.lang;
+        delete attributes.lang;
+      }
+
+      var attributesString = this.convertAttributes(attributes);
+
       if (this.options.highlight) {
         var out = this.options.highlight(code, lang);
         if (out !== null && out !== code) {
@@ -1304,15 +1363,22 @@ var Renderer = (function () {
       }
 
       if (!lang) {
-        return "<pre><code>" + (escaped ? code : _escape$unescape$HEADING_BOOK_CLASS_MAP$HEADING_MULTI_PART_CLASS_MAP$HEADING_DOCUMENT_CLASS_MAP.escape(code, true)) + "\n</code></pre>";
+        return "<pre" + attributesString + "><code>" + (escaped ? code : _escape$unescape$HEADING_BOOK_CLASS_MAP$HEADING_MULTI_PART_CLASS_MAP$HEADING_DOCUMENT_CLASS_MAP.escape(code, true)) + "\n</code></pre>";
       }
 
-      return "<pre><code class=\"" + this.options.langPrefix + _escape$unescape$HEADING_BOOK_CLASS_MAP$HEADING_MULTI_PART_CLASS_MAP$HEADING_DOCUMENT_CLASS_MAP.escape(lang, true) + "\">" + (escaped ? code : _escape$unescape$HEADING_BOOK_CLASS_MAP$HEADING_MULTI_PART_CLASS_MAP$HEADING_DOCUMENT_CLASS_MAP.escape(code, true)) + "\n</code></pre>\n";
+      return "<pre" + attributesString + "><code class=\"" + this.options.langPrefix + _escape$unescape$HEADING_BOOK_CLASS_MAP$HEADING_MULTI_PART_CLASS_MAP$HEADING_DOCUMENT_CLASS_MAP.escape(lang, true) + "\">" + (escaped ? code : _escape$unescape$HEADING_BOOK_CLASS_MAP$HEADING_MULTI_PART_CLASS_MAP$HEADING_DOCUMENT_CLASS_MAP.escape(code, true)) + "\n</code></pre>\n";
     })
   }, {
+    key: "aside",
+    value: function aside(text, attributes) {
+      var attrs = this.convertAttributes(attributes, "aside");
+      return "<div" + attrs + ">\n" + text + "</div>\n";
+    }
+  }, {
     key: "blockquote",
-    value: function blockquote(quote) {
-      return "<blockquote>\n" + quote + "</blockquote>\n";
+    value: function blockquote(quote, attributes) {
+      var attrs = this.convertAttributes(attributes);
+      return "<blockquote" + attrs + ">\n" + quote + "</blockquote>\n";
     }
   }, {
     key: "figure",
@@ -1323,38 +1389,60 @@ var Renderer = (function () {
       var alt = _ref.alt;
       var caption = _ref.caption;
 
-      var attrs = "class='figure";
-      attrs += align ? " " + align + "'" : "'";
+      // Take em out
+      attributes = _.omit(attributes, "align", "alt", "caption");
 
+      // Determine the class
+      var className = "figure";
+      className += align ? " " + align : "";
+
+      // Figure out alt-text and caption
       alt = altText || alt || "";
       caption = captionText || caption;
 
-      var div = "<div " + attrs + ">\n  " + this.image(image, null, alt) + "\n" + this.caption(caption) + "</div>\n";
+      // Get the other attributes
+      var attrs = this.convertAttributes(attributes, className);
+
+      var div = "<div" + attrs + ">\n  " + this.image(image, null, alt) + "\n" + this.caption(caption) + "</div>\n";
       return div;
     }
   }, {
     key: "caption",
-    value: function caption(text) {
-      return text ? "  <p class='caption'>" + text + "</p>\n" : "";
+    value: function caption(text, attributes) {
+      var attrs = this.convertAttributes(attributes, "caption");
+      return text ? "  <p" + attrs + ">" + text + "</p>\n" : "";
     }
   }, {
     key: "heading",
-    value: function heading(text, level, raw) {
-      return "<h" + level + (" class=\"" + this.getHeadingClass(level) + "\"") + (" id=\"" + this.options.headerPrefix + "" + raw.toLowerCase().replace(/[^\w]+/g, "-") + "\">") + text + "</h" + level + ">\n";
+    value: function heading(text, level, raw, attributes) {
+      var id = undefined;
+
+      if (attributes && attributes.id) {
+        id = attributes.id;
+        delete attributes.id;
+      } else {
+        id = this.options.headerPrefix + raw.toLowerCase().replace(/[^\w]+/g, "-");
+      }
+
+      var attrs = this.convertAttributes(attributes, this.getHeadingClass(level));
+
+      return "<h" + level + ("" + attrs) + (" id=\"" + id + "\">") + text + "</h" + level + ">\n";
     }
   }, {
     key: "hr",
-    value: function hr() {
-      return "<hr>\n";
+    value: function hr(attributes) {
+      var attrs = this.convertAttributes(attributes);
+      return "<hr" + attrs + ">\n";
     }
   }, {
     key: "list",
-    value: function list(body, listType, start) {
+    value: function list(body, listType, start, attributes) {
       var typeTag,
           typeAttribute = "",
           startAttr = "";
       start = start.substr(0, start.length - 1);
 
+      // Figure out the type of list, add some attributes
       switch (listType) {
         case "bullet":
           typeTag = "ul";
@@ -1380,37 +1468,45 @@ var Renderer = (function () {
           typeTag = "ol";
       }
 
-      return "<" + typeTag + "" + typeAttribute + "" + startAttr + ">\n" + body + "</" + typeTag + ">\n";
+      // Get the generic attributes for the list
+      var genericAttrs = this.convertAttributes(attributes);
+
+      return "<" + typeTag + "" + typeAttribute + "" + startAttr + "" + genericAttrs + ">\n" + body + "</" + typeTag + ">\n";
     }
   }, {
     key: "definitionListItem",
-    value: function definitionListItem(text, title) {
-      return "<dt>" + title + "</dt>\n<dd>" + text + "</dd>\n";
+    value: function definitionListItem(text, title, attributes) {
+      var attrs = this.convertAttributes(attributes);
+      return "<dt" + attrs + ">" + title + "</dt>\n<dd>" + text + "</dd>\n";
     }
   }, {
     key: "listitem",
-    value: function listitem(text) {
-      return "<li>" + text + "</li>\n";
+    value: function listitem(text, attributes) {
+      var attrs = this.convertAttributes(attributes);
+      return "<li" + attrs + ">" + text + "</li>\n";
     }
   }, {
     key: "paragraph",
-    value: function paragraph(text) {
+    value: function paragraph(text, attributes) {
       text = text.replace(/\n/g, "<br/>");
-      return "<p>" + text + "</p>\n";
+      var attrs = this.convertAttributes(attributes);
+      return "<p" + attrs + ">" + text + "</p>\n";
     }
   }, {
     key: "table",
-    value: function table(header, body) {
-      return "<table>\n" + "<thead>\n" + header + "</thead>\n" + "<tbody>\n" + body + "</tbody>\n" + "</table>\n";
+    value: function table(header, body, attributes) {
+      var attrs = this.convertAttributes(attributes);
+      return "<table" + attrs + ">\n" + "<thead>\n" + header + "</thead>\n" + "<tbody>\n" + body + "</tbody>\n" + "</table>\n";
     }
   }, {
     key: "tablerow",
-    value: function tablerow(content) {
-      return "<tr>\n" + content + "</tr>\n";
+    value: function tablerow(content, attributes) {
+      var attrs = this.convertAttributes(attributes);
+      return "<tr" + attrs + ">\n" + content + "</tr>\n";
     }
   }, {
     key: "tablecell",
-    value: function tablecell(content, flags) {
+    value: function tablecell(content, flags, attributes) {
       var type = flags.header ? "th" : "td";
       var tag = flags.align ? "<" + type + " style=\"text-align: " + flags.align + "\">" : "<" + type + ">";
       return tag + content + "</" + type + ">\n";
@@ -1419,18 +1515,21 @@ var Renderer = (function () {
     key: "strong",
 
     // span level renderer
-    value: function strong(text) {
-      return "<strong>" + text + "</strong>";
+    value: function strong(text, attributes) {
+      var attrs = this.convertAttributes(attributes);
+      return "<strong" + attrs + ">" + text + "</strong>";
     }
   }, {
     key: "em",
-    value: function em(text) {
-      return "<em>" + text + "</em>";
+    value: function em(text, attributes) {
+      var attrs = this.convertAttributes(attributes);
+      return "<em" + attrs + ">" + text + "</em>";
     }
   }, {
     key: "codespan",
-    value: function codespan(text) {
-      return "<code>" + text + "</code>";
+    value: function codespan(text, attributes) {
+      var attrs = this.convertAttributes(attributes);
+      return "<code" + attrs + ">" + text + "</code>";
     }
   }, {
     key: "br",
@@ -1439,12 +1538,12 @@ var Renderer = (function () {
     }
   }, {
     key: "del",
-    value: function del(text) {
+    value: function del(text, attributes) {
       return "<del>" + text + "</del>";
     }
   }, {
     key: "link",
-    value: function link(href, title, text) {
+    value: function link(href, title, text, attributes) {
       if (this.options.sanitize) {
         try {
           var prot = decodeURIComponent(_escape$unescape$HEADING_BOOK_CLASS_MAP$HEADING_MULTI_PART_CLASS_MAP$HEADING_DOCUMENT_CLASS_MAP.unescape(href)).replace(/[^\w:]/g, "").toLowerCase();
@@ -1464,7 +1563,7 @@ var Renderer = (function () {
     }
   }, {
     key: "image",
-    value: function image(href, title, text) {
+    value: function image(href, title, text, attributes) {
       if (!/http:|https:/.test(href)) href = "images/" + href;
 
       var out = "<img src=\"" + href + "\" alt=\"" + text + "\"";
@@ -1482,7 +1581,7 @@ var Renderer = (function () {
 exports["default"] = Renderer;
 module.exports = exports["default"];
 }).call(this,require("1YiZ5S"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/renderer.js","/")
-},{"./constants":1,"./util":10,"1YiZ5S":18,"buffer":14}],10:[function(require,module,exports){
+},{"./constants":1,"./util":10,"1YiZ5S":18,"buffer":14,"underscore":20}],10:[function(require,module,exports){
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
 'use strict';
 

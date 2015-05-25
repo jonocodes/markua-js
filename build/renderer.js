@@ -12,6 +12,8 @@ var _escape$unescape$HEADING_BOOK_CLASS_MAP$HEADING_MULTI_PART_CLASS_MAP$HEADING
 
 var _decimalize$ALPHABET = require("./util");
 
+var _ = require("underscore");
+
 var Renderer = (function () {
   function Renderer() {
     var options = arguments[0] === undefined ? {} : arguments[0];
@@ -23,6 +25,8 @@ var Renderer = (function () {
 
   _createClass(Renderer, [{
     key: "getHeadingClass",
+
+    // Return the correct heading class for the type of book that we are writing.
     value: function getHeadingClass(level) {
       switch (this.options.bookType) {
         case "book":
@@ -36,9 +40,31 @@ var Renderer = (function () {
       }
     }
   }, {
+    key: "convertAttributes",
+
+    // Take a object of attributes, and return a string that will be placed on the tag.
+    value: function convertAttributes(attributes, className) {
+      if (!attributes) {
+        return className ? " class=\"" + className + "\"" : "";
+      }
+      var attrString = " ";
+
+      // If we have a class specified in the tag that we are rendering, then make sure to add that
+      // class as well.
+      if (className) {
+        attrString += attributes["class"] ? "class=\"" + className + " " + attributes["class"] + "\" " : "class=\"" + className + "\"";
+        delete attributes["class"];
+      }
+
+      _.each(_.keys(attributes), function (key, i) {
+        attrString += "" + key + "=\"" + attributes[key] + "\"";
+      });
+      return attrString;;
+    }
+  }, {
     key: "code",
     value: (function (_code) {
-      function code(_x, _x2, _x3) {
+      function code(_x, _x2, _x3, _x4) {
         return _code.apply(this, arguments);
       }
 
@@ -47,7 +73,15 @@ var Renderer = (function () {
       };
 
       return code;
-    })(function (code, lang, escaped) {
+    })(function (code, lang, escaped, attributes) {
+      // override the language from the attribute if we have to.
+      if (attributes && attributes.lang) {
+        lang = attributes.lang;
+        delete attributes.lang;
+      }
+
+      var attributesString = this.convertAttributes(attributes);
+
       if (this.options.highlight) {
         var out = this.options.highlight(code, lang);
         if (out !== null && out !== code) {
@@ -57,15 +91,22 @@ var Renderer = (function () {
       }
 
       if (!lang) {
-        return "<pre><code>" + (escaped ? code : _escape$unescape$HEADING_BOOK_CLASS_MAP$HEADING_MULTI_PART_CLASS_MAP$HEADING_DOCUMENT_CLASS_MAP.escape(code, true)) + "\n</code></pre>";
+        return "<pre" + attributesString + "><code>" + (escaped ? code : _escape$unescape$HEADING_BOOK_CLASS_MAP$HEADING_MULTI_PART_CLASS_MAP$HEADING_DOCUMENT_CLASS_MAP.escape(code, true)) + "\n</code></pre>";
       }
 
-      return "<pre><code class=\"" + this.options.langPrefix + _escape$unescape$HEADING_BOOK_CLASS_MAP$HEADING_MULTI_PART_CLASS_MAP$HEADING_DOCUMENT_CLASS_MAP.escape(lang, true) + "\">" + (escaped ? code : _escape$unescape$HEADING_BOOK_CLASS_MAP$HEADING_MULTI_PART_CLASS_MAP$HEADING_DOCUMENT_CLASS_MAP.escape(code, true)) + "\n</code></pre>\n";
+      return "<pre" + attributesString + "><code class=\"" + this.options.langPrefix + _escape$unescape$HEADING_BOOK_CLASS_MAP$HEADING_MULTI_PART_CLASS_MAP$HEADING_DOCUMENT_CLASS_MAP.escape(lang, true) + "\">" + (escaped ? code : _escape$unescape$HEADING_BOOK_CLASS_MAP$HEADING_MULTI_PART_CLASS_MAP$HEADING_DOCUMENT_CLASS_MAP.escape(code, true)) + "\n</code></pre>\n";
     })
   }, {
+    key: "aside",
+    value: function aside(text, attributes) {
+      var attrs = this.convertAttributes(attributes, "aside");
+      return "<div" + attrs + ">\n" + text + "</div>\n";
+    }
+  }, {
     key: "blockquote",
-    value: function blockquote(quote) {
-      return "<blockquote>\n" + quote + "</blockquote>\n";
+    value: function blockquote(quote, attributes) {
+      var attrs = this.convertAttributes(attributes);
+      return "<blockquote" + attrs + ">\n" + quote + "</blockquote>\n";
     }
   }, {
     key: "figure",
@@ -76,38 +117,60 @@ var Renderer = (function () {
       var alt = _ref.alt;
       var caption = _ref.caption;
 
-      var attrs = "class='figure";
-      attrs += align ? " " + align + "'" : "'";
+      // Take em out
+      attributes = _.omit(attributes, "align", "alt", "caption");
 
+      // Determine the class
+      var className = "figure";
+      className += align ? " " + align : "";
+
+      // Figure out alt-text and caption
       alt = altText || alt || "";
       caption = captionText || caption;
 
-      var div = "<div " + attrs + ">\n  " + this.image(image, null, alt) + "\n" + this.caption(caption) + "</div>\n";
+      // Get the other attributes
+      var attrs = this.convertAttributes(attributes, className);
+
+      var div = "<div" + attrs + ">\n  " + this.image(image, null, alt) + "\n" + this.caption(caption) + "</div>\n";
       return div;
     }
   }, {
     key: "caption",
-    value: function caption(text) {
-      return text ? "  <p class='caption'>" + text + "</p>\n" : "";
+    value: function caption(text, attributes) {
+      var attrs = this.convertAttributes(attributes, "caption");
+      return text ? "  <p" + attrs + ">" + text + "</p>\n" : "";
     }
   }, {
     key: "heading",
-    value: function heading(text, level, raw) {
-      return "<h" + level + (" class=\"" + this.getHeadingClass(level) + "\"") + (" id=\"" + this.options.headerPrefix + "" + raw.toLowerCase().replace(/[^\w]+/g, "-") + "\">") + text + "</h" + level + ">\n";
+    value: function heading(text, level, raw, attributes) {
+      var id = undefined;
+
+      if (attributes && attributes.id) {
+        id = attributes.id;
+        delete attributes.id;
+      } else {
+        id = this.options.headerPrefix + raw.toLowerCase().replace(/[^\w]+/g, "-");
+      }
+
+      var attrs = this.convertAttributes(attributes, this.getHeadingClass(level));
+
+      return "<h" + level + ("" + attrs) + (" id=\"" + id + "\">") + text + "</h" + level + ">\n";
     }
   }, {
     key: "hr",
-    value: function hr() {
-      return "<hr>\n";
+    value: function hr(attributes) {
+      var attrs = this.convertAttributes(attributes);
+      return "<hr" + attrs + ">\n";
     }
   }, {
     key: "list",
-    value: function list(body, listType, start) {
+    value: function list(body, listType, start, attributes) {
       var typeTag,
           typeAttribute = "",
           startAttr = "";
       start = start.substr(0, start.length - 1);
 
+      // Figure out the type of list, add some attributes
       switch (listType) {
         case "bullet":
           typeTag = "ul";
@@ -133,37 +196,45 @@ var Renderer = (function () {
           typeTag = "ol";
       }
 
-      return "<" + typeTag + "" + typeAttribute + "" + startAttr + ">\n" + body + "</" + typeTag + ">\n";
+      // Get the generic attributes for the list
+      var genericAttrs = this.convertAttributes(attributes);
+
+      return "<" + typeTag + "" + typeAttribute + "" + startAttr + "" + genericAttrs + ">\n" + body + "</" + typeTag + ">\n";
     }
   }, {
     key: "definitionListItem",
-    value: function definitionListItem(text, title) {
-      return "<dt>" + title + "</dt>\n<dd>" + text + "</dd>\n";
+    value: function definitionListItem(text, title, attributes) {
+      var attrs = this.convertAttributes(attributes);
+      return "<dt" + attrs + ">" + title + "</dt>\n<dd>" + text + "</dd>\n";
     }
   }, {
     key: "listitem",
-    value: function listitem(text) {
-      return "<li>" + text + "</li>\n";
+    value: function listitem(text, attributes) {
+      var attrs = this.convertAttributes(attributes);
+      return "<li" + attrs + ">" + text + "</li>\n";
     }
   }, {
     key: "paragraph",
-    value: function paragraph(text) {
+    value: function paragraph(text, attributes) {
       text = text.replace(/\n/g, "<br/>");
-      return "<p>" + text + "</p>\n";
+      var attrs = this.convertAttributes(attributes);
+      return "<p" + attrs + ">" + text + "</p>\n";
     }
   }, {
     key: "table",
-    value: function table(header, body) {
-      return "<table>\n" + "<thead>\n" + header + "</thead>\n" + "<tbody>\n" + body + "</tbody>\n" + "</table>\n";
+    value: function table(header, body, attributes) {
+      var attrs = this.convertAttributes(attributes);
+      return "<table" + attrs + ">\n" + "<thead>\n" + header + "</thead>\n" + "<tbody>\n" + body + "</tbody>\n" + "</table>\n";
     }
   }, {
     key: "tablerow",
-    value: function tablerow(content) {
-      return "<tr>\n" + content + "</tr>\n";
+    value: function tablerow(content, attributes) {
+      var attrs = this.convertAttributes(attributes);
+      return "<tr" + attrs + ">\n" + content + "</tr>\n";
     }
   }, {
     key: "tablecell",
-    value: function tablecell(content, flags) {
+    value: function tablecell(content, flags, attributes) {
       var type = flags.header ? "th" : "td";
       var tag = flags.align ? "<" + type + " style=\"text-align: " + flags.align + "\">" : "<" + type + ">";
       return tag + content + "</" + type + ">\n";
@@ -172,18 +243,21 @@ var Renderer = (function () {
     key: "strong",
 
     // span level renderer
-    value: function strong(text) {
-      return "<strong>" + text + "</strong>";
+    value: function strong(text, attributes) {
+      var attrs = this.convertAttributes(attributes);
+      return "<strong" + attrs + ">" + text + "</strong>";
     }
   }, {
     key: "em",
-    value: function em(text) {
-      return "<em>" + text + "</em>";
+    value: function em(text, attributes) {
+      var attrs = this.convertAttributes(attributes);
+      return "<em" + attrs + ">" + text + "</em>";
     }
   }, {
     key: "codespan",
-    value: function codespan(text) {
-      return "<code>" + text + "</code>";
+    value: function codespan(text, attributes) {
+      var attrs = this.convertAttributes(attributes);
+      return "<code" + attrs + ">" + text + "</code>";
     }
   }, {
     key: "br",
@@ -192,12 +266,12 @@ var Renderer = (function () {
     }
   }, {
     key: "del",
-    value: function del(text) {
+    value: function del(text, attributes) {
       return "<del>" + text + "</del>";
     }
   }, {
     key: "link",
-    value: function link(href, title, text) {
+    value: function link(href, title, text, attributes) {
       if (this.options.sanitize) {
         try {
           var prot = decodeURIComponent(_escape$unescape$HEADING_BOOK_CLASS_MAP$HEADING_MULTI_PART_CLASS_MAP$HEADING_DOCUMENT_CLASS_MAP.unescape(href)).replace(/[^\w:]/g, "").toLowerCase();
@@ -217,7 +291,7 @@ var Renderer = (function () {
     }
   }, {
     key: "image",
-    value: function image(href, title, text) {
+    value: function image(href, title, text, attributes) {
       if (!/http:|https:/.test(href)) href = "images/" + href;
 
       var out = "<img src=\"" + href + "\" alt=\"" + text + "\"";
