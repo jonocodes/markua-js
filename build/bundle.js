@@ -135,7 +135,7 @@ var block = {
     definition: /^(?:(?:([^\n]*)(?:\n:(?: *))))/,
     number: /^([0-9]+)(?:\.|\))/,
     alphabetized: /^([A-Za-z]+)(?:[\)\.])/,
-    numeral: /^(?=[MDCLXVI])M*(?:(C)[MD]|D?C{0,3})(?:X[CL]|L?X{0,3})(I[XV]|V?I{0,3}(?:\)|\.))/i,
+    numeral: /^(?=[XVI])M*(?:(C)[MD]|D?C{0,3})(?:X[CL]|L?X{0,3})(I[XV]|V?I{0,3}(?:\)|\.))/i,
     bullet: /^\*/
   },
   def: /^ *\[([^\]]+)\]: *<?([^\s>]+)>?(?: +["(]([^\n]+)[")])? *(?:\n+|$)/,
@@ -215,7 +215,7 @@ var _WebFileAccessor = require("./web_file_accessor");
 var _WebFileAccessor2 = _interopRequireWildcard(_WebFileAccessor);
 
 if (typeof window !== "undefined") window.markua = new _Markua2["default"]("/data/test_book", { fileAccessor: _WebFileAccessor2["default"], debug: true });
-}).call(this,require("1YiZ5S"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/fake_f124a9f3.js","/")
+}).call(this,require("1YiZ5S"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/fake_b28192ba.js","/")
 },{"./markua":6,"./web_file_accessor":11,"1YiZ5S":18,"buffer":14}],3:[function(require,module,exports){
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
 "use strict";
@@ -1450,7 +1450,7 @@ var Renderer = (function () {
         case "alphabetized":
           typeTag = "ol";
           typeAttribute = " type=\"" + (start === start.toUpperCase() ? "A" : "a") + "\"";
-          startAttr = start.toUpperCase() === "A" ? "" : " start='" + (_decimalize$ALPHABET.ALPHABET.indexOf(start.toUpperCase()) + 1) + "'";
+          startAttr = start.toUpperCase() === "A" ? "" : " start=\"" + (_decimalize$ALPHABET.ALPHABET.indexOf(start.toUpperCase()) + 1) + "\"";
           break;
         case "definition":
           typeTag = "dl";
@@ -1462,7 +1462,7 @@ var Renderer = (function () {
           break;
         case "number":
           typeTag = "ol";
-          startAttr = start && start !== "1" ? " start='" + start + "'" : "";
+          startAttr = start && start !== "1" ? " start=\"" + start + "\"" : "";
           break;
         default:
           typeTag = "ol";
@@ -1592,7 +1592,7 @@ var ALPHABET = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M',
 
 exports.ALPHABET = ALPHABET;
 var characterIsNext = function characterIsNext(character, previous) {
-  return ALPHABET[ALPHABET.indexOf(character) - 1] === previous;
+  return ALPHABET[ALPHABET.indexOf(character.toUpperCase()) - 1] === previous.toUpperCase();
 };
 
 exports.characterIsNext = characterIsNext;

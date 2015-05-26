@@ -178,7 +178,7 @@ var Renderer = (function () {
         case "alphabetized":
           typeTag = "ol";
           typeAttribute = " type=\"" + (start === start.toUpperCase() ? "A" : "a") + "\"";
-          startAttr = start.toUpperCase() === "A" ? "" : " start='" + (_decimalize$ALPHABET.ALPHABET.indexOf(start.toUpperCase()) + 1) + "'";
+          startAttr = start.toUpperCase() === "A" ? "" : " start=\"" + (_decimalize$ALPHABET.ALPHABET.indexOf(start.toUpperCase()) + 1) + "\"";
           break;
         case "definition":
           typeTag = "dl";
@@ -190,7 +190,7 @@ var Renderer = (function () {
           break;
         case "number":
           typeTag = "ol";
-          startAttr = start && start !== "1" ? " start='" + start + "'" : "";
+          startAttr = start && start !== "1" ? " start=\"" + start + "\"" : "";
           break;
         default:
           typeTag = "ol";

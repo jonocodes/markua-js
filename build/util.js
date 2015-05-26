@@ -7,7 +7,7 @@ var ALPHABET = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M',
 
 exports.ALPHABET = ALPHABET;
 var characterIsNext = function characterIsNext(character, previous) {
-  return ALPHABET[ALPHABET.indexOf(character) - 1] === previous;
+  return ALPHABET[ALPHABET.indexOf(character.toUpperCase()) - 1] === previous.toUpperCase();
 };
 
 exports.characterIsNext = characterIsNext;

@@ -150,7 +150,7 @@ class Renderer {
       case 'alphabetized':
         typeTag = `ol`
         typeAttribute = ` type="${start === start.toUpperCase() ? 'A' : 'a'}"`;
-        startAttr = start.toUpperCase() === "A" ? '' : ` start='${ALPHABET.indexOf(start.toUpperCase()) + 1}'`;
+        startAttr = start.toUpperCase() === "A" ? '' : ` start="${ALPHABET.indexOf(start.toUpperCase()) + 1}"`;
         break;
       case 'definition':
         typeTag = `dl`;
@@ -162,7 +162,7 @@ class Renderer {
         break;
       case 'number':
         typeTag = `ol`;
-        startAttr = start && start !== '1' ? ` start='${start}'` : '';
+        startAttr = start && start !== '1' ? ` start="${start}"` : '';
         break;
       default:
         typeTag = `ol`;
