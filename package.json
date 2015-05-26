@@ -2,7 +2,7 @@
   "name": "markua-js",
   "version": "1.0.0",
   "description": "A markua implementation in javascript.",
-  "main": "index.js",
+  "main": "build/markua.js",
   "scripts": {
     "test": "gulp test"
   },
