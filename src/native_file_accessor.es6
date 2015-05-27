@@ -4,7 +4,7 @@ var fs, path = require("path");
 try {
   fs = require("fs");
 } catch(err) {
-  // fs is not available in this env
+  console.log("fs is not available in this env");
 }
 
 class NativeFileAccessor extends FileAccessor {

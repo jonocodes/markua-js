@@ -16,8 +16,14 @@ var _FileAccessor2 = require("./file_accessor");
 
 var _FileAccessor3 = _interopRequireWildcard(_FileAccessor2);
 
-var fs = require("fs"),
+var fs,
     path = require("path");
+
+try {
+  fs = require("fs");
+} catch (err) {
+  console.log("fs is not available in this env");
+}
 
 var NativeFileAccessor = (function (_FileAccessor) {
   function NativeFileAccessor() {
