@@ -22,6 +22,10 @@ var _nativeFileAccessor = require("./native_file_accessor");
 
 var _nativeFileAccessor2 = _interopRequireWildcard(_nativeFileAccessor);
 
+var _webFileAccessor = require("./web_file_accessor");
+
+var _webFileAccessor2 = _interopRequireWildcard(_webFileAccessor);
+
 var ObjectAssign = require("object-assign");
 var _ = require("underscore");
 var async = require("async");
@@ -123,6 +127,8 @@ var Markua = (function () {
 
   return Markua;
 })();
+
+Markua.WebFileAccessor = _webFileAccessor2["default"];
 
 exports["default"] = Markua;
 module.exports = exports["default"];
