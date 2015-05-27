@@ -1,6 +1,7 @@
 import Lexer from "./lexer";
 import Parser from "./parser";
 import nativeFileAccessor from "./native_file_accessor";
+import webFileAccessor from "./web_file_accessor";
 
 let ObjectAssign = require("object-assign");
 let _ = require("underscore");
@@ -92,5 +93,7 @@ class Markua {
     });
   }
 }
+
+Markua.WebFileAccessor = webFileAccessor;
 
 export default Markua;
