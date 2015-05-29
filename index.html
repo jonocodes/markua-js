@@ -68,10 +68,10 @@
           // Take it away from what we need to get
           filesToGet.splice(filesToGet.indexOf(this.value), 1)
 
-          $(".files.list").append("<li><a data-target='/data/test_book/manuscript/" + this.value + "'>" + this.value + "</a></li>");
+          $(".files.list").append("<li><a data-target='/data/test_book/" + this.value + "'>" + this.value + "</a></li>");
 
           // Stash the value of this file somewhere
-          window.fileData["/data/test_book/manuscript/" + this.value] = contents
+          window.fileData["/data/test_book/" + this.value] = contents
 
           if (filesToGet.length === 0) {
             setup()
@@ -86,9 +86,9 @@
           $(".files.list").append("<li><a data-target='/data/test_book/book.txt'>book.txt</a></li>");
           filesToGet = lines.split("\n")
           filesToGet = filesToGet.slice(0, filesToGet.length - 1);
-          currentFile = "/data/test_book/manuscript/" + filesToGet[0];
+          currentFile = "/data/test_book/" + filesToGet[0];
           for (fileIndex in filesToGet) {
-            $.get("/data/test_book/manuscript/" + filesToGet[fileIndex], onReceiveFile.bind({ value: filesToGet[fileIndex] }));
+            $.get("/data/test_book/" + filesToGet[fileIndex], onReceiveFile.bind({ value: filesToGet[fileIndex] }));
           }
         });
       });

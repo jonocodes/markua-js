@@ -101,7 +101,7 @@ var Markua = (function () {
         });
       } else {
         async.map(chapters, function (chapter, cb) {
-          _this.fileAccessor.get("manuscript/" + chapter, cb);
+          _this.fileAccessor.get("" + chapter, cb);
         }, done);
       }
     }

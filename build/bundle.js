@@ -215,7 +215,7 @@ var _WebFileAccessor = require("./web_file_accessor");
 var _WebFileAccessor2 = _interopRequireWildcard(_WebFileAccessor);
 
 if (typeof window !== "undefined") window.markua = new _Markua2["default"]("/data/test_book", { fileAccessor: _WebFileAccessor2["default"], debug: true });
-}).call(this,require("1YiZ5S"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/fake_5035abcc.js","/")
+}).call(this,require("1YiZ5S"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/fake_1e6f7781.js","/")
 },{"./markua":6,"./web_file_accessor":11,"1YiZ5S":18,"buffer":14}],3:[function(require,module,exports){
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
 "use strict";
@@ -889,6 +889,10 @@ var _nativeFileAccessor = require("./native_file_accessor");
 
 var _nativeFileAccessor2 = _interopRequireWildcard(_nativeFileAccessor);
 
+var _webFileAccessor = require("./web_file_accessor");
+
+var _webFileAccessor2 = _interopRequireWildcard(_webFileAccessor);
+
 var ObjectAssign = require("object-assign");
 var _ = require("underscore");
 var async = require("async");
@@ -964,7 +968,7 @@ var Markua = (function () {
         });
       } else {
         async.map(chapters, function (chapter, cb) {
-          _this.fileAccessor.get("manuscript/" + chapter, cb);
+          _this.fileAccessor.get("" + chapter, cb);
         }, done);
       }
     }
@@ -973,6 +977,7 @@ var Markua = (function () {
     value: function processChapters(chapters, done) {
       var _this2 = this;
 
+      console.log("Processing chapters", chapters);
       async.map(_.compact(chapters), function (chapter, cb) {
         // try {
         var tokens = _Lexer2["default"].lex(chapter, _this2.options);
@@ -991,10 +996,12 @@ var Markua = (function () {
   return Markua;
 })();
 
+Markua.WebFileAccessor = _webFileAccessor2["default"];
+
 exports["default"] = Markua;
 module.exports = exports["default"];
 }).call(this,require("1YiZ5S"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/markua.js","/")
-},{"./lexer":5,"./native_file_accessor":7,"./parser":8,"1YiZ5S":18,"async":12,"buffer":14,"object-assign":19,"underscore":20}],7:[function(require,module,exports){
+},{"./lexer":5,"./native_file_accessor":7,"./parser":8,"./web_file_accessor":11,"1YiZ5S":18,"async":12,"buffer":14,"object-assign":19,"underscore":20}],7:[function(require,module,exports){
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
 "use strict";
 

@@ -73,7 +73,7 @@ class Markua {
     }
     else {
       async.map(chapters, (chapter, cb) => {
-        this.fileAccessor.get(`manuscript/${chapter}`, cb);
+        this.fileAccessor.get(`${chapter}`, cb);
       }, done);
     }
   }
