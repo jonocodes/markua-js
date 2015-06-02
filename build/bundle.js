@@ -215,7 +215,7 @@ var _WebFileAccessor = require("./web_file_accessor");
 var _WebFileAccessor2 = _interopRequireWildcard(_WebFileAccessor);
 
 if (typeof window !== "undefined") window.markua = new _Markua2["default"]("/data/test_book", { fileAccessor: _WebFileAccessor2["default"], debug: true });
-}).call(this,require("1YiZ5S"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/fake_1e6f7781.js","/")
+}).call(this,require("1YiZ5S"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/fake_923ca0ac.js","/")
 },{"./markua":6,"./web_file_accessor":11,"1YiZ5S":18,"buffer":14}],3:[function(require,module,exports){
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
 "use strict";
@@ -643,7 +643,7 @@ var Lexer = (function () {
           // Read the file, output a codeblock with that file's language
           var file = ext ? "" + fileWithoutExt + "." + ext : fileWithoutExt;
 
-          var code = this.options.fileAccessor.getSync("code/" + file);
+          var code = this.options.fileAccessor.getSync("" + this.options.projectPath + "/code/" + file);
 
           this.tokens.push({
             type: "code",
@@ -977,7 +977,6 @@ var Markua = (function () {
     value: function processChapters(chapters, done) {
       var _this2 = this;
 
-      console.log("Processing chapters", chapters);
       async.map(_.compact(chapters), function (chapter, cb) {
         // try {
         var tokens = _Lexer2["default"].lex(chapter, _this2.options);
@@ -1046,7 +1045,7 @@ var NativeFileAccessor = (function (_FileAccessor) {
 
     // Override
     value: function get(filePath, cb) {
-      fs.readFile(path.join(this.projectPath, filePath), { encoding: "utf8" }, function (error, contents) {
+      fs.readFile(filePath, { encoding: "utf8" }, function (error, contents) {
         if (error) return cb(error);
         cb(null, contents);
       });
@@ -1057,7 +1056,7 @@ var NativeFileAccessor = (function (_FileAccessor) {
     // This is required for the code block imports, maybe do the file retrieval in an async method as a pre
     // or post processing step
     value: function getSync(filePath) {
-      return fs.readFileSync(path.join(this.projectPath, filePath), { encoding: "utf8" }).toString();
+      return fs.readFileSync(filePath, { encoding: "utf8" }).toString();
     }
   }]);
 

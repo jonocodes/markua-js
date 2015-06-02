@@ -25,6 +25,7 @@ class Markua {
   constructor(projectPath, options) {
     this.projectPath = projectPath;
     this.options = ObjectAssign(DEFAULT_OPTIONS, options);
+    this.options.projectPath = projectPath;
     this.fileAccessor = new this.options.fileAccessor(projectPath);
     this.options.fileAccessor = this.fileAccessor;
   }
@@ -42,7 +43,7 @@ class Markua {
   }
 
   determineType(done) {
-    this.fileAccessor.get('book.txt', (error, bookText) => {
+    this.fileAccessor.get(`${this.projectPath}/book.txt`, (error, bookText) => {
       if (/ENOENT/.test(error))
         done(null, 'single');
       else
@@ -56,7 +57,7 @@ class Markua {
       done(null, projectType, []);
     }
     else {
-      this.fileAccessor.get("book.txt", (error, bookString) => {
+      this.fileAccessor.get(`${this.projectPath}/book.txt`, (error, bookString) => {
         if (error) return done(error);
         let lines = _.compact(bookString.split("\n"));
         done(null, projectType, lines);
@@ -66,14 +67,14 @@ class Markua {
 
   loadChapters(projectType, chapters, done) {
     if (projectType === 'single') {
-      this.fileAccessor.get('manuscript.txt', (error, contents) => {
+      this.fileAccessor.get(`${this.projectPath}/manuscript.txt`, (error, contents) => {
         if (error) return done(error);
         done(null, [contents]);
       });
     }
     else {
       async.map(chapters, (chapter, cb) => {
-        this.fileAccessor.get(`${chapter}`, cb);
+        this.fileAccessor.get(`${this.projectPath}/${chapter}`, cb);
       }, done);
     }
   }

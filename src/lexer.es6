@@ -180,7 +180,7 @@ class Lexer {
         // Read the file, output a codeblock with that file's language
         let file = ext ? `${fileWithoutExt}.${ext}` : fileWithoutExt
 
-        let code = this.options.fileAccessor.getSync(`code/${file}`);
+        let code = this.options.fileAccessor.getSync(`${this.options.projectPath}/code/${file}`);
 
         this.tokens.push({
           type: 'code',

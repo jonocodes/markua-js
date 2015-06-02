@@ -51,6 +51,7 @@ var Markua = (function () {
 
     this.projectPath = projectPath;
     this.options = ObjectAssign(DEFAULT_OPTIONS, options);
+    this.options.projectPath = projectPath;
     this.fileAccessor = new this.options.fileAccessor(projectPath);
     this.options.fileAccessor = this.fileAccessor;
   }
@@ -71,7 +72,7 @@ var Markua = (function () {
   }, {
     key: "determineType",
     value: function determineType(done) {
-      this.fileAccessor.get("book.txt", function (error, bookText) {
+      this.fileAccessor.get("" + this.projectPath + "/book.txt", function (error, bookText) {
         if (/ENOENT/.test(error)) done(null, "single");else done(null, "multi");
       });
     }
@@ -82,7 +83,7 @@ var Markua = (function () {
         // We have just a manuscript.txt file, just process it
         done(null, projectType, []);
       } else {
-        this.fileAccessor.get("book.txt", function (error, bookString) {
+        this.fileAccessor.get("" + this.projectPath + "/book.txt", function (error, bookString) {
           if (error) return done(error);
           var lines = _.compact(bookString.split("\n"));
           done(null, projectType, lines);
@@ -95,13 +96,13 @@ var Markua = (function () {
       var _this = this;
 
       if (projectType === "single") {
-        this.fileAccessor.get("manuscript.txt", function (error, contents) {
+        this.fileAccessor.get("" + this.projectPath + "/manuscript.txt", function (error, contents) {
           if (error) return done(error);
           done(null, [contents]);
         });
       } else {
         async.map(chapters, function (chapter, cb) {
-          _this.fileAccessor.get("" + chapter, cb);
+          _this.fileAccessor.get("" + _this.projectPath + "/" + chapter, cb);
         }, done);
       }
     }

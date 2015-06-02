@@ -32,7 +32,7 @@ var WebFileAccessor = (function (_FileAccessor) {
 
     // Retrieves a file from our client side data (faked)
     value: function get(filePath, cb) {
-      var item = window.fileData["" + this.projectPath + "/" + filePath];
+      var item = window.fileData[filePath];
       cb(null, item);
     }
   }, {
@@ -41,7 +41,7 @@ var WebFileAccessor = (function (_FileAccessor) {
     // This is required for the code block imports, maybe do the file retrieval in an async method as a pre
     // or post processing step
     value: function getSync(filePath) {
-      return window.fileData["" + this.projectPath + "/" + filePath];
+      return window.fileData[filePath];
     }
   }]);
 
