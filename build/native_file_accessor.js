@@ -41,7 +41,7 @@ var NativeFileAccessor = (function (_FileAccessor) {
 
     // Override
     value: function get(filePath, cb) {
-      fs.readFile(filePath, { encoding: "utf8" }, function (error, contents) {
+      fs.readFile(path.join(this.projectPath, filePath), { encoding: "utf8" }, function (error, contents) {
         if (error) return cb(error);
         cb(null, contents);
       });
@@ -52,7 +52,7 @@ var NativeFileAccessor = (function (_FileAccessor) {
     // This is required for the code block imports, maybe do the file retrieval in an async method as a pre
     // or post processing step
     value: function getSync(filePath) {
-      return fs.readFileSync(filePath, { encoding: "utf8" }).toString();
+      return fs.readFileSync(path.join(this.projectPath, filePath), { encoding: "utf8" }).toString();
     }
   }]);
 

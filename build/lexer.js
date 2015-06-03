@@ -189,7 +189,7 @@ var Lexer = (function () {
           // Read the file, output a codeblock with that file's language
           var file = ext ? "" + fileWithoutExt + "." + ext : fileWithoutExt;
 
-          var code = this.options.fileAccessor.getSync("" + this.options.projectPath + "/code/" + file);
+          var code = this.options.fileAccessor.getSync(file, "code");
 
           this.tokens.push({
             type: "code",

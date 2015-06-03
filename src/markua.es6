@@ -43,12 +43,12 @@ class Markua {
   }
 
   determineType(done) {
-    this.fileAccessor.get(`${this.projectPath}/book.txt`, (error, bookText) => {
+    this.fileAccessor.get("book.txt", (error, bookText) => {
       if (/ENOENT/.test(error))
         done(null, 'single');
       else
         done(null, 'multi');
-    });
+    }, null);
   }
 
   loadBook(projectType, done) {
@@ -57,24 +57,24 @@ class Markua {
       done(null, projectType, []);
     }
     else {
-      this.fileAccessor.get(`${this.projectPath}/book.txt`, (error, bookString) => {
+      this.fileAccessor.get("book.txt", (error, bookString) => {
         if (error) return done(error);
         let lines = _.compact(bookString.split("\n"));
         done(null, projectType, lines);
-      });
+      }, null);
     }
   }
 
   loadChapters(projectType, chapters, done) {
     if (projectType === 'single') {
-      this.fileAccessor.get(`${this.projectPath}/manuscript.txt`, (error, contents) => {
+      this.fileAccessor.get("manuscript.txt", (error, contents) => {
         if (error) return done(error);
         done(null, [contents]);
-      });
+      }, null);
     }
     else {
       async.map(chapters, (chapter, cb) => {
-        this.fileAccessor.get(`${this.projectPath}/${chapter}`, cb);
+        this.fileAccessor.get(chapter, cb);
       }, done);
     }
   }

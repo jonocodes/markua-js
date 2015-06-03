@@ -215,7 +215,7 @@ var _WebFileAccessor = require("./web_file_accessor");
 var _WebFileAccessor2 = _interopRequireWildcard(_WebFileAccessor);
 
 if (typeof window !== "undefined") window.markua = new _Markua2["default"]("/data/test_book", { fileAccessor: _WebFileAccessor2["default"], debug: true });
-}).call(this,require("1YiZ5S"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/fake_923ca0ac.js","/")
+}).call(this,require("1YiZ5S"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/fake_f5f4995f.js","/")
 },{"./markua":6,"./web_file_accessor":11,"1YiZ5S":18,"buffer":14}],3:[function(require,module,exports){
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
 "use strict";
@@ -643,7 +643,7 @@ var Lexer = (function () {
           // Read the file, output a codeblock with that file's language
           var file = ext ? "" + fileWithoutExt + "." + ext : fileWithoutExt;
 
-          var code = this.options.fileAccessor.getSync("" + this.options.projectPath + "/code/" + file);
+          var code = this.options.fileAccessor.getSync(file, "code");
 
           this.tokens.push({
             type: "code",
@@ -918,6 +918,7 @@ var Markua = (function () {
 
     this.projectPath = projectPath;
     this.options = ObjectAssign(DEFAULT_OPTIONS, options);
+    this.options.projectPath = projectPath;
     this.fileAccessor = new this.options.fileAccessor(projectPath);
     this.options.fileAccessor = this.fileAccessor;
   }
@@ -940,7 +941,7 @@ var Markua = (function () {
     value: function determineType(done) {
       this.fileAccessor.get("book.txt", function (error, bookText) {
         if (/ENOENT/.test(error)) done(null, "single");else done(null, "multi");
-      });
+      }, null);
     }
   }, {
     key: "loadBook",
@@ -953,7 +954,7 @@ var Markua = (function () {
           if (error) return done(error);
           var lines = _.compact(bookString.split("\n"));
           done(null, projectType, lines);
-        });
+        }, null);
       }
     }
   }, {
@@ -965,10 +966,10 @@ var Markua = (function () {
         this.fileAccessor.get("manuscript.txt", function (error, contents) {
           if (error) return done(error);
           done(null, [contents]);
-        });
+        }, null);
       } else {
         async.map(chapters, function (chapter, cb) {
-          _this.fileAccessor.get("" + chapter, cb);
+          _this.fileAccessor.get(chapter, cb);
         }, done);
       }
     }
@@ -1045,7 +1046,7 @@ var NativeFileAccessor = (function (_FileAccessor) {
 
     // Override
     value: function get(filePath, cb) {
-      fs.readFile(filePath, { encoding: "utf8" }, function (error, contents) {
+      fs.readFile(path.join(this.projectPath, filePath), { encoding: "utf8" }, function (error, contents) {
         if (error) return cb(error);
         cb(null, contents);
       });
@@ -1056,7 +1057,7 @@ var NativeFileAccessor = (function (_FileAccessor) {
     // This is required for the code block imports, maybe do the file retrieval in an async method as a pre
     // or post processing step
     value: function getSync(filePath) {
-      return fs.readFileSync(filePath, { encoding: "utf8" }).toString();
+      return fs.readFileSync(path.join(this.projectPath, filePath), { encoding: "utf8" }).toString();
     }
   }]);
 
@@ -1682,11 +1683,22 @@ var WebFileAccessor = (function (_FileAccessor) {
   _inherits(WebFileAccessor, _FileAccessor);
 
   _createClass(WebFileAccessor, [{
+    key: "getFilePrefix",
+    value: function getFilePrefix(type) {
+      if (type === "code") {
+        return "" + this.projectPath + "/code";
+      } else {
+        return this.projectPath;
+      }
+    }
+  }, {
     key: "get",
 
     // Retrieves a file from our client side data (faked)
     value: function get(filePath, cb) {
-      var item = window.fileData["" + this.projectPath + "/" + filePath];
+      var type = arguments[2] === undefined ? "manuscript" : arguments[2];
+
+      var item = window.fileData["" + this.getFilePrefix(type) + "/" + filePath];
       cb(null, item);
     }
   }, {
@@ -1695,7 +1707,9 @@ var WebFileAccessor = (function (_FileAccessor) {
     // This is required for the code block imports, maybe do the file retrieval in an async method as a pre
     // or post processing step
     value: function getSync(filePath) {
-      return window.fileData["" + this.projectPath + "/" + filePath];
+      var type = arguments[1] === undefined ? "manuscript" : arguments[1];
+
+      return window.fileData["" + this.getFilePrefix(type) + "/" + filePath];
     }
   }]);
 

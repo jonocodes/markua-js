@@ -28,11 +28,22 @@ var WebFileAccessor = (function (_FileAccessor) {
   _inherits(WebFileAccessor, _FileAccessor);
 
   _createClass(WebFileAccessor, [{
+    key: "getFilePrefix",
+    value: function getFilePrefix(type) {
+      if (type === "code") {
+        return "" + this.projectPath + "/code";
+      } else {
+        return this.projectPath;
+      }
+    }
+  }, {
     key: "get",
 
     // Retrieves a file from our client side data (faked)
     value: function get(filePath, cb) {
-      var item = window.fileData[filePath];
+      var type = arguments[2] === undefined ? "manuscript" : arguments[2];
+
+      var item = window.fileData["" + this.getFilePrefix(type) + "/" + filePath];
       cb(null, item);
     }
   }, {
@@ -41,7 +52,9 @@ var WebFileAccessor = (function (_FileAccessor) {
     // This is required for the code block imports, maybe do the file retrieval in an async method as a pre
     // or post processing step
     value: function getSync(filePath) {
-      return window.fileData[filePath];
+      var type = arguments[1] === undefined ? "manuscript" : arguments[1];
+
+      return window.fileData["" + this.getFilePrefix(type) + "/" + filePath];
     }
   }]);
 
