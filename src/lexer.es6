@@ -187,6 +187,8 @@ class Lexer {
             text: code
           });
         }
+        else
+          this.warnings.push(`Error: Cannot find file ${file}`)
         continue;
       }
 
