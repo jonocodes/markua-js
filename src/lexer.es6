@@ -180,13 +180,13 @@ class Lexer {
         // Read the file, output a codeblock with that file's language
         let file = ext ? `${fileWithoutExt}.${ext}` : fileWithoutExt
 
-        let code = this.options.fileAccessor.getSync(file, "code");
-
-        this.tokens.push({
-          type: 'code',
-          lang: cap[2] || "text",
-          text: code
-        });
+        if (let code = this.options.fileAccessor.getSync(file, "code")) {
+          this.tokens.push({
+            type: 'code',
+            lang: cap[2] || "text",
+            text: code
+          });
+        }
         continue;
       }
 
