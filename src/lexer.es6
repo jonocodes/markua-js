@@ -175,12 +175,13 @@ class Lexer {
       if (cap = this.rules.codeimport.exec(src)) {
         src = src.substring(cap[0].length);
         let fileWithoutExt = cap[1],
-            ext = cap[2];
+            ext = cap[2],
+            code;
 
         // Read the file, output a codeblock with that file's language
-        let file = ext ? `${fileWithoutExt}.${ext}` : fileWithoutExt
+        let file = ext ? `${fileWithoutExt}.${ext}` : fileWithoutExt;
 
-        if (let code = this.options.fileAccessor.getSync(file, "code")) {
+        if (code = this.options.fileAccessor.getSync(file, "code")) {
           this.tokens.push({
             type: 'code',
             lang: cap[2] || "text",
@@ -188,7 +189,8 @@ class Lexer {
           });
         }
         else
-          this.warnings.push(`Error: Cannot find file ${file}`)
+          this.warnings.push(`Error: Cannot find file ${file}`);
+
         continue;
       }
 

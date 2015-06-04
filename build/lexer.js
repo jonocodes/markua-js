@@ -184,18 +184,20 @@ var Lexer = (function () {
         if (cap = this.rules.codeimport.exec(src)) {
           src = src.substring(cap[0].length);
           var fileWithoutExt = cap[1],
-              ext = cap[2];
+              ext = cap[2],
+              code = undefined;
 
           // Read the file, output a codeblock with that file's language
           var file = ext ? "" + fileWithoutExt + "." + ext : fileWithoutExt;
 
-          var code = this.options.fileAccessor.getSync(file, "code");
+          if (code = this.options.fileAccessor.getSync(file, "code")) {
+            this.tokens.push({
+              type: "code",
+              lang: cap[2] || "text",
+              text: code
+            });
+          } else this.warnings.push("Error: Cannot find file " + file);
 
-          this.tokens.push({
-            type: "code",
-            lang: cap[2] || "text",
-            text: code
-          });
           continue;
         }
 
