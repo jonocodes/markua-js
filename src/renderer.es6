@@ -75,6 +75,11 @@ class Renderer {
     return `<div${attrs}>\n${text}</div>\n`;
   }
 
+  blurb(text, attributes) {
+    let attrs = this.convertAttributes(attributes, "blurb")
+    return `<div${attrs}>\n${text}</div>\n`;
+  }
+
   blockquote(quote, attributes) {
     let attrs = this.convertAttributes(attributes)
     return `<blockquote${attrs}>\n${quote}</blockquote>\n`;

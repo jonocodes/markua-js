@@ -156,11 +156,21 @@ var Lexer = (function () {
 
           cap = cap[0].replace(/^ *A> ?/gm, "");
 
-          // Pass `top` to keep the current
-          // "toplevel" state. This is exactly
-          // how markdown.pl works.
           this.token(cap, top, true);
           this.tokens.push({ type: "aside_end" });
+          continue;
+        }
+
+        // blurb
+        if (cap = this.rules.blurb.exec(src)) {
+          src = src.substring(cap[0].length);
+
+          this.tokens.push({ type: "blurb_start" });
+
+          cap = cap[0].replace(/^ *B> ?/gm, "");
+
+          this.token(cap, top, true);
+          this.tokens.push({ type: "blurb_end" });
           continue;
         }
 
@@ -172,9 +182,6 @@ var Lexer = (function () {
 
           cap = cap[0].replace(/^ *> ?/gm, "");
 
-          // Pass `top` to keep the current
-          // "toplevel" state. This is exactly
-          // how markdown.pl works.
           this.token(cap, top, true);
           this.tokens.push({ type: "blockquote_end" });
           continue;

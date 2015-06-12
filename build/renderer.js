@@ -103,6 +103,12 @@ var Renderer = (function () {
       return "<div" + attrs + ">\n" + text + "</div>\n";
     }
   }, {
+    key: "blurb",
+    value: function blurb(text, attributes) {
+      var attrs = this.convertAttributes(attributes, "blurb");
+      return "<div" + attrs + ">\n" + text + "</div>\n";
+    }
+  }, {
     key: "blockquote",
     value: function blockquote(quote, attributes) {
       var attrs = this.convertAttributes(attributes);

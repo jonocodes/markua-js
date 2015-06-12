@@ -128,6 +128,15 @@ class Parser {
 
         return this.renderer.aside(body, attributes);
       }
+      case 'blurb_start': {
+        var body = '';
+
+        while (this.next().type !== 'blurb_end') {
+          body += this.tok();
+        }
+
+        return this.renderer.blurb(body, attributes);
+      }
       case 'blockquote_start': {
         var body = '';
 
