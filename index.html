@@ -24,9 +24,19 @@
     <script>
       $(function() {
         window.fileData = {}
-        var filesToGet, currentFile;
+        var filesToGet, currentFile, editor;
         setup = function() {
           output = function() {
+            var position = editor.getCursorPosition(),
+                src = editor.getValue(),
+                count = 0,
+                i = 0;
+
+            while(count < position.row && (i = src.indexOf('\n', i) + 1)) {
+              count++;
+            }
+            index = i - 1 + position.column;
+
             markua.run(function(error, result) {
               $("#output").html(result)
               $("#output img").each(function() {
@@ -34,7 +44,7 @@
                 if (!/http:|https:/.test(currentSrc))
                   $(this).attr('src', "/data/test_book/" + currentSrc);
               });
-            });
+            }, { cursor: index > 0 ? { position: index, filename: currentFile.substr(currentFile.lastIndexOf("/") + 1) } : null});
           };
 
           editor = ace.edit('editor');

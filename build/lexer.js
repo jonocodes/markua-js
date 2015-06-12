@@ -54,6 +54,13 @@ var Lexer = (function () {
           if (cap[0].length > 1) this.tokens.push({ type: "space" });
         }
 
+        // cursor
+        if (cap = this.rules.cursor.exec(src)) {
+          src = src.substring(cap[0].length);
+          this.tokens.push({ type: "cursor" });
+          continue;
+        }
+
         // attribute
         if (cap = this.rules.attribute.group.exec(src)) {
           src = src.substring(cap[0].length);

@@ -130,6 +130,7 @@ var block = {
   aside: /^( *A>[^\n]+(\n(?!def)[^\n]+)*)+/,
   blurb: /^( *B>[^\n]+(\n(?!def)[^\n]+)*)+/,
   codeimport: /^<<\(([^\n\)\.]+)(?:\.([\S]+))?\)/,
+  cursor: /^>>{%%markuaCursorPosition%%}>>/,
   list: {
     body: /^( *)(bull) (?:[\0-\uD7FF\uE000-\uFFFF]|[\uD800-\uDBFF][\uDC00-\uDFFF]|[\uD800-\uDBFF](?![\uDC00-\uDFFF])|(?:[^\uD800-\uDBFF]|^)[\uDC00-\uDFFF])+?(?:hr|def|\n{2,}(?! )(?!\1bull )\n*|[\t-\r \xA0\u1680\u180E\u2000-\u200A\u2028\u2029\u202F\u205F\u3000\uFEFF]*$)/,
     definition: /^(?:(?:([^\n]*)(?:\n:(?: *))))/,
@@ -200,7 +201,7 @@ var HEADING_DOCUMENT_CLASS_MAP = {
 };
 exports.HEADING_DOCUMENT_CLASS_MAP = HEADING_DOCUMENT_CLASS_MAP;
 }).call(this,require("1YiZ5S"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/constants.js","/")
-},{"1YiZ5S":16,"buffer":12,"object-assign":17}],2:[function(require,module,exports){
+},{"1YiZ5S":18,"buffer":14,"object-assign":19}],2:[function(require,module,exports){
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
 "use strict";
 
@@ -215,8 +216,8 @@ var _WebFileAccessor = require("./web_file_accessor");
 var _WebFileAccessor2 = _interopRequireWildcard(_WebFileAccessor);
 
 if (typeof window !== "undefined") window.markua = new _Markua2["default"]("/data/test_book", { fileAccessor: _WebFileAccessor2["default"], debug: true });
-}).call(this,require("1YiZ5S"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/fake_d45450ed.js","/")
-},{"./markua":5,"./web_file_accessor":9,"1YiZ5S":16,"buffer":12}],3:[function(require,module,exports){
+}).call(this,require("1YiZ5S"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/fake_4aaf566b.js","/")
+},{"./markua":6,"./web_file_accessor":11,"1YiZ5S":18,"buffer":14}],3:[function(require,module,exports){
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
 "use strict";
 
@@ -248,7 +249,209 @@ var FileAccessor = (function () {
 exports["default"] = FileAccessor;
 module.exports = exports["default"];
 }).call(this,require("1YiZ5S"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/file_accessor.js","/")
-},{"1YiZ5S":16,"buffer":12}],4:[function(require,module,exports){
+},{"1YiZ5S":18,"buffer":14}],4:[function(require,module,exports){
+(function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
+"use strict";
+
+var _interopRequireWildcard = function (obj) { return obj && obj.__esModule ? obj : { "default": obj }; };
+
+var _classCallCheck = function (instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } };
+
+var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _inline$escape = require("./constants");
+
+var _Renderer = require("./renderer");
+
+var _Renderer2 = _interopRequireWildcard(_Renderer);
+
+// Lexes and pipes tokens to the inline renderer
+
+var InlineLexer = (function () {
+  function InlineLexer(links, options) {
+    _classCallCheck(this, InlineLexer);
+
+    this.options = options;
+    this.links = links;
+    this.rules = _inline$escape.inline.normal;
+
+    this.renderer = new _Renderer2["default"]();
+
+    if (!this.links) throw new Error("Tokens array requires a `links` property.");
+  }
+
+  _createClass(InlineLexer, [{
+    key: "output",
+
+    // lex and send tokens to the renderer
+    value: function output(src) {
+      var cap = undefined,
+          link = undefined,
+          text = undefined,
+          href = undefined,
+          out = "";
+
+      while (src) {
+        // escape
+        if (cap = this.rules.escape.exec(src)) {
+          src = src.substring(cap[0].length);
+          out += cap[1];
+          continue;
+        }
+
+        // autolink
+        if (cap = this.rules.autolink.exec(src)) {
+          src = src.substring(cap[0].length);
+          if (cap[2] === "@") {
+            text = cap[1].charAt(6) === ":" ? cap[1].substring(7) : cap[1];
+            href = "mailto:" + text;
+          } else {
+            text = _inline$escape.escape(cap[1]);
+            href = text;
+          }
+          out += this.renderer.link(href, null, text);
+          continue;
+        }
+
+        // url (gfm)
+        if (!this.inLink && (cap = this.rules.url.exec(src))) {
+          src = src.substring(cap[0].length);
+          text = _inline$escape.escape(cap[1]);
+          href = text;
+          out += this.renderer.link(href, null, text);
+          continue;
+        }
+
+        // link
+        if (cap = this.rules.link.exec(src)) {
+          src = src.substring(cap[0].length);
+          this.inLink = true;
+          out += this.outputLink(cap, {
+            href: cap[2],
+            title: cap[3]
+          });
+          this.inLink = false;
+          continue;
+        }
+
+        // reflink, nolink
+        if ((cap = this.rules.reflink.exec(src)) || (cap = this.rules.nolink.exec(src))) {
+          src = src.substring(cap[0].length);
+          link = (cap[2] || cap[1]).replace(/\s+/g, " ");
+          link = this.links[link.toLowerCase()];
+          if (!link || !link.href) {
+            out += cap[0].charAt(0);
+            src = cap[0].substring(1) + src;
+            continue;
+          }
+          this.inLink = true;
+          out += this.outputLink(cap, link);
+          this.inLink = false;
+          continue;
+        }
+
+        // strong
+        if (cap = this.rules.strong.exec(src)) {
+          src = src.substring(cap[0].length);
+          out += this.renderer.strong(this.output(cap[2] || cap[1]));
+          continue;
+        }
+
+        // em
+        if (cap = this.rules.em.exec(src)) {
+          src = src.substring(cap[0].length);
+          out += this.renderer.em(this.output(cap[2] || cap[1]));
+          continue;
+        }
+
+        // code
+        if (cap = this.rules.code.exec(src)) {
+          src = src.substring(cap[0].length);
+          out += this.renderer.codespan(_inline$escape.escape(cap[2], true));
+          continue;
+        }
+
+        // br
+        if (cap = this.rules.br.exec(src)) {
+          src = src.substring(cap[0].length);
+          out += this.renderer.br();
+          continue;
+        }
+
+        // del (gfm)
+        if (cap = this.rules.del.exec(src)) {
+          src = src.substring(cap[0].length);
+          out += this.renderer.del(this.output(cap[1]));
+          continue;
+        }
+
+        // text
+        if (cap = this.rules.text.exec(src)) {
+          src = src.substring(cap[0].length);
+          out += _inline$escape.escape(this.smartypants(cap[0]));
+          continue;
+        }
+
+        if (src) {
+          throw new Error("Infinite loop on byte: " + src.charCodeAt(0));
+        }
+      }
+
+      return out;
+    }
+  }, {
+    key: "outputLink",
+
+    // Compile a link or Image
+    value: function outputLink(cap, link) {
+      var href = _inline$escape.escape(link.href),
+          title = link.title ? _inline$escape.escape(link.title) : null;
+
+      return cap[0].charAt(0) !== "!" ? this.renderer.link(href, title, this.output(cap[1])) : this.renderer.image(href, title, _inline$escape.escape(cap[1]));
+    }
+  }, {
+    key: "smartypants",
+
+    // Turn dashes and stuff into special characters
+    // -- SmartyPants
+    value: function smartypants(text) {
+      return text
+      // em-dashes
+      .replace(/--/g, "—")
+      // opening singles
+      .replace(/(^|[-\u2014/(\[{"\s])'/g, "$1‘")
+      // closing singles & apostrophes
+      .replace(/'/g, "’")
+      // opening doubles
+      .replace(/(^|[-\u2014/(\[{\u2018\s])"/g, "$1“")
+      // closing doubles
+      .replace(/"/g, "”")
+      // ellipses
+      .replace(/\.{3}/g, "…");
+    }
+  }], [{
+    key: "output",
+
+    // Exposed output function
+    value: function output(src, links, options) {
+      return new InlineLexer(links, options).output(src);
+    }
+  }]);
+
+  return InlineLexer;
+})();
+
+// Expose rules
+InlineLexer.rules = _inline$escape.inline;
+
+exports["default"] = InlineLexer;
+module.exports = exports["default"];
+}).call(this,require("1YiZ5S"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/inline_lexer.js","/")
+},{"./constants":1,"./renderer":9,"1YiZ5S":18,"buffer":14}],5:[function(require,module,exports){
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
 "use strict";
 
@@ -304,6 +507,13 @@ var Lexer = (function () {
         if (cap = this.rules.newline.exec(src)) {
           src = src.substring(cap[0].length);
           if (cap[0].length > 1) this.tokens.push({ type: "space" });
+        }
+
+        // cursor
+        if (cap = this.rules.cursor.exec(src)) {
+          src = src.substring(cap[0].length);
+          this.tokens.push({ type: "cursor" });
+          continue;
         }
 
         // attribute
@@ -670,7 +880,7 @@ var Lexer = (function () {
 exports["default"] = Lexer;
 module.exports = exports["default"];
 }).call(this,require("1YiZ5S"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/lexer.js","/")
-},{"./constants":1,"./util":8,"1YiZ5S":16,"buffer":12,"underscore":18}],5:[function(require,module,exports){
+},{"./constants":1,"./util":10,"1YiZ5S":18,"buffer":14,"underscore":87}],6:[function(require,module,exports){
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
 "use strict";
 
@@ -702,6 +912,7 @@ var _webFileAccessor2 = _interopRequireWildcard(_webFileAccessor);
 
 var ObjectAssign = require("object-assign");
 var _ = require("underscore");
+_.string = require("underscore.string");
 var async = require("async");
 
 var DEFAULT_OPTIONS = {
@@ -733,6 +944,10 @@ var Markua = (function () {
   _createClass(Markua, [{
     key: "run",
     value: function run(cb) {
+      var runOptions = arguments[1] === undefined ? {} : arguments[1];
+
+      this.options = _.extend(this.options, runOptions);
+
       // First, get all the chapters in the book using book.txt
       async.waterfall([this.determineType.bind(this), this.loadBook.bind(this), this.loadChapters.bind(this), this.processChapters.bind(this)], function (error, result) {
         if (error) {
@@ -776,7 +991,13 @@ var Markua = (function () {
         }, null);
       } else {
         async.map(chapters, function (chapter, cb) {
-          _this.fileAccessor.get(chapter, cb);
+          _this.fileAccessor.get(chapter, function (error, contents) {
+
+            // If we are given a cursor position, then insert that into the markua text
+            if (_this.options.cursor && _this.options.cursor.filename === chapter) contents = _.string.splice(contents, _this.options.cursor.position, 0, "\n>>{%%markuaCursorPosition%%}>>\n");
+
+            cb(null, contents);
+          });
         }, done);
       }
     }
@@ -808,7 +1029,7 @@ Markua.WebFileAccessor = _webFileAccessor2["default"];
 exports["default"] = Markua;
 module.exports = exports["default"];
 }).call(this,require("1YiZ5S"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/markua.js","/")
-},{"./lexer":4,"./native_file_accessor":6,"./parser":7,"./web_file_accessor":9,"1YiZ5S":16,"async":10,"buffer":12,"object-assign":17,"underscore":18}],6:[function(require,module,exports){
+},{"./lexer":5,"./native_file_accessor":7,"./parser":8,"./web_file_accessor":11,"1YiZ5S":18,"async":12,"buffer":14,"object-assign":19,"underscore":87,"underscore.string":43}],7:[function(require,module,exports){
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
 "use strict";
 
@@ -874,11 +1095,561 @@ var NativeFileAccessor = (function (_FileAccessor) {
 exports["default"] = NativeFileAccessor;
 module.exports = exports["default"];
 }).call(this,require("1YiZ5S"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/native_file_accessor.js","/")
-},{"./file_accessor":3,"1YiZ5S":16,"buffer":12,"fs":11,"path":15}],7:[function(require,module,exports){
+},{"./file_accessor":3,"1YiZ5S":18,"buffer":14,"fs":13,"path":17}],8:[function(require,module,exports){
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
+"use strict";
 
+var _interopRequireWildcard = function (obj) { return obj && obj.__esModule ? obj : { "default": obj }; };
+
+var _classCallCheck = function (instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } };
+
+var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _Renderer = require("./renderer");
+
+var _Renderer2 = _interopRequireWildcard(_Renderer);
+
+var _InlineLexer = require("./inline_lexer");
+
+var _InlineLexer2 = _interopRequireWildcard(_InlineLexer);
+
+var _ = require("underscore");
+
+var Parser = (function () {
+  function Parser() {
+    var options = arguments[0] === undefined ? {} : arguments[0];
+
+    _classCallCheck(this, Parser);
+
+    this.options = options;
+    this.tokens = [];
+    this.token = null;
+    this.renderer = new _Renderer2["default"]();
+    this.renderer.options = this.options;
+  }
+
+  _createClass(Parser, [{
+    key: "parse",
+
+    // Parse all the tokens
+    value: function parse(src) {
+      this.inline = new _InlineLexer2["default"](src.links, this.options);
+      this.tokens = src.reverse();
+
+      var out = "";
+      while (this.next()) {
+        out += this.tok();
+      }
+      return out;
+    }
+  }, {
+    key: "next",
+
+    // Next Token
+    value: function next() {
+      return this.token = this.tokens.pop();
+    }
+  }, {
+    key: "peek",
+
+    // Preview Next Token
+    value: function peek() {
+      return this.tokens[this.tokens.length - 1] || 0;
+    }
+  }, {
+    key: "parseText",
+
+    // Parse Text Tokens
+    value: function parseText() {
+      var body = this.token.text;
+
+      while (this.peek().type === "text") {
+        body += "\n" + this.next().text;
+      }
+
+      return this.inline.output(body);
+    }
+  }, {
+    key: "tok",
+
+    // Parse Current Token
+    value: function tok() {
+      var attributes = _.clone(this.attributes);
+      this.attributes = null;
+      switch (this.token.type) {
+        case "space":
+          {
+            return "";
+          }
+        case "hr":
+          {
+            return this.renderer.hr(attributes);
+          }
+        case "cursor":
+          {
+            return this.renderer.cursor();
+          }
+        case "heading":
+          {
+            return this.renderer.heading(this.inline.output(this.token.text), this.token.depth, this.token.text, attributes);
+          }
+        case "code":
+          {
+            return this.renderer.code(this.token.text, this.token.lang, this.token.escaped, attributes);
+          }
+        case "attribute":
+          {
+            // Set the attributes for the next tag
+            this.attributes = _.object(_.pluck(this.token.attributes, "key"), _.pluck(this.token.attributes, "value"));
+            return "";
+          }
+        case "figure":
+          {
+            return this.renderer.figure(this.token.alt, this.token.image, this.token.caption, attributes);
+          }
+        case "table":
+          {
+            var header = "",
+                body = "",
+                i,
+                row,
+                cell,
+                flags,
+                j;
+
+            // header
+            cell = "";
+            for (i = 0; i < this.token.header.length; i++) {
+              flags = { header: true, align: this.token.align[i] };
+              cell += this.renderer.tablecell(this.inline.output(this.token.header[i]), { header: true, align: this.token.align[i] });
+            }
+            header += this.renderer.tablerow(cell);
+
+            for (i = 0; i < this.token.cells.length; i++) {
+              row = this.token.cells[i];
+
+              cell = "";
+              for (j = 0; j < row.length; j++) {
+                cell += this.renderer.tablecell(this.inline.output(row[j]), { header: false, align: this.token.align[j] });
+              }
+
+              body += this.renderer.tablerow(cell);
+            }
+            return this.renderer.table(header, body, attributes);
+          }
+        case "aside_start":
+          {
+            var body = "";
+
+            while (this.next().type !== "aside_end") {
+              body += this.tok();
+            }
+
+            return this.renderer.aside(body, attributes);
+          }
+        case "blurb_start":
+          {
+            var body = "";
+
+            while (this.next().type !== "blurb_end") {
+              body += this.tok();
+            }
+
+            return this.renderer.blurb(body, attributes);
+          }
+        case "blockquote_start":
+          {
+            var body = "";
+
+            while (this.next().type !== "blockquote_end") {
+              body += this.tok();
+            }
+
+            return this.renderer.blockquote(body, attributes);
+          }
+        case "list_start":
+          {
+            var body = "",
+                listType = this.token.listType,
+                start = this.token.start;
+
+            while (this.next().type !== "list_end") {
+              body += this.tok();
+            }
+
+            return this.renderer.list(body, listType, start, attributes);
+          }
+        case "list_item_start":
+          {
+            var body = "";
+
+            var _listType = this.token.listType,
+                title = this.token.bullet;
+
+            while (this.next().type !== "list_item_end") {
+              body += this.token.type === "text" ? this.parseText() : this.tok();
+            }
+
+            if (_listType === "definition") {
+              return this.renderer.definitionListItem(body, title, attributes);
+            } else {
+              return this.renderer.listitem(body, attributes);
+            }
+          }
+        case "paragraph":
+          {
+            return this.renderer.paragraph(this.inline.output(this.token.text), attributes);
+          }
+        case "text":
+          {
+            return this.renderer.paragraph(this.parseText(), attributes);
+          }
+      }
+    }
+  }], [{
+    key: "parse",
+    value: function parse(src, options) {
+      return new Parser(options).parse(src);
+    }
+  }]);
+
+  return Parser;
+})();
+
+exports["default"] = Parser;
+module.exports = exports["default"];
 }).call(this,require("1YiZ5S"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/parser.js","/")
-},{"1YiZ5S":16,"buffer":12}],8:[function(require,module,exports){
+},{"./inline_lexer":4,"./renderer":9,"1YiZ5S":18,"buffer":14,"underscore":87}],9:[function(require,module,exports){
+(function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
+"use strict";
+
+var _classCallCheck = function (instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } };
+
+var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _escape$unescape$HEADING_BOOK_CLASS_MAP$HEADING_MULTI_PART_CLASS_MAP$HEADING_DOCUMENT_CLASS_MAP = require("./constants");
+
+var _decimalize$ALPHABET = require("./util");
+
+var _ = require("underscore");
+
+var Renderer = (function () {
+  function Renderer() {
+    var options = arguments[0] === undefined ? {} : arguments[0];
+
+    _classCallCheck(this, Renderer);
+
+    this.options = options;
+  }
+
+  _createClass(Renderer, [{
+    key: "getHeadingClass",
+
+    // Return the correct heading class for the type of book that we are writing.
+    value: function getHeadingClass(level) {
+      switch (this.options.bookType) {
+        case "book":
+          return _escape$unescape$HEADING_BOOK_CLASS_MAP$HEADING_MULTI_PART_CLASS_MAP$HEADING_DOCUMENT_CLASS_MAP.HEADING_BOOK_CLASS_MAP[level];
+        case "multi-part-book":
+          return _escape$unescape$HEADING_BOOK_CLASS_MAP$HEADING_MULTI_PART_CLASS_MAP$HEADING_DOCUMENT_CLASS_MAP.HEADING_MULTI_PART_CLASS_MAP[level];
+        case "document":
+          return _escape$unescape$HEADING_BOOK_CLASS_MAP$HEADING_MULTI_PART_CLASS_MAP$HEADING_DOCUMENT_CLASS_MAP.HEADING_DOCUMENT_CLASS_MAP[level];
+        default:
+          return "";
+      }
+    }
+  }, {
+    key: "convertAttributes",
+
+    // Take a object of attributes, and return a string that will be placed on the tag.
+    value: function convertAttributes(attributes, className) {
+      if (!attributes) {
+        return className ? " class=\"" + className + "\"" : "";
+      }
+      var attrString = " ";
+
+      // If we have a class specified in the tag that we are rendering, then make sure to add that
+      // class as well.
+      if (className) {
+        attrString += attributes["class"] ? "class=\"" + className + " " + attributes["class"] + "\" " : "class=\"" + className + "\"";
+        delete attributes["class"];
+      }
+
+      _.each(_.keys(attributes), function (key, i) {
+        attrString += "" + key + "=\"" + attributes[key] + "\"";
+      });
+      return attrString;;
+    }
+  }, {
+    key: "code",
+    value: (function (_code) {
+      function code(_x, _x2, _x3, _x4) {
+        return _code.apply(this, arguments);
+      }
+
+      code.toString = function () {
+        return _code.toString();
+      };
+
+      return code;
+    })(function (code, lang, escaped, attributes) {
+      // override the language from the attribute if we have to.
+      if (attributes && attributes.lang) {
+        lang = attributes.lang;
+        delete attributes.lang;
+      }
+
+      var attributesString = this.convertAttributes(attributes);
+
+      if (this.options.highlight) {
+        var out = this.options.highlight(code, lang);
+        if (out !== null && out !== code) {
+          escaped = true;
+          code = out;
+        }
+      }
+
+      if (!lang) {
+        return "<pre" + attributesString + "><code>" + (escaped ? code : _escape$unescape$HEADING_BOOK_CLASS_MAP$HEADING_MULTI_PART_CLASS_MAP$HEADING_DOCUMENT_CLASS_MAP.escape(code, true)) + "\n</code></pre>";
+      }
+
+      return "<pre" + attributesString + "><code class=\"" + this.options.langPrefix + _escape$unescape$HEADING_BOOK_CLASS_MAP$HEADING_MULTI_PART_CLASS_MAP$HEADING_DOCUMENT_CLASS_MAP.escape(lang, true) + "\">" + (escaped ? code : _escape$unescape$HEADING_BOOK_CLASS_MAP$HEADING_MULTI_PART_CLASS_MAP$HEADING_DOCUMENT_CLASS_MAP.escape(code, true)) + "\n</code></pre>\n";
+    })
+  }, {
+    key: "aside",
+    value: function aside(text, attributes) {
+      var attrs = this.convertAttributes(attributes, "aside");
+      return "<div" + attrs + ">\n" + text + "</div>\n";
+    }
+  }, {
+    key: "blurb",
+    value: function blurb(text, attributes) {
+      var attrs = this.convertAttributes(attributes, "blurb");
+      return "<div" + attrs + ">\n" + text + "</div>\n";
+    }
+  }, {
+    key: "blockquote",
+    value: function blockquote(quote, attributes) {
+      var attrs = this.convertAttributes(attributes);
+      return "<blockquote" + attrs + ">\n" + quote + "</blockquote>\n";
+    }
+  }, {
+    key: "figure",
+    value: function figure(altText, image, captionText, attributes) {
+      var _ref = attributes || {};
+
+      var align = _ref.align;
+      var alt = _ref.alt;
+      var caption = _ref.caption;
+
+      // Take em out
+      attributes = _.omit(attributes, "align", "alt", "caption");
+
+      // Determine the class
+      var className = "figure";
+      className += align ? " " + align : "";
+
+      // Figure out alt-text and caption
+      alt = altText || alt || "";
+      caption = captionText || caption;
+
+      // Get the other attributes
+      var attrs = this.convertAttributes(attributes, className);
+
+      var div = "<div" + attrs + ">\n  " + this.image(image, null, alt) + "\n" + this.caption(caption) + "</div>\n";
+      return div;
+    }
+  }, {
+    key: "caption",
+    value: function caption(text, attributes) {
+      var attrs = this.convertAttributes(attributes, "caption");
+      return text ? "  <p" + attrs + ">" + text + "</p>\n" : "";
+    }
+  }, {
+    key: "heading",
+    value: function heading(text, level, raw, attributes) {
+      var id = undefined;
+
+      if (attributes && attributes.id) {
+        id = attributes.id;
+        delete attributes.id;
+      } else {
+        id = this.options.headerPrefix + raw.toLowerCase().replace(/[^\w]+/g, "-");
+      }
+
+      var attrs = this.convertAttributes(attributes, this.getHeadingClass(level));
+
+      return "<h" + level + ("" + attrs) + (" id=\"" + id + "\">") + text + "</h" + level + ">\n";
+    }
+  }, {
+    key: "hr",
+    value: function hr(attributes) {
+      var attrs = this.convertAttributes(attributes);
+      return "<hr" + attrs + ">\n";
+    }
+  }, {
+    key: "list",
+    value: function list(body, listType, start, attributes) {
+      var typeTag,
+          typeAttribute = "",
+          startAttr = "";
+      start = start.substr(0, start.length - 1);
+
+      // Figure out the type of list, add some attributes
+      switch (listType) {
+        case "bullet":
+          typeTag = "ul";
+          break;
+        case "alphabetized":
+          typeTag = "ol";
+          typeAttribute = " type=\"" + (start === start.toUpperCase() ? "A" : "a") + "\"";
+          startAttr = start.toUpperCase() === "A" ? "" : " start=\"" + (_decimalize$ALPHABET.ALPHABET.indexOf(start.toUpperCase()) + 1) + "\"";
+          break;
+        case "definition":
+          typeTag = "dl";
+          break;
+        case "numeral":
+          typeTag = "ol";
+          typeAttribute = " type=\"" + (start === start.toUpperCase() ? "I" : "i") + "\"";
+          startAttr = (start = _decimalize$ALPHABET.decimalize(start) || 0) && start !== 1 ? " start=\"" + start + "\"" : "";
+          break;
+        case "number":
+          typeTag = "ol";
+          startAttr = start && start !== "1" ? " start=\"" + start + "\"" : "";
+          break;
+        default:
+          typeTag = "ol";
+      }
+
+      // Get the generic attributes for the list
+      var genericAttrs = this.convertAttributes(attributes);
+
+      return "<" + typeTag + "" + typeAttribute + "" + startAttr + "" + genericAttrs + ">\n" + body + "</" + typeTag + ">\n";
+    }
+  }, {
+    key: "definitionListItem",
+    value: function definitionListItem(text, title, attributes) {
+      var attrs = this.convertAttributes(attributes);
+      return "<dt" + attrs + ">" + title + "</dt>\n<dd>" + text + "</dd>\n";
+    }
+  }, {
+    key: "listitem",
+    value: function listitem(text, attributes) {
+      var attrs = this.convertAttributes(attributes);
+      return "<li" + attrs + ">" + text + "</li>\n";
+    }
+  }, {
+    key: "paragraph",
+    value: function paragraph(text, attributes) {
+      text = text.replace(/\n/g, "<br/>");
+      var attrs = this.convertAttributes(attributes);
+      return "<p" + attrs + ">" + text + "</p>\n";
+    }
+  }, {
+    key: "table",
+    value: function table(header, body, attributes) {
+      var attrs = this.convertAttributes(attributes);
+      return "<table" + attrs + ">\n" + "<thead>\n" + header + "</thead>\n" + "<tbody>\n" + body + "</tbody>\n" + "</table>\n";
+    }
+  }, {
+    key: "tablerow",
+    value: function tablerow(content, attributes) {
+      var attrs = this.convertAttributes(attributes);
+      return "<tr" + attrs + ">\n" + content + "</tr>\n";
+    }
+  }, {
+    key: "tablecell",
+    value: function tablecell(content, flags, attributes) {
+      var type = flags.header ? "th" : "td";
+      var tag = flags.align ? "<" + type + " style=\"text-align: " + flags.align + "\">" : "<" + type + ">";
+      return tag + content + "</" + type + ">\n";
+    }
+  }, {
+    key: "cursor",
+
+    // Cursor
+    value: function cursor() {
+      return "<span id=\"__markuaCursorPosition__\"></span>";
+    }
+  }, {
+    key: "strong",
+
+    // span level renderer
+    value: function strong(text, attributes) {
+      var attrs = this.convertAttributes(attributes);
+      return "<strong" + attrs + ">" + text + "</strong>";
+    }
+  }, {
+    key: "em",
+    value: function em(text, attributes) {
+      var attrs = this.convertAttributes(attributes);
+      return "<em" + attrs + ">" + text + "</em>";
+    }
+  }, {
+    key: "codespan",
+    value: function codespan(text, attributes) {
+      var attrs = this.convertAttributes(attributes);
+      return "<code" + attrs + ">" + text + "</code>";
+    }
+  }, {
+    key: "br",
+    value: function br() {
+      return "<br>";
+    }
+  }, {
+    key: "del",
+    value: function del(text, attributes) {
+      return "<del>" + text + "</del>";
+    }
+  }, {
+    key: "link",
+    value: function link(href, title, text, attributes) {
+      if (this.options.sanitize) {
+        try {
+          var prot = decodeURIComponent(_escape$unescape$HEADING_BOOK_CLASS_MAP$HEADING_MULTI_PART_CLASS_MAP$HEADING_DOCUMENT_CLASS_MAP.unescape(href)).replace(/[^\w:]/g, "").toLowerCase();
+        } catch (e) {
+          return "";
+        }
+        if (prot.indexOf("javascript:") === 0 || prot.indexOf("vbscript:") === 0) {
+          return "";
+        }
+      }
+      var out = "<a href=\"" + href + "\"";
+      if (title) {
+        out += " title=\"" + title + "\"";
+      }
+      out += ">" + text + "</a>";
+      return out;
+    }
+  }, {
+    key: "image",
+    value: function image(href, title, text, attributes) {
+      if (!/http:|https:/.test(href)) href = "images/" + href;
+
+      var out = "<img src=\"" + href + "\" alt=\"" + text + "\"";
+      if (title) {
+        out += " title=\"" + title + "\"";
+      }
+      out += "/>";
+      return out;
+    }
+  }]);
+
+  return Renderer;
+})();
+
+exports["default"] = Renderer;
+module.exports = exports["default"];
+}).call(this,require("1YiZ5S"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/renderer.js","/")
+},{"./constants":1,"./util":10,"1YiZ5S":18,"buffer":14,"underscore":87}],10:[function(require,module,exports){
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
 'use strict';
 
@@ -935,7 +1706,7 @@ var decimalize = function decimalize(romanNumeral) {
 };
 exports.decimalize = decimalize;
 }).call(this,require("1YiZ5S"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/util.js","/")
-},{"1YiZ5S":16,"buffer":12}],9:[function(require,module,exports){
+},{"1YiZ5S":18,"buffer":14}],11:[function(require,module,exports){
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
 "use strict";
 
@@ -1003,7 +1774,7 @@ var WebFileAccessor = (function (_FileAccessor) {
 exports["default"] = WebFileAccessor;
 module.exports = exports["default"];
 }).call(this,require("1YiZ5S"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/web_file_accessor.js","/")
-},{"./file_accessor":3,"1YiZ5S":16,"buffer":12}],10:[function(require,module,exports){
+},{"./file_accessor":3,"1YiZ5S":18,"buffer":14}],12:[function(require,module,exports){
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
 /*!
  * async
@@ -2130,9 +2901,9 @@ module.exports = exports["default"];
 }());
 
 }).call(this,require("1YiZ5S"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/../node_modules/async/lib/async.js","/../node_modules/async/lib")
-},{"1YiZ5S":16,"buffer":12}],11:[function(require,module,exports){
+},{"1YiZ5S":18,"buffer":14}],13:[function(require,module,exports){
 
-},{"1YiZ5S":16,"buffer":12}],12:[function(require,module,exports){
+},{"1YiZ5S":18,"buffer":14}],14:[function(require,module,exports){
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
 /*!
  * The buffer module from node.js, for the browser.
@@ -3245,7 +4016,7 @@ function assert (test, message) {
 }
 
 }).call(this,require("1YiZ5S"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/../node_modules/gulp-browserify/node_modules/browserify/node_modules/buffer/index.js","/../node_modules/gulp-browserify/node_modules/browserify/node_modules/buffer")
-},{"1YiZ5S":16,"base64-js":13,"buffer":12,"ieee754":14}],13:[function(require,module,exports){
+},{"1YiZ5S":18,"base64-js":15,"buffer":14,"ieee754":16}],15:[function(require,module,exports){
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
 var lookup = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
 
@@ -3373,7 +4144,7 @@ var lookup = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
 }(typeof exports === 'undefined' ? (this.base64js = {}) : exports))
 
 }).call(this,require("1YiZ5S"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/../node_modules/gulp-browserify/node_modules/browserify/node_modules/buffer/node_modules/base64-js/lib/b64.js","/../node_modules/gulp-browserify/node_modules/browserify/node_modules/buffer/node_modules/base64-js/lib")
-},{"1YiZ5S":16,"buffer":12}],14:[function(require,module,exports){
+},{"1YiZ5S":18,"buffer":14}],16:[function(require,module,exports){
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
 exports.read = function(buffer, offset, isLE, mLen, nBytes) {
   var e, m,
@@ -3461,7 +4232,7 @@ exports.write = function(buffer, value, offset, isLE, mLen, nBytes) {
 };
 
 }).call(this,require("1YiZ5S"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/../node_modules/gulp-browserify/node_modules/browserify/node_modules/buffer/node_modules/ieee754/index.js","/../node_modules/gulp-browserify/node_modules/browserify/node_modules/buffer/node_modules/ieee754")
-},{"1YiZ5S":16,"buffer":12}],15:[function(require,module,exports){
+},{"1YiZ5S":18,"buffer":14}],17:[function(require,module,exports){
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
 // Copyright Joyent, Inc. and other Node contributors.
 //
@@ -3689,7 +4460,7 @@ var substr = 'ab'.substr(-1) === 'b'
 ;
 
 }).call(this,require("1YiZ5S"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/../node_modules/gulp-browserify/node_modules/browserify/node_modules/path-browserify/index.js","/../node_modules/gulp-browserify/node_modules/browserify/node_modules/path-browserify")
-},{"1YiZ5S":16,"buffer":12}],16:[function(require,module,exports){
+},{"1YiZ5S":18,"buffer":14}],18:[function(require,module,exports){
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
 // shim for using process in browser
 
@@ -3756,7 +4527,7 @@ process.chdir = function (dir) {
 };
 
 }).call(this,require("1YiZ5S"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/../node_modules/gulp-browserify/node_modules/browserify/node_modules/process/browser.js","/../node_modules/gulp-browserify/node_modules/browserify/node_modules/process")
-},{"1YiZ5S":16,"buffer":12}],17:[function(require,module,exports){
+},{"1YiZ5S":18,"buffer":14}],19:[function(require,module,exports){
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
 'use strict';
 
@@ -3786,7 +4557,1203 @@ module.exports = Object.assign || function (target, source) {
 };
 
 }).call(this,require("1YiZ5S"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/../node_modules/object-assign/index.js","/../node_modules/object-assign")
-},{"1YiZ5S":16,"buffer":12}],18:[function(require,module,exports){
+},{"1YiZ5S":18,"buffer":14}],20:[function(require,module,exports){
+(function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
+var trim = require('./trim');
+var decap = require('./decapitalize');
+
+module.exports = function camelize(str, decapitalize) {
+  str = trim(str).replace(/[-_\s]+(.)?/g, function(match, c) {
+    return c ? c.toUpperCase() : "";
+  });
+
+  if (decapitalize === true) {
+    return decap(str);
+  } else {
+    return str;
+  }
+};
+
+}).call(this,require("1YiZ5S"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/../node_modules/underscore.string/camelize.js","/../node_modules/underscore.string")
+},{"./decapitalize":28,"./trim":80,"1YiZ5S":18,"buffer":14}],21:[function(require,module,exports){
+(function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
+var makeString = require('./helper/makeString');
+
+module.exports = function capitalize(str, lowercaseRest) {
+  str = makeString(str);
+  var remainingChars = !lowercaseRest ? str.slice(1) : str.slice(1).toLowerCase();
+
+  return str.charAt(0).toUpperCase() + remainingChars;
+};
+
+}).call(this,require("1YiZ5S"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/../node_modules/underscore.string/capitalize.js","/../node_modules/underscore.string")
+},{"./helper/makeString":38,"1YiZ5S":18,"buffer":14}],22:[function(require,module,exports){
+(function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
+var makeString = require('./helper/makeString');
+
+module.exports = function chars(str) {
+  return makeString(str).split('');
+};
+
+}).call(this,require("1YiZ5S"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/../node_modules/underscore.string/chars.js","/../node_modules/underscore.string")
+},{"./helper/makeString":38,"1YiZ5S":18,"buffer":14}],23:[function(require,module,exports){
+(function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
+module.exports = function chop(str, step) {
+  if (str == null) return [];
+  str = String(str);
+  step = ~~step;
+  return step > 0 ? str.match(new RegExp('.{1,' + step + '}', 'g')) : [str];
+};
+
+}).call(this,require("1YiZ5S"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/../node_modules/underscore.string/chop.js","/../node_modules/underscore.string")
+},{"1YiZ5S":18,"buffer":14}],24:[function(require,module,exports){
+(function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
+var capitalize = require('./capitalize');
+var camelize = require('./camelize');
+var makeString = require('./helper/makeString');
+
+module.exports = function classify(str) {
+  str = makeString(str);
+  return capitalize(camelize(str.replace(/[\W_]/g, ' ')).replace(/\s/g, ''));
+};
+
+}).call(this,require("1YiZ5S"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/../node_modules/underscore.string/classify.js","/../node_modules/underscore.string")
+},{"./camelize":20,"./capitalize":21,"./helper/makeString":38,"1YiZ5S":18,"buffer":14}],25:[function(require,module,exports){
+(function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
+var trim = require('./trim');
+
+module.exports = function clean(str) {
+  return trim(str).replace(/\s+/g, ' ');
+};
+
+}).call(this,require("1YiZ5S"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/../node_modules/underscore.string/clean.js","/../node_modules/underscore.string")
+},{"./trim":80,"1YiZ5S":18,"buffer":14}],26:[function(require,module,exports){
+(function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
+var makeString = require('./helper/makeString');
+
+module.exports = function(str, substr) {
+  str = makeString(str);
+  substr = makeString(substr);
+
+  if (str.length === 0 || substr.length === 0) return 0;
+  
+  return str.split(substr).length - 1;
+};
+
+}).call(this,require("1YiZ5S"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/../node_modules/underscore.string/count.js","/../node_modules/underscore.string")
+},{"./helper/makeString":38,"1YiZ5S":18,"buffer":14}],27:[function(require,module,exports){
+(function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
+var trim = require('./trim');
+
+module.exports = function dasherize(str) {
+  return trim(str).replace(/([A-Z])/g, '-$1').replace(/[-_\s]+/g, '-').toLowerCase();
+};
+
+}).call(this,require("1YiZ5S"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/../node_modules/underscore.string/dasherize.js","/../node_modules/underscore.string")
+},{"./trim":80,"1YiZ5S":18,"buffer":14}],28:[function(require,module,exports){
+(function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
+var makeString = require('./helper/makeString');
+
+module.exports = function decapitalize(str) {
+  str = makeString(str);
+  return str.charAt(0).toLowerCase() + str.slice(1);
+};
+
+}).call(this,require("1YiZ5S"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/../node_modules/underscore.string/decapitalize.js","/../node_modules/underscore.string")
+},{"./helper/makeString":38,"1YiZ5S":18,"buffer":14}],29:[function(require,module,exports){
+(function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
+var makeString = require('./helper/makeString');
+
+function getIndent(str) {
+  var matches = str.match(/^[\s\\t]*/gm);
+  var indent = matches[0].length;
+  
+  for (var i = 1; i < matches.length; i++) {
+    indent = Math.min(matches[i].length, indent);
+  }
+
+  return indent;
+}
+
+module.exports = function dedent(str, pattern) {
+  str = makeString(str);
+  var indent = getIndent(str);
+  var reg;
+
+  if (indent === 0) return str;
+
+  if (typeof pattern === 'string') {
+    reg = new RegExp('^' + pattern, 'gm');
+  } else {
+    reg = new RegExp('^[ \\t]{' + indent + '}', 'gm');
+  }
+
+  return str.replace(reg, '');
+};
+
+}).call(this,require("1YiZ5S"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/../node_modules/underscore.string/dedent.js","/../node_modules/underscore.string")
+},{"./helper/makeString":38,"1YiZ5S":18,"buffer":14}],30:[function(require,module,exports){
+(function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
+var makeString = require('./helper/makeString');
+var toPositive = require('./helper/toPositive');
+
+module.exports = function endsWith(str, ends, position) {
+  str = makeString(str);
+  ends = '' + ends;
+  if (typeof position == 'undefined') {
+    position = str.length - ends.length;
+  } else {
+    position = Math.min(toPositive(position), str.length) - ends.length;
+  }
+  return position >= 0 && str.indexOf(ends, position) === position;
+};
+
+}).call(this,require("1YiZ5S"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/../node_modules/underscore.string/endsWith.js","/../node_modules/underscore.string")
+},{"./helper/makeString":38,"./helper/toPositive":40,"1YiZ5S":18,"buffer":14}],31:[function(require,module,exports){
+(function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
+var makeString = require('./helper/makeString');
+var escapeChars = require('./helper/escapeChars');
+var reversedEscapeChars = {};
+
+var regexString = "[";
+for(var key in escapeChars) {
+  regexString += key;
+}
+regexString += "]";
+
+var regex = new RegExp( regexString, 'g');
+
+module.exports = function escapeHTML(str) {
+
+  return makeString(str).replace(regex, function(m) {
+    return '&' + escapeChars[m] + ';';
+  });
+};
+
+}).call(this,require("1YiZ5S"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/../node_modules/underscore.string/escapeHTML.js","/../node_modules/underscore.string")
+},{"./helper/escapeChars":35,"./helper/makeString":38,"1YiZ5S":18,"buffer":14}],32:[function(require,module,exports){
+(function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
+module.exports = function() {
+  var result = {};
+
+  for (var prop in this) {
+    if (!this.hasOwnProperty(prop) || prop.match(/^(?:include|contains|reverse|join)$/)) continue;
+    result[prop] = this[prop];
+  }
+
+  return result;
+};
+
+}).call(this,require("1YiZ5S"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/../node_modules/underscore.string/exports.js","/../node_modules/underscore.string")
+},{"1YiZ5S":18,"buffer":14}],33:[function(require,module,exports){
+(function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
+var makeString = require('./makeString');
+
+module.exports = function adjacent(str, direction) {
+  str = makeString(str);
+  if (str.length === 0) {
+    return '';
+  }
+  return str.slice(0, -1) + String.fromCharCode(str.charCodeAt(str.length - 1) + direction);
+};
+
+}).call(this,require("1YiZ5S"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/../node_modules/underscore.string/helper/adjacent.js","/../node_modules/underscore.string/helper")
+},{"./makeString":38,"1YiZ5S":18,"buffer":14}],34:[function(require,module,exports){
+(function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
+var escapeRegExp = require('./escapeRegExp');
+
+module.exports = function defaultToWhiteSpace(characters) {
+  if (characters == null)
+    return '\\s';
+  else if (characters.source)
+    return characters.source;
+  else
+    return '[' + escapeRegExp(characters) + ']';
+};
+
+}).call(this,require("1YiZ5S"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/../node_modules/underscore.string/helper/defaultToWhiteSpace.js","/../node_modules/underscore.string/helper")
+},{"./escapeRegExp":36,"1YiZ5S":18,"buffer":14}],35:[function(require,module,exports){
+(function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
+/* We're explicitly defining the list of entities we want to escape.
+nbsp is an HTML entity, but we don't want to escape all space characters in a string, hence its omission in this map.
+
+*/
+var escapeChars = {
+  '¢' : 'cent',
+  '£' : 'pound',
+  '¥' : 'yen',
+  '€': 'euro',
+  '©' :'copy',
+  '®' : 'reg',
+  '<' : 'lt',
+  '>' : 'gt',
+  '"' : 'quot',
+  '&' : 'amp',
+  "'": '#39'
+};
+
+module.exports = escapeChars;
+
+}).call(this,require("1YiZ5S"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/../node_modules/underscore.string/helper/escapeChars.js","/../node_modules/underscore.string/helper")
+},{"1YiZ5S":18,"buffer":14}],36:[function(require,module,exports){
+(function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
+var makeString = require('./makeString');
+
+module.exports = function escapeRegExp(str) {
+  return makeString(str).replace(/([.*+?^=!:${}()|[\]\/\\])/g, '\\$1');
+};
+
+}).call(this,require("1YiZ5S"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/../node_modules/underscore.string/helper/escapeRegExp.js","/../node_modules/underscore.string/helper")
+},{"./makeString":38,"1YiZ5S":18,"buffer":14}],37:[function(require,module,exports){
+(function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
+/*
+We're explicitly defining the list of entities that might see in escape HTML strings
+*/
+var htmlEntities = {
+  nbsp: ' ',
+  cent: '¢',
+  pound: '£',
+  yen: '¥',
+  euro: '€',
+  copy: '©',
+  reg: '®',
+  lt: '<',
+  gt: '>',
+  quot: '"',
+  amp: '&',
+  apos: "'"
+};
+
+module.exports = htmlEntities;
+
+}).call(this,require("1YiZ5S"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/../node_modules/underscore.string/helper/htmlEntities.js","/../node_modules/underscore.string/helper")
+},{"1YiZ5S":18,"buffer":14}],38:[function(require,module,exports){
+(function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
+/**
+ * Ensure some object is a coerced to a string
+ **/
+module.exports = function makeString(object) {
+  if (object == null) return '';
+  return '' + object;
+};
+
+}).call(this,require("1YiZ5S"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/../node_modules/underscore.string/helper/makeString.js","/../node_modules/underscore.string/helper")
+},{"1YiZ5S":18,"buffer":14}],39:[function(require,module,exports){
+(function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
+module.exports = function strRepeat(str, qty){
+  if (qty < 1) return '';
+  var result = '';
+  while (qty > 0) {
+    if (qty & 1) result += str;
+    qty >>= 1, str += str;
+  }
+  return result;
+};
+
+}).call(this,require("1YiZ5S"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/../node_modules/underscore.string/helper/strRepeat.js","/../node_modules/underscore.string/helper")
+},{"1YiZ5S":18,"buffer":14}],40:[function(require,module,exports){
+(function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
+module.exports = function toPositive(number) {
+  return number < 0 ? 0 : (+number || 0);
+};
+
+}).call(this,require("1YiZ5S"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/../node_modules/underscore.string/helper/toPositive.js","/../node_modules/underscore.string/helper")
+},{"1YiZ5S":18,"buffer":14}],41:[function(require,module,exports){
+(function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
+var capitalize = require('./capitalize');
+var underscored = require('./underscored');
+var trim = require('./trim');
+
+module.exports = function humanize(str) {
+  return capitalize(trim(underscored(str).replace(/_id$/, '').replace(/_/g, ' ')));
+};
+
+}).call(this,require("1YiZ5S"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/../node_modules/underscore.string/humanize.js","/../node_modules/underscore.string")
+},{"./capitalize":21,"./trim":80,"./underscored":82,"1YiZ5S":18,"buffer":14}],42:[function(require,module,exports){
+(function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
+var makeString = require('./helper/makeString');
+
+module.exports = function include(str, needle) {
+  if (needle === '') return true;
+  return makeString(str).indexOf(needle) !== -1;
+};
+
+}).call(this,require("1YiZ5S"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/../node_modules/underscore.string/include.js","/../node_modules/underscore.string")
+},{"./helper/makeString":38,"1YiZ5S":18,"buffer":14}],43:[function(require,module,exports){
+(function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
+//  Underscore.string
+//  (c) 2010 Esa-Matti Suuronen <esa-matti aet suuronen dot org>
+//  Underscore.string is freely distributable under the terms of the MIT license.
+//  Documentation: https://github.com/epeli/underscore.string
+//  Some code is borrowed from MooTools and Alexandru Marasteanu.
+//  Version '3.1.1'
+
+'use strict';
+
+function s(value) {
+  /* jshint validthis: true */
+  if (!(this instanceof s)) return new s(value);
+  this._wrapped = value;
+}
+
+s.VERSION = '3.1.1';
+
+s.isBlank          = require('./isBlank');
+s.stripTags        = require('./stripTags');
+s.capitalize       = require('./capitalize');
+s.decapitalize     = require('./decapitalize');
+s.chop             = require('./chop');
+s.trim             = require('./trim');
+s.clean            = require('./clean');
+s.count            = require('./count');
+s.chars            = require('./chars');
+s.swapCase         = require('./swapCase');
+s.escapeHTML       = require('./escapeHTML');
+s.unescapeHTML     = require('./unescapeHTML');
+s.splice           = require('./splice');
+s.insert           = require('./insert');
+s.replaceAll       = require('./replaceAll');
+s.include          = require('./include');
+s.join             = require('./join');
+s.lines            = require('./lines');
+s.dedent           = require('./dedent');
+s.reverse          = require('./reverse');
+s.startsWith       = require('./startsWith');
+s.endsWith         = require('./endsWith');
+s.pred             = require('./pred');
+s.succ             = require('./succ');
+s.titleize         = require('./titleize');
+s.camelize         = require('./camelize');
+s.underscored      = require('./underscored');
+s.dasherize        = require('./dasherize');
+s.classify         = require('./classify');
+s.humanize         = require('./humanize');
+s.ltrim            = require('./ltrim');
+s.rtrim            = require('./rtrim');
+s.truncate         = require('./truncate');
+s.prune            = require('./prune');
+s.words            = require('./words');
+s.pad              = require('./pad');
+s.lpad             = require('./lpad');
+s.rpad             = require('./rpad');
+s.lrpad            = require('./lrpad');
+s.sprintf          = require('./sprintf');
+s.vsprintf         = require('./vsprintf');
+s.toNumber         = require('./toNumber');
+s.numberFormat     = require('./numberFormat');
+s.strRight         = require('./strRight');
+s.strRightBack     = require('./strRightBack');
+s.strLeft          = require('./strLeft');
+s.strLeftBack      = require('./strLeftBack');
+s.toSentence       = require('./toSentence');
+s.toSentenceSerial = require('./toSentenceSerial');
+s.slugify          = require('./slugify');
+s.surround         = require('./surround');
+s.quote            = require('./quote');
+s.unquote          = require('./unquote');
+s.repeat           = require('./repeat');
+s.naturalCmp       = require('./naturalCmp');
+s.levenshtein      = require('./levenshtein');
+s.toBoolean        = require('./toBoolean');
+s.exports          = require('./exports');
+s.escapeRegExp     = require('./helper/escapeRegExp');
+
+// Aliases
+s.strip     = s.trim;
+s.lstrip    = s.ltrim;
+s.rstrip    = s.rtrim;
+s.center    = s.lrpad;
+s.rjust     = s.lpad;
+s.ljust     = s.rpad;
+s.contains  = s.include;
+s.q         = s.quote;
+s.toBool    = s.toBoolean;
+s.camelcase = s.camelize;
+
+
+// Implement chaining
+s.prototype = {
+  value: function value() {
+    return this._wrapped;
+  }
+};
+
+function fn2method(key, fn) {
+    if (typeof fn !== "function") return;
+    s.prototype[key] = function() {
+      var args = [this._wrapped].concat(Array.prototype.slice.call(arguments));
+      var res = fn.apply(null, args);
+      // if the result is non-string stop the chain and return the value
+      return typeof res === 'string' ? new s(res) : res;
+    };
+}
+
+// Copy functions to instance methods for chaining
+for (var key in s) fn2method(key, s[key]);
+
+fn2method("tap", function tap(string, fn) {
+  return fn(string);
+});
+
+function prototype2method(methodName) {
+  fn2method(methodName, function(context) {
+    var args = Array.prototype.slice.call(arguments, 1);
+    return String.prototype[methodName].apply(context, args);
+  });
+}
+
+var prototypeMethods = [
+  "toUpperCase",
+  "toLowerCase",
+  "split",
+  "replace",
+  "slice",
+  "substring",
+  "substr",
+  "concat"
+];
+
+for (var key in prototypeMethods) prototype2method(prototypeMethods[key]);
+
+
+module.exports = s;
+
+}).call(this,require("1YiZ5S"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/../node_modules/underscore.string/index.js","/../node_modules/underscore.string")
+},{"./camelize":20,"./capitalize":21,"./chars":22,"./chop":23,"./classify":24,"./clean":25,"./count":26,"./dasherize":27,"./decapitalize":28,"./dedent":29,"./endsWith":30,"./escapeHTML":31,"./exports":32,"./helper/escapeRegExp":36,"./humanize":41,"./include":42,"./insert":44,"./isBlank":45,"./join":46,"./levenshtein":47,"./lines":48,"./lpad":49,"./lrpad":50,"./ltrim":51,"./naturalCmp":52,"./numberFormat":53,"./pad":54,"./pred":55,"./prune":56,"./quote":57,"./repeat":58,"./replaceAll":59,"./reverse":60,"./rpad":61,"./rtrim":62,"./slugify":63,"./splice":64,"./sprintf":65,"./startsWith":66,"./strLeft":67,"./strLeftBack":68,"./strRight":69,"./strRightBack":70,"./stripTags":71,"./succ":72,"./surround":73,"./swapCase":74,"./titleize":75,"./toBoolean":76,"./toNumber":77,"./toSentence":78,"./toSentenceSerial":79,"./trim":80,"./truncate":81,"./underscored":82,"./unescapeHTML":83,"./unquote":84,"./vsprintf":85,"./words":86,"1YiZ5S":18,"buffer":14}],44:[function(require,module,exports){
+(function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
+var splice = require('./splice');
+
+module.exports = function insert(str, i, substr) {
+  return splice(str, i, 0, substr);
+};
+
+}).call(this,require("1YiZ5S"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/../node_modules/underscore.string/insert.js","/../node_modules/underscore.string")
+},{"./splice":64,"1YiZ5S":18,"buffer":14}],45:[function(require,module,exports){
+(function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
+var makeString = require('./helper/makeString');
+
+module.exports = function isBlank(str) {
+  return (/^\s*$/).test(makeString(str));
+};
+
+}).call(this,require("1YiZ5S"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/../node_modules/underscore.string/isBlank.js","/../node_modules/underscore.string")
+},{"./helper/makeString":38,"1YiZ5S":18,"buffer":14}],46:[function(require,module,exports){
+(function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
+var makeString = require('./helper/makeString');
+var slice = [].slice;
+
+module.exports = function join() {
+  var args = slice.call(arguments),
+    separator = args.shift();
+
+  return args.join(makeString(separator));
+};
+
+}).call(this,require("1YiZ5S"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/../node_modules/underscore.string/join.js","/../node_modules/underscore.string")
+},{"./helper/makeString":38,"1YiZ5S":18,"buffer":14}],47:[function(require,module,exports){
+(function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
+var makeString = require('./helper/makeString');
+
+/**
+ * Based on the implementation here: https://github.com/hiddentao/fast-levenshtein
+ */
+module.exports = function levenshtein(str1, str2) {
+  'use strict';
+  str1 = makeString(str1);
+  str2 = makeString(str2);
+
+  // Short cut cases  
+  if (str1 === str2) return 0;
+  if (!str1 || !str2) return Math.max(str1.length, str2.length);
+
+  // two rows
+  var prevRow = new Array(str2.length + 1);
+
+  // initialise previous row
+  for (var i = 0; i < prevRow.length; ++i) {
+    prevRow[i] = i;
+  }
+
+  // calculate current row distance from previous row
+  for (i = 0; i < str1.length; ++i) {
+    var nextCol = i + 1;
+
+    for (var j = 0; j < str2.length; ++j) {
+      var curCol = nextCol;
+
+      // substution
+      nextCol = prevRow[j] + ( (str1.charAt(i) === str2.charAt(j)) ? 0 : 1 );
+      // insertion
+      var tmp = curCol + 1;
+      if (nextCol > tmp) {
+        nextCol = tmp;
+      }
+      // deletion
+      tmp = prevRow[j + 1] + 1;
+      if (nextCol > tmp) {
+        nextCol = tmp;
+      }
+
+      // copy current col value into previous (in preparation for next iteration)
+      prevRow[j] = curCol;
+    }
+
+    // copy last col value into previous (in preparation for next iteration)
+    prevRow[j] = nextCol;
+  }
+
+  return nextCol;
+};
+
+}).call(this,require("1YiZ5S"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/../node_modules/underscore.string/levenshtein.js","/../node_modules/underscore.string")
+},{"./helper/makeString":38,"1YiZ5S":18,"buffer":14}],48:[function(require,module,exports){
+(function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
+module.exports = function lines(str) {
+  if (str == null) return [];
+  return String(str).split(/\r?\n/);
+};
+
+}).call(this,require("1YiZ5S"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/../node_modules/underscore.string/lines.js","/../node_modules/underscore.string")
+},{"1YiZ5S":18,"buffer":14}],49:[function(require,module,exports){
+(function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
+var pad = require('./pad');
+
+module.exports = function lpad(str, length, padStr) {
+  return pad(str, length, padStr);
+};
+
+}).call(this,require("1YiZ5S"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/../node_modules/underscore.string/lpad.js","/../node_modules/underscore.string")
+},{"./pad":54,"1YiZ5S":18,"buffer":14}],50:[function(require,module,exports){
+(function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
+var pad = require('./pad');
+
+module.exports = function lrpad(str, length, padStr) {
+  return pad(str, length, padStr, 'both');
+};
+
+}).call(this,require("1YiZ5S"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/../node_modules/underscore.string/lrpad.js","/../node_modules/underscore.string")
+},{"./pad":54,"1YiZ5S":18,"buffer":14}],51:[function(require,module,exports){
+(function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
+var makeString = require('./helper/makeString');
+var defaultToWhiteSpace = require('./helper/defaultToWhiteSpace');
+var nativeTrimLeft = String.prototype.trimLeft;
+
+module.exports = function ltrim(str, characters) {
+  str = makeString(str);
+  if (!characters && nativeTrimLeft) return nativeTrimLeft.call(str);
+  characters = defaultToWhiteSpace(characters);
+  return str.replace(new RegExp('^' + characters + '+'), '');
+};
+
+}).call(this,require("1YiZ5S"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/../node_modules/underscore.string/ltrim.js","/../node_modules/underscore.string")
+},{"./helper/defaultToWhiteSpace":34,"./helper/makeString":38,"1YiZ5S":18,"buffer":14}],52:[function(require,module,exports){
+(function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
+module.exports = function naturalCmp(str1, str2) {
+  if (str1 == str2) return 0;
+  if (!str1) return -1;
+  if (!str2) return 1;
+
+  var cmpRegex = /(\.\d+|\d+|\D+)/g,
+    tokens1 = String(str1).match(cmpRegex),
+    tokens2 = String(str2).match(cmpRegex),
+    count = Math.min(tokens1.length, tokens2.length);
+
+  for (var i = 0; i < count; i++) {
+    var a = tokens1[i],
+      b = tokens2[i];
+
+    if (a !== b) {
+      var num1 = +a;
+      var num2 = +b;
+      if (num1 === num1 && num2 === num2) {
+        return num1 > num2 ? 1 : -1;
+      }
+      return a < b ? -1 : 1;
+    }
+  }
+
+  if (tokens1.length != tokens2.length)
+    return tokens1.length - tokens2.length;
+
+  return str1 < str2 ? -1 : 1;
+};
+
+}).call(this,require("1YiZ5S"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/../node_modules/underscore.string/naturalCmp.js","/../node_modules/underscore.string")
+},{"1YiZ5S":18,"buffer":14}],53:[function(require,module,exports){
+(function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
+module.exports = function numberFormat(number, dec, dsep, tsep) {
+  if (isNaN(number) || number == null) return '';
+
+  number = number.toFixed(~~dec);
+  tsep = typeof tsep == 'string' ? tsep : ',';
+
+  var parts = number.split('.'),
+    fnums = parts[0],
+    decimals = parts[1] ? (dsep || '.') + parts[1] : '';
+
+  return fnums.replace(/(\d)(?=(?:\d{3})+$)/g, '$1' + tsep) + decimals;
+};
+
+}).call(this,require("1YiZ5S"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/../node_modules/underscore.string/numberFormat.js","/../node_modules/underscore.string")
+},{"1YiZ5S":18,"buffer":14}],54:[function(require,module,exports){
+(function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
+var makeString = require('./helper/makeString');
+var strRepeat = require('./helper/strRepeat');
+
+module.exports = function pad(str, length, padStr, type) {
+  str = makeString(str);
+  length = ~~length;
+
+  var padlen = 0;
+
+  if (!padStr)
+    padStr = ' ';
+  else if (padStr.length > 1)
+    padStr = padStr.charAt(0);
+
+  switch (type) {
+    case 'right':
+      padlen = length - str.length;
+      return str + strRepeat(padStr, padlen);
+    case 'both':
+      padlen = length - str.length;
+      return strRepeat(padStr, Math.ceil(padlen / 2)) + str + strRepeat(padStr, Math.floor(padlen / 2));
+    default: // 'left'
+      padlen = length - str.length;
+      return strRepeat(padStr, padlen) + str;
+  }
+};
+
+}).call(this,require("1YiZ5S"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/../node_modules/underscore.string/pad.js","/../node_modules/underscore.string")
+},{"./helper/makeString":38,"./helper/strRepeat":39,"1YiZ5S":18,"buffer":14}],55:[function(require,module,exports){
+(function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
+var adjacent = require('./helper/adjacent');
+
+module.exports = function succ(str) {
+  return adjacent(str, -1);
+};
+
+}).call(this,require("1YiZ5S"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/../node_modules/underscore.string/pred.js","/../node_modules/underscore.string")
+},{"./helper/adjacent":33,"1YiZ5S":18,"buffer":14}],56:[function(require,module,exports){
+(function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
+/**
+ * _s.prune: a more elegant version of truncate
+ * prune extra chars, never leaving a half-chopped word.
+ * @author github.com/rwz
+ */
+var makeString = require('./helper/makeString');
+var rtrim = require('./rtrim');
+
+module.exports = function prune(str, length, pruneStr) {
+  str = makeString(str);
+  length = ~~length;
+  pruneStr = pruneStr != null ? String(pruneStr) : '...';
+
+  if (str.length <= length) return str;
+
+  var tmpl = function(c) {
+    return c.toUpperCase() !== c.toLowerCase() ? 'A' : ' ';
+  },
+    template = str.slice(0, length + 1).replace(/.(?=\W*\w*$)/g, tmpl); // 'Hello, world' -> 'HellAA AAAAA'
+
+  if (template.slice(template.length - 2).match(/\w\w/))
+    template = template.replace(/\s*\S+$/, '');
+  else
+    template = rtrim(template.slice(0, template.length - 1));
+
+  return (template + pruneStr).length > str.length ? str : str.slice(0, template.length) + pruneStr;
+};
+
+}).call(this,require("1YiZ5S"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/../node_modules/underscore.string/prune.js","/../node_modules/underscore.string")
+},{"./helper/makeString":38,"./rtrim":62,"1YiZ5S":18,"buffer":14}],57:[function(require,module,exports){
+(function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
+var surround = require('./surround');
+
+module.exports = function quote(str, quoteChar) {
+  return surround(str, quoteChar || '"');
+};
+
+}).call(this,require("1YiZ5S"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/../node_modules/underscore.string/quote.js","/../node_modules/underscore.string")
+},{"./surround":73,"1YiZ5S":18,"buffer":14}],58:[function(require,module,exports){
+(function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
+var makeString = require('./helper/makeString');
+var strRepeat = require('./helper/strRepeat');
+
+module.exports = function repeat(str, qty, separator) {
+  str = makeString(str);
+
+  qty = ~~qty;
+
+  // using faster implementation if separator is not needed;
+  if (separator == null) return strRepeat(str, qty);
+
+  // this one is about 300x slower in Google Chrome
+  for (var repeat = []; qty > 0; repeat[--qty] = str) {}
+  return repeat.join(separator);
+};
+
+}).call(this,require("1YiZ5S"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/../node_modules/underscore.string/repeat.js","/../node_modules/underscore.string")
+},{"./helper/makeString":38,"./helper/strRepeat":39,"1YiZ5S":18,"buffer":14}],59:[function(require,module,exports){
+(function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
+var makeString = require('./helper/makeString');
+
+module.exports = function replaceAll(str, find, replace, ignorecase) {
+  var flags = (ignorecase === true)?'gi':'g';
+  var reg = new RegExp(find, flags);
+
+  return makeString(str).replace(reg, replace);
+};
+
+}).call(this,require("1YiZ5S"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/../node_modules/underscore.string/replaceAll.js","/../node_modules/underscore.string")
+},{"./helper/makeString":38,"1YiZ5S":18,"buffer":14}],60:[function(require,module,exports){
+(function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
+var chars = require('./chars');
+
+module.exports = function reverse(str) {
+  return chars(str).reverse().join('');
+};
+
+}).call(this,require("1YiZ5S"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/../node_modules/underscore.string/reverse.js","/../node_modules/underscore.string")
+},{"./chars":22,"1YiZ5S":18,"buffer":14}],61:[function(require,module,exports){
+(function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
+var pad = require('./pad');
+
+module.exports = function rpad(str, length, padStr) {
+  return pad(str, length, padStr, 'right');
+};
+
+}).call(this,require("1YiZ5S"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/../node_modules/underscore.string/rpad.js","/../node_modules/underscore.string")
+},{"./pad":54,"1YiZ5S":18,"buffer":14}],62:[function(require,module,exports){
+(function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
+var makeString = require('./helper/makeString');
+var defaultToWhiteSpace = require('./helper/defaultToWhiteSpace');
+var nativeTrimRight = String.prototype.trimRight;
+
+module.exports = function rtrim(str, characters) {
+  str = makeString(str);
+  if (!characters && nativeTrimRight) return nativeTrimRight.call(str);
+  characters = defaultToWhiteSpace(characters);
+  return str.replace(new RegExp(characters + '+$'), '');
+};
+
+}).call(this,require("1YiZ5S"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/../node_modules/underscore.string/rtrim.js","/../node_modules/underscore.string")
+},{"./helper/defaultToWhiteSpace":34,"./helper/makeString":38,"1YiZ5S":18,"buffer":14}],63:[function(require,module,exports){
+(function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
+var makeString = require('./helper/makeString');
+var defaultToWhiteSpace = require('./helper/defaultToWhiteSpace');
+var trim = require('./trim');
+var dasherize = require('./dasherize');
+
+module.exports = function slugify(str) {
+  var from  = "ąàáäâãåæăćčĉęèéëêĝĥìíïîĵłľńňòóöőôõðøśșšŝťțŭùúüűûñÿýçżźž",
+      to    = "aaaaaaaaaccceeeeeghiiiijllnnoooooooossssttuuuuuunyyczzz",
+      regex = new RegExp(defaultToWhiteSpace(from), 'g');
+
+  str = makeString(str).toLowerCase().replace(regex, function(c){
+    var index = from.indexOf(c);
+    return to.charAt(index) || '-';
+  });
+
+  return trim(dasherize(str.replace(/[^\w\s-]/g, '-')), '-');
+};
+
+}).call(this,require("1YiZ5S"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/../node_modules/underscore.string/slugify.js","/../node_modules/underscore.string")
+},{"./dasherize":27,"./helper/defaultToWhiteSpace":34,"./helper/makeString":38,"./trim":80,"1YiZ5S":18,"buffer":14}],64:[function(require,module,exports){
+(function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
+var chars = require('./chars');
+
+module.exports = function splice(str, i, howmany, substr) {
+  var arr = chars(str);
+  arr.splice(~~i, ~~howmany, substr);
+  return arr.join('');
+};
+
+}).call(this,require("1YiZ5S"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/../node_modules/underscore.string/splice.js","/../node_modules/underscore.string")
+},{"./chars":22,"1YiZ5S":18,"buffer":14}],65:[function(require,module,exports){
+(function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
+// sprintf() for JavaScript 0.7-beta1
+// http://www.diveintojavascript.com/projects/javascript-sprintf
+//
+// Copyright (c) Alexandru Marasteanu <alexaholic [at) gmail (dot] com>
+// All rights reserved.
+var strRepeat = require('./helper/strRepeat');
+var toString = Object.prototype.toString;
+var sprintf = (function() {
+  function get_type(variable) {
+    return toString.call(variable).slice(8, -1).toLowerCase();
+  }
+
+  var str_repeat = strRepeat;
+
+  var str_format = function() {
+    if (!str_format.cache.hasOwnProperty(arguments[0])) {
+      str_format.cache[arguments[0]] = str_format.parse(arguments[0]);
+    }
+    return str_format.format.call(null, str_format.cache[arguments[0]], arguments);
+  };
+
+  str_format.format = function(parse_tree, argv) {
+    var cursor = 1, tree_length = parse_tree.length, node_type = '', arg, output = [], i, k, match, pad, pad_character, pad_length;
+    for (i = 0; i < tree_length; i++) {
+      node_type = get_type(parse_tree[i]);
+      if (node_type === 'string') {
+        output.push(parse_tree[i]);
+      }
+      else if (node_type === 'array') {
+        match = parse_tree[i]; // convenience purposes only
+        if (match[2]) { // keyword argument
+          arg = argv[cursor];
+          for (k = 0; k < match[2].length; k++) {
+            if (!arg.hasOwnProperty(match[2][k])) {
+              throw new Error(sprintf('[_.sprintf] property "%s" does not exist', match[2][k]));
+            }
+            arg = arg[match[2][k]];
+          }
+        } else if (match[1]) { // positional argument (explicit)
+          arg = argv[match[1]];
+        }
+        else { // positional argument (implicit)
+          arg = argv[cursor++];
+        }
+
+        if (/[^s]/.test(match[8]) && (get_type(arg) != 'number')) {
+          throw new Error(sprintf('[_.sprintf] expecting number but found %s', get_type(arg)));
+        }
+        switch (match[8]) {
+          case 'b': arg = arg.toString(2); break;
+          case 'c': arg = String.fromCharCode(arg); break;
+          case 'd': arg = parseInt(arg, 10); break;
+          case 'e': arg = match[7] ? arg.toExponential(match[7]) : arg.toExponential(); break;
+          case 'f': arg = match[7] ? parseFloat(arg).toFixed(match[7]) : parseFloat(arg); break;
+          case 'o': arg = arg.toString(8); break;
+          case 's': arg = ((arg = String(arg)) && match[7] ? arg.substring(0, match[7]) : arg); break;
+          case 'u': arg = Math.abs(arg); break;
+          case 'x': arg = arg.toString(16); break;
+          case 'X': arg = arg.toString(16).toUpperCase(); break;
+        }
+        arg = (/[def]/.test(match[8]) && match[3] && arg >= 0 ? '+'+ arg : arg);
+        pad_character = match[4] ? match[4] == '0' ? '0' : match[4].charAt(1) : ' ';
+        pad_length = match[6] - String(arg).length;
+        pad = match[6] ? str_repeat(pad_character, pad_length) : '';
+        output.push(match[5] ? arg + pad : pad + arg);
+      }
+    }
+    return output.join('');
+  };
+
+  str_format.cache = {};
+
+  str_format.parse = function(fmt) {
+    var _fmt = fmt, match = [], parse_tree = [], arg_names = 0;
+    while (_fmt) {
+      if ((match = /^[^\x25]+/.exec(_fmt)) !== null) {
+        parse_tree.push(match[0]);
+      }
+      else if ((match = /^\x25{2}/.exec(_fmt)) !== null) {
+        parse_tree.push('%');
+      }
+      else if ((match = /^\x25(?:([1-9]\d*)\$|\(([^\)]+)\))?(\+)?(0|'[^$])?(-)?(\d+)?(?:\.(\d+))?([b-fosuxX])/.exec(_fmt)) !== null) {
+        if (match[2]) {
+          arg_names |= 1;
+          var field_list = [], replacement_field = match[2], field_match = [];
+          if ((field_match = /^([a-z_][a-z_\d]*)/i.exec(replacement_field)) !== null) {
+            field_list.push(field_match[1]);
+            while ((replacement_field = replacement_field.substring(field_match[0].length)) !== '') {
+              if ((field_match = /^\.([a-z_][a-z_\d]*)/i.exec(replacement_field)) !== null) {
+                field_list.push(field_match[1]);
+              }
+              else if ((field_match = /^\[(\d+)\]/.exec(replacement_field)) !== null) {
+                field_list.push(field_match[1]);
+              }
+              else {
+                throw new Error('[_.sprintf] huh?');
+              }
+            }
+          }
+          else {
+            throw new Error('[_.sprintf] huh?');
+          }
+          match[2] = field_list;
+        }
+        else {
+          arg_names |= 2;
+        }
+        if (arg_names === 3) {
+          throw new Error('[_.sprintf] mixing positional and named placeholders is not (yet) supported');
+        }
+        parse_tree.push(match);
+      }
+      else {
+        throw new Error('[_.sprintf] huh?');
+      }
+      _fmt = _fmt.substring(match[0].length);
+    }
+    return parse_tree;
+  };
+
+  return str_format;
+})();
+
+module.exports = sprintf;
+
+}).call(this,require("1YiZ5S"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/../node_modules/underscore.string/sprintf.js","/../node_modules/underscore.string")
+},{"./helper/strRepeat":39,"1YiZ5S":18,"buffer":14}],66:[function(require,module,exports){
+(function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
+var makeString = require('./helper/makeString');
+var toPositive = require('./helper/toPositive');
+
+module.exports = function startsWith(str, starts, position) {
+  str = makeString(str);
+  starts = '' + starts;
+  position = position == null ? 0 : Math.min(toPositive(position), str.length);
+  return str.lastIndexOf(starts, position) === position;
+};
+
+}).call(this,require("1YiZ5S"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/../node_modules/underscore.string/startsWith.js","/../node_modules/underscore.string")
+},{"./helper/makeString":38,"./helper/toPositive":40,"1YiZ5S":18,"buffer":14}],67:[function(require,module,exports){
+(function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
+var makeString = require('./helper/makeString');
+
+module.exports = function strLeft(str, sep) {
+  str = makeString(str);
+  sep = makeString(sep);
+  var pos = !sep ? -1 : str.indexOf(sep);
+  return~ pos ? str.slice(0, pos) : str;
+};
+
+}).call(this,require("1YiZ5S"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/../node_modules/underscore.string/strLeft.js","/../node_modules/underscore.string")
+},{"./helper/makeString":38,"1YiZ5S":18,"buffer":14}],68:[function(require,module,exports){
+(function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
+var makeString = require('./helper/makeString');
+
+module.exports = function strLeftBack(str, sep) {
+  str = makeString(str);
+  sep = makeString(sep);
+  var pos = str.lastIndexOf(sep);
+  return~ pos ? str.slice(0, pos) : str;
+};
+
+}).call(this,require("1YiZ5S"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/../node_modules/underscore.string/strLeftBack.js","/../node_modules/underscore.string")
+},{"./helper/makeString":38,"1YiZ5S":18,"buffer":14}],69:[function(require,module,exports){
+(function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
+var makeString = require('./helper/makeString');
+
+module.exports = function strRight(str, sep) {
+  str = makeString(str);
+  sep = makeString(sep);
+  var pos = !sep ? -1 : str.indexOf(sep);
+  return~ pos ? str.slice(pos + sep.length, str.length) : str;
+};
+
+}).call(this,require("1YiZ5S"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/../node_modules/underscore.string/strRight.js","/../node_modules/underscore.string")
+},{"./helper/makeString":38,"1YiZ5S":18,"buffer":14}],70:[function(require,module,exports){
+(function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
+var makeString = require('./helper/makeString');
+
+module.exports = function strRightBack(str, sep) {
+  str = makeString(str);
+  sep = makeString(sep);
+  var pos = !sep ? -1 : str.lastIndexOf(sep);
+  return~ pos ? str.slice(pos + sep.length, str.length) : str;
+};
+
+}).call(this,require("1YiZ5S"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/../node_modules/underscore.string/strRightBack.js","/../node_modules/underscore.string")
+},{"./helper/makeString":38,"1YiZ5S":18,"buffer":14}],71:[function(require,module,exports){
+(function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
+var makeString = require('./helper/makeString');
+
+module.exports = function stripTags(str) {
+  return makeString(str).replace(/<\/?[^>]+>/g, '');
+};
+
+}).call(this,require("1YiZ5S"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/../node_modules/underscore.string/stripTags.js","/../node_modules/underscore.string")
+},{"./helper/makeString":38,"1YiZ5S":18,"buffer":14}],72:[function(require,module,exports){
+(function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
+var adjacent = require('./helper/adjacent');
+
+module.exports = function succ(str) {
+  return adjacent(str, 1);
+};
+
+}).call(this,require("1YiZ5S"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/../node_modules/underscore.string/succ.js","/../node_modules/underscore.string")
+},{"./helper/adjacent":33,"1YiZ5S":18,"buffer":14}],73:[function(require,module,exports){
+(function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
+module.exports = function surround(str, wrapper) {
+  return [wrapper, str, wrapper].join('');
+};
+
+}).call(this,require("1YiZ5S"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/../node_modules/underscore.string/surround.js","/../node_modules/underscore.string")
+},{"1YiZ5S":18,"buffer":14}],74:[function(require,module,exports){
+(function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
+var makeString = require('./helper/makeString');
+
+module.exports = function swapCase(str) {
+  return makeString(str).replace(/\S/g, function(c) {
+    return c === c.toUpperCase() ? c.toLowerCase() : c.toUpperCase();
+  });
+};
+
+}).call(this,require("1YiZ5S"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/../node_modules/underscore.string/swapCase.js","/../node_modules/underscore.string")
+},{"./helper/makeString":38,"1YiZ5S":18,"buffer":14}],75:[function(require,module,exports){
+(function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
+var makeString = require('./helper/makeString');
+
+module.exports = function titleize(str) {
+  return makeString(str).toLowerCase().replace(/(?:^|\s|-)\S/g, function(c) {
+    return c.toUpperCase();
+  });
+};
+
+}).call(this,require("1YiZ5S"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/../node_modules/underscore.string/titleize.js","/../node_modules/underscore.string")
+},{"./helper/makeString":38,"1YiZ5S":18,"buffer":14}],76:[function(require,module,exports){
+(function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
+var trim = require('./trim');
+
+function boolMatch(s, matchers) {
+  var i, matcher, down = s.toLowerCase();
+  matchers = [].concat(matchers);
+  for (i = 0; i < matchers.length; i += 1) {
+    matcher = matchers[i];
+    if (!matcher) continue;
+    if (matcher.test && matcher.test(s)) return true;
+    if (matcher.toLowerCase() === down) return true;
+  }
+}
+
+module.exports = function toBoolean(str, trueValues, falseValues) {
+  if (typeof str === "number") str = "" + str;
+  if (typeof str !== "string") return !!str;
+  str = trim(str);
+  if (boolMatch(str, trueValues || ["true", "1"])) return true;
+  if (boolMatch(str, falseValues || ["false", "0"])) return false;
+};
+
+}).call(this,require("1YiZ5S"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/../node_modules/underscore.string/toBoolean.js","/../node_modules/underscore.string")
+},{"./trim":80,"1YiZ5S":18,"buffer":14}],77:[function(require,module,exports){
+(function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
+var trim = require('./trim');
+
+module.exports = function toNumber(num, precision) {
+  if (num == null) return 0;
+  var factor = Math.pow(10, isFinite(precision) ? precision : 0);
+  return Math.round(num * factor) / factor;
+};
+
+}).call(this,require("1YiZ5S"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/../node_modules/underscore.string/toNumber.js","/../node_modules/underscore.string")
+},{"./trim":80,"1YiZ5S":18,"buffer":14}],78:[function(require,module,exports){
+(function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
+var rtrim = require('./rtrim');
+
+module.exports = function toSentence(array, separator, lastSeparator, serial) {
+  separator = separator || ', ';
+  lastSeparator = lastSeparator || ' and ';
+  var a = array.slice(),
+    lastMember = a.pop();
+
+  if (array.length > 2 && serial) lastSeparator = rtrim(separator) + lastSeparator;
+
+  return a.length ? a.join(separator) + lastSeparator + lastMember : lastMember;
+};
+
+}).call(this,require("1YiZ5S"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/../node_modules/underscore.string/toSentence.js","/../node_modules/underscore.string")
+},{"./rtrim":62,"1YiZ5S":18,"buffer":14}],79:[function(require,module,exports){
+(function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
+var toSentence = require('./toSentence');
+
+module.exports = function toSentenceSerial(array, sep, lastSep) {
+  return toSentence(array, sep, lastSep, true);
+};
+
+}).call(this,require("1YiZ5S"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/../node_modules/underscore.string/toSentenceSerial.js","/../node_modules/underscore.string")
+},{"./toSentence":78,"1YiZ5S":18,"buffer":14}],80:[function(require,module,exports){
+(function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
+var makeString = require('./helper/makeString');
+var defaultToWhiteSpace = require('./helper/defaultToWhiteSpace');
+var nativeTrim = String.prototype.trim;
+
+module.exports = function trim(str, characters) {
+  str = makeString(str);
+  if (!characters && nativeTrim) return nativeTrim.call(str);
+  characters = defaultToWhiteSpace(characters);
+  return str.replace(new RegExp('^' + characters + '+|' + characters + '+$', 'g'), '');
+};
+
+}).call(this,require("1YiZ5S"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/../node_modules/underscore.string/trim.js","/../node_modules/underscore.string")
+},{"./helper/defaultToWhiteSpace":34,"./helper/makeString":38,"1YiZ5S":18,"buffer":14}],81:[function(require,module,exports){
+(function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
+var makeString = require('./helper/makeString');
+
+module.exports = function truncate(str, length, truncateStr) {
+  str = makeString(str);
+  truncateStr = truncateStr || '...';
+  length = ~~length;
+  return str.length > length ? str.slice(0, length) + truncateStr : str;
+};
+
+}).call(this,require("1YiZ5S"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/../node_modules/underscore.string/truncate.js","/../node_modules/underscore.string")
+},{"./helper/makeString":38,"1YiZ5S":18,"buffer":14}],82:[function(require,module,exports){
+(function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
+var trim = require('./trim');
+
+module.exports = function underscored(str) {
+  return trim(str).replace(/([a-z\d])([A-Z]+)/g, '$1_$2').replace(/[-\s]+/g, '_').toLowerCase();
+};
+
+}).call(this,require("1YiZ5S"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/../node_modules/underscore.string/underscored.js","/../node_modules/underscore.string")
+},{"./trim":80,"1YiZ5S":18,"buffer":14}],83:[function(require,module,exports){
+(function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
+var makeString = require('./helper/makeString');
+var htmlEntities = require('./helper/htmlEntities');
+
+module.exports = function unescapeHTML(str) {
+  return makeString(str).replace(/\&([^;]+);/g, function(entity, entityCode) {
+    var match;
+
+    if (entityCode in htmlEntities) {
+      return htmlEntities[entityCode];
+    } else if (match = entityCode.match(/^#x([\da-fA-F]+)$/)) {
+      return String.fromCharCode(parseInt(match[1], 16));
+    } else if (match = entityCode.match(/^#(\d+)$/)) {
+      return String.fromCharCode(~~match[1]);
+    } else {
+      return entity;
+    }
+  });
+};
+
+}).call(this,require("1YiZ5S"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/../node_modules/underscore.string/unescapeHTML.js","/../node_modules/underscore.string")
+},{"./helper/htmlEntities":37,"./helper/makeString":38,"1YiZ5S":18,"buffer":14}],84:[function(require,module,exports){
+(function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
+module.exports = function unquote(str, quoteChar) {
+  quoteChar = quoteChar || '"';
+  if (str[0] === quoteChar && str[str.length - 1] === quoteChar)
+    return str.slice(1, str.length - 1);
+  else return str;
+};
+
+}).call(this,require("1YiZ5S"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/../node_modules/underscore.string/unquote.js","/../node_modules/underscore.string")
+},{"1YiZ5S":18,"buffer":14}],85:[function(require,module,exports){
+(function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
+var sprintf = require('./sprintf');
+
+module.exports = function vsprintf(fmt, argv) {
+  argv.unshift(fmt);
+  return sprintf.apply(null, argv);
+};
+
+}).call(this,require("1YiZ5S"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/../node_modules/underscore.string/vsprintf.js","/../node_modules/underscore.string")
+},{"./sprintf":65,"1YiZ5S":18,"buffer":14}],86:[function(require,module,exports){
+(function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
+var isBlank = require('./isBlank');
+var trim = require('./trim');
+
+module.exports = function words(str, delimiter) {
+  if (isBlank(str)) return [];
+  return trim(str, delimiter).split(delimiter || /\s+/);
+};
+
+}).call(this,require("1YiZ5S"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/../node_modules/underscore.string/words.js","/../node_modules/underscore.string")
+},{"./isBlank":45,"./trim":80,"1YiZ5S":18,"buffer":14}],87:[function(require,module,exports){
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
 //     Underscore.js 1.8.3
 //     http://underscorejs.org
@@ -5338,4 +7305,4 @@ module.exports = Object.assign || function (target, source) {
 }.call(this));
 
 }).call(this,require("1YiZ5S"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/../node_modules/underscore/underscore.js","/../node_modules/underscore")
-},{"1YiZ5S":16,"buffer":12}]},{},[2])
+},{"1YiZ5S":18,"buffer":14}]},{},[2])

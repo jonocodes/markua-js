@@ -137,6 +137,7 @@ export let block = {
   aside: /^( *A>[^\n]+(\n(?!def)[^\n]+)*)+/,
   blurb: /^( *B>[^\n]+(\n(?!def)[^\n]+)*)+/,
   codeimport: /^<<\(([^\n\)\.]+)(?:\.([\S]+))?\)/,
+  cursor: /^>>{%%markuaCursorPosition%%}>>/,
   list: {
     body: /^( *)(bull) [\s\S]+?(?:hr|def|\n{2,}(?! )(?!\1bull )\n*|\s*$)/u,
     definition: /^(?:(?:([^\n]*)(?:\n:(?: *))))/,

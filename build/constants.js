@@ -128,6 +128,7 @@ var block = {
   aside: /^( *A>[^\n]+(\n(?!def)[^\n]+)*)+/,
   blurb: /^( *B>[^\n]+(\n(?!def)[^\n]+)*)+/,
   codeimport: /^<<\(([^\n\)\.]+)(?:\.([\S]+))?\)/,
+  cursor: /^>>{%%markuaCursorPosition%%}>>/,
   list: {
     body: /^( *)(bull) (?:[\0-\uD7FF\uE000-\uFFFF]|[\uD800-\uDBFF][\uDC00-\uDFFF]|[\uD800-\uDBFF](?![\uDC00-\uDFFF])|(?:[^\uD800-\uDBFF]|^)[\uDC00-\uDFFF])+?(?:hr|def|\n{2,}(?! )(?!\1bull )\n*|[\t-\r \xA0\u1680\u180E\u2000-\u200A\u2028\u2029\u202F\u205F\u3000\uFEFF]*$)/,
     definition: /^(?:(?:([^\n]*)(?:\n:(?: *))))/,

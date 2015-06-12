@@ -28,6 +28,7 @@ var _webFileAccessor2 = _interopRequireWildcard(_webFileAccessor);
 
 var ObjectAssign = require("object-assign");
 var _ = require("underscore");
+_.string = require("underscore.string");
 var async = require("async");
 
 var DEFAULT_OPTIONS = {
@@ -59,6 +60,10 @@ var Markua = (function () {
   _createClass(Markua, [{
     key: "run",
     value: function run(cb) {
+      var runOptions = arguments[1] === undefined ? {} : arguments[1];
+
+      this.options = _.extend(this.options, runOptions);
+
       // First, get all the chapters in the book using book.txt
       async.waterfall([this.determineType.bind(this), this.loadBook.bind(this), this.loadChapters.bind(this), this.processChapters.bind(this)], function (error, result) {
         if (error) {
@@ -102,7 +107,13 @@ var Markua = (function () {
         }, null);
       } else {
         async.map(chapters, function (chapter, cb) {
-          _this.fileAccessor.get(chapter, cb);
+          _this.fileAccessor.get(chapter, function (error, contents) {
+
+            // If we are given a cursor position, then insert that into the markua text
+            if (_this.options.cursor && _this.options.cursor.filename === chapter) contents = _.string.splice(contents, _this.options.cursor.position, 0, "\n>>{%%markuaCursorPosition%%}>>\n");
+
+            cb(null, contents);
+          });
         }, done);
       }
     }

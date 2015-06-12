@@ -90,6 +90,10 @@ var Parser = (function () {
           {
             return this.renderer.hr(attributes);
           }
+        case "cursor":
+          {
+            return this.renderer.cursor();
+          }
         case "heading":
           {
             return this.renderer.heading(this.inline.output(this.token.text), this.token.depth, this.token.text, attributes);

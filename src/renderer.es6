@@ -220,6 +220,11 @@ class Renderer {
     return tag + content + '</' + type + '>\n';
   }
 
+  // Cursor
+  cursor() {
+    return `<span id="__markuaCursorPosition__"></span>`
+  }
+
   // span level renderer
   strong(text, attributes) {
     let attrs = this.convertAttributes(attributes);
