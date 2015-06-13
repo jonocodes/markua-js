@@ -128,7 +128,6 @@ var block = {
   aside: /^( *A>[^\n]+(\n(?!def)[^\n]+)*)+/,
   blurb: /^( *B>[^\n]+(\n(?!def)[^\n]+)*)+/,
   codeimport: /^<<\(([^\n\)\.]+)(?:\.([\S]+))?\)/,
-  cursor: /^>>{%%markuaCursorPosition%%}>>/,
   list: {
     body: /^( *)(bull) (?:[\0-\uD7FF\uE000-\uFFFF]|[\uD800-\uDBFF][\uDC00-\uDFFF]|[\uD800-\uDBFF](?![\uDC00-\uDFFF])|(?:[^\uD800-\uDBFF]|^)[\uDC00-\uDFFF])+?(?:hr|def|\n{2,}(?! )(?!\1bull )\n*|[\t-\r \xA0\u1680\u180E\u2000-\u200A\u2028\u2029\u202F\u205F\u3000\uFEFF]*$)/,
     definition: /^(?:(?:([^\n]*)(?:\n:(?: *))))/,
@@ -153,10 +152,10 @@ var block = {
 exports.block = block;
 block.figure = replace(block.figure)(/figure/g, inline.image)();
 
-block.bullet = /(?:(\*)|([0-9A-Za-z\u017F\u212A]+)(?:\)|\.)|((?:[\0-\t\x0B-\uD7FF\uE000-\uFFFF]|[\uD800-\uDBFF][\uDC00-\uDFFF]|[\uD800-\uDBFF](?![\uDC00-\uDFFF])|(?:[^\uD800-\uDBFF]|^)[\uDC00-\uDFFF])+)(?:\n(?::)))( *)/i;
+block.bullet = /(attribute)?(?:([*])|([a-zA-Z\d]+)(?:\)|\.)|([^\n]+)(?:\n(?::)))( *)/i;
+block.bullet = replace(block.bullet)(/attribute/g, block.attribute.group)();
 block.item = /^( *)(bull) (?:[\0-\t\x0B-\uD7FF\uE000-\uFFFF]|[\uD800-\uDBFF][\uDC00-\uDFFF]|[\uD800-\uDBFF](?![\uDC00-\uDFFF])|(?:[^\uD800-\uDBFF]|^)[\uDC00-\uDFFF])*(?:\n(?!\1bull )(?:[\0-\t\x0B-\uD7FF\uE000-\uFFFF]|[\uD800-\uDBFF][\uDC00-\uDFFF]|[\uD800-\uDBFF](?![\uDC00-\uDFFF])|(?:[^\uD800-\uDBFF]|^)[\uDC00-\uDFFF])*)*/;
 block.item = replace(block.item, 'gm')(/bull/g, block.bullet)();
-
 block.list.body = replace(block.list.body)(/bull/g, block.bullet)('hr', '\\n+(?=\\1?(?:[-*_] *){3,}(?:\\n+|$))')('def', '\\n+(?=' + block.def.source + ')')();
 
 block.blockquote = replace(block.blockquote)('def', block.def)();

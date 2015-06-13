@@ -130,7 +130,6 @@ var block = {
   aside: /^( *A>[^\n]+(\n(?!def)[^\n]+)*)+/,
   blurb: /^( *B>[^\n]+(\n(?!def)[^\n]+)*)+/,
   codeimport: /^<<\(([^\n\)\.]+)(?:\.([\S]+))?\)/,
-  cursor: /^>>{%%markuaCursorPosition%%}>>/,
   list: {
     body: /^( *)(bull) (?:[\0-\uD7FF\uE000-\uFFFF]|[\uD800-\uDBFF][\uDC00-\uDFFF]|[\uD800-\uDBFF](?![\uDC00-\uDFFF])|(?:[^\uD800-\uDBFF]|^)[\uDC00-\uDFFF])+?(?:hr|def|\n{2,}(?! )(?!\1bull )\n*|[\t-\r \xA0\u1680\u180E\u2000-\u200A\u2028\u2029\u202F\u205F\u3000\uFEFF]*$)/,
     definition: /^(?:(?:([^\n]*)(?:\n:(?: *))))/,
@@ -155,10 +154,10 @@ var block = {
 exports.block = block;
 block.figure = replace(block.figure)(/figure/g, inline.image)();
 
-block.bullet = /(?:(\*)|([0-9A-Za-z\u017F\u212A]+)(?:\)|\.)|((?:[\0-\t\x0B-\uD7FF\uE000-\uFFFF]|[\uD800-\uDBFF][\uDC00-\uDFFF]|[\uD800-\uDBFF](?![\uDC00-\uDFFF])|(?:[^\uD800-\uDBFF]|^)[\uDC00-\uDFFF])+)(?:\n(?::)))( *)/i;
+block.bullet = /(attribute)?(?:([*])|([a-zA-Z\d]+)(?:\)|\.)|([^\n]+)(?:\n(?::)))( *)/i;
+block.bullet = replace(block.bullet)(/attribute/g, block.attribute.group)();
 block.item = /^( *)(bull) (?:[\0-\t\x0B-\uD7FF\uE000-\uFFFF]|[\uD800-\uDBFF][\uDC00-\uDFFF]|[\uD800-\uDBFF](?![\uDC00-\uDFFF])|(?:[^\uD800-\uDBFF]|^)[\uDC00-\uDFFF])*(?:\n(?!\1bull )(?:[\0-\t\x0B-\uD7FF\uE000-\uFFFF]|[\uD800-\uDBFF][\uDC00-\uDFFF]|[\uD800-\uDBFF](?![\uDC00-\uDFFF])|(?:[^\uD800-\uDBFF]|^)[\uDC00-\uDFFF])*)*/;
 block.item = replace(block.item, 'gm')(/bull/g, block.bullet)();
-
 block.list.body = replace(block.list.body)(/bull/g, block.bullet)('hr', '\\n+(?=\\1?(?:[-*_] *){3,}(?:\\n+|$))')('def', '\\n+(?=' + block.def.source + ')')();
 
 block.blockquote = replace(block.blockquote)('def', block.def)();
@@ -216,7 +215,7 @@ var _WebFileAccessor = require("./web_file_accessor");
 var _WebFileAccessor2 = _interopRequireWildcard(_WebFileAccessor);
 
 if (typeof window !== "undefined") window.markua = new _Markua2["default"]("/data/test_book", { fileAccessor: _WebFileAccessor2["default"], debug: true });
-}).call(this,require("1YiZ5S"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/fake_4aaf566b.js","/")
+}).call(this,require("1YiZ5S"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/fake_46ee64b9.js","/")
 },{"./markua":6,"./web_file_accessor":11,"1YiZ5S":18,"buffer":14}],3:[function(require,module,exports){
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
 "use strict";
@@ -507,13 +506,6 @@ var Lexer = (function () {
         if (cap = this.rules.newline.exec(src)) {
           src = src.substring(cap[0].length);
           if (cap[0].length > 1) this.tokens.push({ type: "space" });
-        }
-
-        // cursor
-        if (cap = this.rules.cursor.exec(src)) {
-          src = src.substring(cap[0].length);
-          this.tokens.push({ type: "cursor" });
-          continue;
         }
 
         // attribute
@@ -994,7 +986,7 @@ var Markua = (function () {
           _this.fileAccessor.get(chapter, function (error, contents) {
 
             // If we are given a cursor position, then insert that into the markua text
-            if (_this.options.cursor && _this.options.cursor.filename === chapter) contents = _.string.splice(contents, _this.options.cursor.position, 0, "\n>>{%%markuaCursorPosition%%}>>\n");
+            if (_this.options.cursor && _this.options.cursor.filename === chapter) contents = _.string.splice(contents, _this.options.cursor.position, 0, "{ data-markua-cursor-position: __markuaCursorPosition__ }\n");
 
             cb(null, contents);
           });
@@ -1179,7 +1171,7 @@ var Parser = (function () {
     // Parse Current Token
     value: function tok() {
       var attributes = _.clone(this.attributes);
-      this.attributes = null;
+      if (this.token.type !== "attribute") this.attributes = null;
       switch (this.token.type) {
         case "space":
           {
@@ -1204,7 +1196,7 @@ var Parser = (function () {
         case "attribute":
           {
             // Set the attributes for the next tag
-            this.attributes = _.object(_.pluck(this.token.attributes, "key"), _.pluck(this.token.attributes, "value"));
+            this.attributes = _.extend({}, this.attributes, _.object(_.pluck(this.token.attributes, "key"), _.pluck(this.token.attributes, "value")));
             return "";
           }
         case "figure":
@@ -1487,7 +1479,7 @@ var Renderer = (function () {
 
       var attrs = this.convertAttributes(attributes, this.getHeadingClass(level));
 
-      return "<h" + level + ("" + attrs) + (" id=\"" + id + "\">") + text + "</h" + level + ">\n";
+      return "<h" + level + ("" + attrs) + (" id=" + id + ">") + text + "</h" + level + ">\n";
     }
   }, {
     key: "hr",

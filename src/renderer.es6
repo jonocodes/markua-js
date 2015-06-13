@@ -131,7 +131,7 @@ class Renderer {
     return '<h'
       + level
       + `${attrs}`
-      + ` id="${id}">`
+      + ` id=${id}>`
       + text
       + '</h'
       + level

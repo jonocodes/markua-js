@@ -160,7 +160,7 @@ var Renderer = (function () {
 
       var attrs = this.convertAttributes(attributes, this.getHeadingClass(level));
 
-      return "<h" + level + ("" + attrs) + (" id=\"" + id + "\">") + text + "</h" + level + ">\n";
+      return "<h" + level + ("" + attrs) + (" id=" + id + ">") + text + "</h" + level + ">\n";
     }
   }, {
     key: "hr",

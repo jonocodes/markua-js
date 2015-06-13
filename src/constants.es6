@@ -137,7 +137,6 @@ export let block = {
   aside: /^( *A>[^\n]+(\n(?!def)[^\n]+)*)+/,
   blurb: /^( *B>[^\n]+(\n(?!def)[^\n]+)*)+/,
   codeimport: /^<<\(([^\n\)\.]+)(?:\.([\S]+))?\)/,
-  cursor: /^>>{%%markuaCursorPosition%%}>>/,
   list: {
     body: /^( *)(bull) [\s\S]+?(?:hr|def|\n{2,}(?! )(?!\1bull )\n*|\s*$)/u,
     definition: /^(?:(?:([^\n]*)(?:\n:(?: *))))/,
@@ -161,10 +160,10 @@ export let block = {
 
 block.figure = replace(block.figure)(/figure/g, inline.image)();
 
-block.bullet = /(?:([*])|([a-zA-Z\d]+)(?:\)|\.)|([^\n]+)(?:\n(?::)))( *)/ui;
+block.bullet = /(attribute)?(?:([*])|([a-zA-Z\d]+)(?:\)|\.)|([^\n]+)(?:\n(?::)))( *)/i;
+block.bullet = replace(block.bullet)(/attribute/g, block.attribute.group)();
 block.item = /^( *)(bull) [^\n]*(?:\n(?!\1bull )[^\n]*)*/u;
 block.item = replace(block.item, 'gm')(/bull/g, block.bullet)();
-
 block.list.body = replace(block.list.body)(/bull/g, block.bullet)
   ('hr', '\\n+(?=\\1?(?:[-*_] *){3,}(?:\\n+|$))')
   ('def', `\\n+(?=${block.def.source})`)
