@@ -274,7 +274,7 @@ class Lexer {
               case 'bullet':
                 return true;
               case 'definition':
-                definitionTitle = item.match(this.rules.bullet)[3];
+                definitionTitle = _.compact(item.match(this.rules.bullet))[1];
                 return true;
             }
           })();

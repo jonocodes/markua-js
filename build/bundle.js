@@ -154,7 +154,7 @@ var block = {
 exports.block = block;
 block.figure = replace(block.figure)(/figure/g, inline.image)();
 
-block.bullet = /(attribute)?(?:([*])|([a-zA-Z\d]+)(?:\)|\.)|([^\n]+)(?:\n(?::)))( *)/i;
+block.bullet = /(?:attribute)?(?:(\*)|([0-9A-Za-z\u017F\u212A]+)(?:\)|\.)|((?:[\0-\t\x0B-\uD7FF\uE000-\uFFFF]|[\uD800-\uDBFF][\uDC00-\uDFFF]|[\uD800-\uDBFF](?![\uDC00-\uDFFF])|(?:[^\uD800-\uDBFF]|^)[\uDC00-\uDFFF])+)(?:\n(?::)))( *)/i;
 block.bullet = replace(block.bullet)(/attribute/g, block.attribute.group)();
 block.item = /^( *)(bull) (?:[\0-\t\x0B-\uD7FF\uE000-\uFFFF]|[\uD800-\uDBFF][\uDC00-\uDFFF]|[\uD800-\uDBFF](?![\uDC00-\uDFFF])|(?:[^\uD800-\uDBFF]|^)[\uDC00-\uDFFF])*(?:\n(?!\1bull )(?:[\0-\t\x0B-\uD7FF\uE000-\uFFFF]|[\uD800-\uDBFF][\uDC00-\uDFFF]|[\uD800-\uDBFF](?![\uDC00-\uDFFF])|(?:[^\uD800-\uDBFF]|^)[\uDC00-\uDFFF])*)*/;
 block.item = replace(block.item, 'gm')(/bull/g, block.bullet)();
@@ -215,7 +215,7 @@ var _WebFileAccessor = require("./web_file_accessor");
 var _WebFileAccessor2 = _interopRequireWildcard(_WebFileAccessor);
 
 if (typeof window !== "undefined") window.markua = new _Markua2["default"]("/data/test_book", { fileAccessor: _WebFileAccessor2["default"], debug: true });
-}).call(this,require("1YiZ5S"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/fake_46ee64b9.js","/")
+}).call(this,require("1YiZ5S"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/fake_94115258.js","/")
 },{"./markua":6,"./web_file_accessor":11,"1YiZ5S":18,"buffer":14}],3:[function(require,module,exports){
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
 "use strict";
@@ -727,7 +727,7 @@ var Lexer = (function () {
                   case "bullet":
                     return true;
                   case "definition":
-                    definitionTitle = item.match(_this.rules.bullet)[3];
+                    definitionTitle = _.compact(item.match(_this.rules.bullet))[1];
                     return true;
                 }
               })();

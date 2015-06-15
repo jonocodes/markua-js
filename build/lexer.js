@@ -273,7 +273,7 @@ var Lexer = (function () {
                   case "bullet":
                     return true;
                   case "definition":
-                    definitionTitle = item.match(_this.rules.bullet)[3];
+                    definitionTitle = _.compact(item.match(_this.rules.bullet))[1];
                     return true;
                 }
               })();

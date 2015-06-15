@@ -160,7 +160,7 @@ export let block = {
 
 block.figure = replace(block.figure)(/figure/g, inline.image)();
 
-block.bullet = /(attribute)?(?:([*])|([a-zA-Z\d]+)(?:\)|\.)|([^\n]+)(?:\n(?::)))( *)/i;
+block.bullet = /(?:attribute)?(?:([*])|([a-zA-Z\d]+)(?:\)|\.)|([^\n]+)(?:\n(?::)))( *)/ui;
 block.bullet = replace(block.bullet)(/attribute/g, block.attribute.group)();
 block.item = /^( *)(bull) [^\n]*(?:\n(?!\1bull )[^\n]*)*/u;
 block.item = replace(block.item, 'gm')(/bull/g, block.bullet)();
