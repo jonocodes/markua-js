@@ -222,7 +222,7 @@ var Renderer = (function () {
   }, {
     key: "paragraph",
     value: function paragraph(text, attributes) {
-      text = text.replace(/\n/g, "<br/>");
+      text = text.replace(/\n/g, "<br/>\n");
       var attrs = this.convertAttributes(attributes);
       return "<p" + attrs + ">" + text + "</p>\n";
     }
