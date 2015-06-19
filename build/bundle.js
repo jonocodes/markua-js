@@ -145,15 +145,14 @@ var block = {
   text: /^[^\n]+/,
   'break': /^ *[\n]{2,}/,
   attribute: {
-    group: /^(?:{)(?: *(?:("(?:[^\s"]|[ ])+")|('(?:[^\s']|[ ])+')|((?:[^\s])+))(?:: *)(?:("(?:[^\s"]|[ ])+")|('(?:[^\s']|[ ])+')|((?:[^\s])+)))(?:(?: *, *)(?: *(?:("(?:[^\s"]|[ ])+")|('(?:[^\s']|[ ])+')|((?:[^\s])+))(?:: *)(?:("(?:[^\s"]|[ ])+")|('(?:[^\s']|[ ])+')|((?:[^\s,])+))))*(?: *)(?:})(?: *)/,
+    group: /^attributeGroup/,
+    inlineGroup: /(?:{)(?: *(?:("(?:[^\s"]|[ ])+")|('(?:[^\s']|[ ])+')|((?:[^\s])+))(?:: *)(?:("(?:[^\s"]|[ ])+")|('(?:[^\s']|[ ])+')|((?:[^\s])+)))(?:(?: *, *)(?: *(?:("(?:[^\s"]|[ ])+")|('(?:[^\s']|[ ])+')|((?:[^\s])+))(?:: *)(?:("(?:[^\s"]|[ ])+")|('(?:[^\s']|[ ])+')|((?:[^\s,])+))))*(?: *)(?:})(?: *)/,
     value: /(?: *(?:(?:"((?:[^\s"]|[ ])+)")|(?:'((?:[^\s']|[ ])+)')|((?:[^\s])+))(?:: *)(?:(?:"((?:[^\s"]|[ ])+)")|(?:'((?:[^\s']|[ ])+)')|((?:[^\s])+)))/g
   },
-  number: /([0-9]+)/
-};
+  number: /([0-9]+)/ };
 
 exports.block = block;
 block.figure = replace(block.figure)(/figure/g, inline.image)();
-
 block.bullet = /(?:attribute)?(?:(\*)|([0-9A-Za-z\u017F\u212A]+)(?:\)|\.)|((?:[\0-\t\x0B-\uD7FF\uE000-\uFFFF]|[\uD800-\uDBFF][\uDC00-\uDFFF]|[\uD800-\uDBFF](?![\uDC00-\uDFFF])|(?:[^\uD800-\uDBFF]|^)[\uDC00-\uDFFF])+)(?:\n(?::)))( *)/i;
 block.bullet = replace(block.bullet)(/attribute/g, block.attribute.group)();
 block.item = /^( *)(bull) (?:[\0-\t\x0B-\uD7FF\uE000-\uFFFF]|[\uD800-\uDBFF][\uDC00-\uDFFF]|[\uD800-\uDBFF](?![\uDC00-\uDFFF])|(?:[^\uD800-\uDBFF]|^)[\uDC00-\uDFFF])*(?:\n(?!\1bull )(?:[\0-\t\x0B-\uD7FF\uE000-\uFFFF]|[\uD800-\uDBFF][\uDC00-\uDFFF]|[\uD800-\uDBFF](?![\uDC00-\uDFFF])|(?:[^\uD800-\uDBFF]|^)[\uDC00-\uDFFF])*)*/;
@@ -164,7 +163,14 @@ block.blockquote = replace(block.blockquote)('def', block.def)();
 
 block.paragraph = replace(block.paragraph)('heading', block.heading)('blockquote', block.blockquote)();
 
+block.attribute.group = replace(block.attribute.group)(/attributeGroup/g, block.attribute.inlineGroup)();
+
 block.normal = ObjectAssign({}, block);
+
+/**
+ * Inline Attributes
+ */
+inline.normal.attribute = block.attribute;
 
 /**
  * Renderer constants
@@ -215,7 +221,7 @@ var _WebFileAccessor = require("./web_file_accessor");
 var _WebFileAccessor2 = _interopRequireWildcard(_WebFileAccessor);
 
 if (typeof window !== "undefined") window.markua = new _Markua2["default"]("/data/test_book", { fileAccessor: _WebFileAccessor2["default"], debug: true });
-}).call(this,require("1YiZ5S"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/fake_fd60f72.js","/")
+}).call(this,require("1YiZ5S"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/fake_817801e1.js","/")
 },{"./markua":6,"./web_file_accessor":11,"1YiZ5S":18,"buffer":14}],3:[function(require,module,exports){
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
 "use strict";
@@ -268,6 +274,8 @@ var _Renderer = require("./renderer");
 
 var _Renderer2 = _interopRequireWildcard(_Renderer);
 
+var _ = require("underscore");
+
 // Lexes and pipes tokens to the inline renderer
 
 var InlineLexer = (function () {
@@ -277,7 +285,8 @@ var InlineLexer = (function () {
     this.options = options;
     this.links = links;
     this.rules = _inline$escape.inline.normal;
-
+    this.attributes = null;
+    this.prevAttributes = null;
     this.renderer = new _Renderer2["default"]();
 
     if (!this.links) throw new Error("Tokens array requires a `links` property.");
@@ -293,6 +302,10 @@ var InlineLexer = (function () {
           text = undefined,
           href = undefined,
           out = "";
+
+      // Clear the attributes unless the last thing was an attribute
+      if (!this.prevAttributes) this.attributes = null;
+      this.prevAttributes = null;
 
       while (src) {
         // escape
@@ -312,7 +325,28 @@ var InlineLexer = (function () {
             text = _inline$escape.escape(cap[1]);
             href = text;
           }
-          out += this.renderer.link(href, null, text);
+          out += this.renderer.link(href, null, text, this.attributes);
+          continue;
+        }
+
+        // attributes
+        if (cap = this.rules.attribute.inlineGroup.exec(src)) {
+          // Since there could be text before the match (middle of a paragraph)
+          // we need to cut the attributes out.
+          var index = src.search(this.rules.attribute.inlineGroup);
+          var _length = cap[0].length;
+
+          src = _.string.splice(src, index - 1, cap[0].length + 1);
+
+          var attributes = [];
+          var pair = undefined;
+
+          while ((pair = _.compact(this.rules.attribute.value.exec(cap[0]))).length) {
+            attributes.push({ key: pair[1], value: pair[2] });
+          }
+
+          this.attributes = attributes;
+          this.prevAttributes = true;
           continue;
         }
 
@@ -321,7 +355,7 @@ var InlineLexer = (function () {
           src = src.substring(cap[0].length);
           text = _inline$escape.escape(cap[1]);
           href = text;
-          out += this.renderer.link(href, null, text);
+          out += this.renderer.link(href, null, text, this.attributes);
           continue;
         }
 
@@ -356,21 +390,21 @@ var InlineLexer = (function () {
         // strong
         if (cap = this.rules.strong.exec(src)) {
           src = src.substring(cap[0].length);
-          out += this.renderer.strong(this.output(cap[2] || cap[1]));
+          out += this.renderer.strong(this.output(cap[2] || cap[1]), this.attributes);
           continue;
         }
 
         // em
         if (cap = this.rules.em.exec(src)) {
           src = src.substring(cap[0].length);
-          out += this.renderer.em(this.output(cap[2] || cap[1]));
+          out += this.renderer.em(this.output(cap[2] || cap[1]), this.attributes);
           continue;
         }
 
         // code
         if (cap = this.rules.code.exec(src)) {
           src = src.substring(cap[0].length);
-          out += this.renderer.codespan(_inline$escape.escape(cap[2], true));
+          out += this.renderer.codespan(_inline$escape.escape(cap[2], true), this.attributes);
           continue;
         }
 
@@ -384,7 +418,7 @@ var InlineLexer = (function () {
         // del (gfm)
         if (cap = this.rules.del.exec(src)) {
           src = src.substring(cap[0].length);
-          out += this.renderer.del(this.output(cap[1]));
+          out += this.renderer.del(this.output(cap[1]), this.attributes);
           continue;
         }
 
@@ -400,6 +434,8 @@ var InlineLexer = (function () {
         }
       }
 
+      // We have attributes that we have to put on the previous element
+      if (this.attributes) console.log("TODO: @bradens, need to attach attrs to the previous element");
       return out;
     }
   }, {
@@ -410,7 +446,7 @@ var InlineLexer = (function () {
       var href = _inline$escape.escape(link.href),
           title = link.title ? _inline$escape.escape(link.title) : null;
 
-      return cap[0].charAt(0) !== "!" ? this.renderer.link(href, title, this.output(cap[1])) : this.renderer.image(href, title, _inline$escape.escape(cap[1]));
+      return cap[0].charAt(0) !== "!" ? this.renderer.link(href, title, this.output(cap[1]), this.attributes) : this.renderer.image(href, title, _inline$escape.escape(cap[1]), this.attributes);
     }
   }, {
     key: "smartypants",
@@ -450,7 +486,7 @@ InlineLexer.rules = _inline$escape.inline;
 exports["default"] = InlineLexer;
 module.exports = exports["default"];
 }).call(this,require("1YiZ5S"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/inline_lexer.js","/")
-},{"./constants":1,"./renderer":9,"1YiZ5S":18,"buffer":14}],5:[function(require,module,exports){
+},{"./constants":1,"./renderer":9,"1YiZ5S":18,"buffer":14,"underscore":87}],5:[function(require,module,exports){
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
 "use strict";
 
@@ -1196,7 +1232,7 @@ var Parser = (function () {
         case "attribute":
           {
             // Set the attributes for the next tag
-            this.attributes = _.extend({}, this.attributes, _.object(_.pluck(this.token.attributes, "key"), _.pluck(this.token.attributes, "value")));
+            this.attributes = this.token.attributes;
             return "";
           }
         case "figure":
@@ -1368,6 +1404,9 @@ var Renderer = (function () {
       }
       var attrString = " ";
 
+      // Convert the attributes into a more useful object for parsing
+      attributes = _.extend({}, _.object(_.pluck(attributes, "key"), _.pluck(attributes, "value")));
+
       // If we have a class specified in the tag that we are rendering, then make sure to add that
       // class as well.
       if (className) {
@@ -1376,7 +1415,7 @@ var Renderer = (function () {
       }
 
       _.each(_.keys(attributes), function (key, i) {
-        attrString += "" + key + "=\"" + attributes[key] + "\"";
+        attrString += " " + key + "=\"" + attributes[key] + "\"";
       });
       return attrString;;
     }
@@ -1599,11 +1638,13 @@ var Renderer = (function () {
   }, {
     key: "del",
     value: function del(text, attributes) {
-      return "<del>" + text + "</del>";
+      var attrs = this.convertAttributes(attributes);
+      return "<del" + attrs + ">" + text + "</del>";
     }
   }, {
     key: "link",
     value: function link(href, title, text, attributes) {
+      var attrs = this.convertAttributes(attributes);
       if (this.options.sanitize) {
         try {
           var prot = decodeURIComponent(_escape$unescape$HEADING_BOOK_CLASS_MAP$HEADING_MULTI_PART_CLASS_MAP$HEADING_DOCUMENT_CLASS_MAP.unescape(href)).replace(/[^\w:]/g, "").toLowerCase();
@@ -1614,7 +1655,7 @@ var Renderer = (function () {
           return "";
         }
       }
-      var out = "<a href=\"" + href + "\"";
+      var out = "<a" + attrs + " href=\"" + href + "\"";
       if (title) {
         out += " title=\"" + title + "\"";
       }
@@ -1624,9 +1665,11 @@ var Renderer = (function () {
   }, {
     key: "image",
     value: function image(href, title, text, attributes) {
+      var attrs = this.convertAttributes(attributes);
+
       if (!/http:|https:/.test(href)) href = "images/" + href;
 
-      var out = "<img src=\"" + href + "\" alt=\"" + text + "\"";
+      var out = "<img" + attrs + " src=\"" + href + "\" alt=\"" + text + "\"";
       if (title) {
         out += " title=\"" + title + "\"";
       }

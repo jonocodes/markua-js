@@ -49,6 +49,9 @@ var Renderer = (function () {
       }
       var attrString = " ";
 
+      // Convert the attributes into a more useful object for parsing
+      attributes = _.extend({}, _.object(_.pluck(attributes, "key"), _.pluck(attributes, "value")));
+
       // If we have a class specified in the tag that we are rendering, then make sure to add that
       // class as well.
       if (className) {
@@ -57,7 +60,7 @@ var Renderer = (function () {
       }
 
       _.each(_.keys(attributes), function (key, i) {
-        attrString += "" + key + "=\"" + attributes[key] + "\"";
+        attrString += " " + key + "=\"" + attributes[key] + "\"";
       });
       return attrString;;
     }
@@ -280,11 +283,13 @@ var Renderer = (function () {
   }, {
     key: "del",
     value: function del(text, attributes) {
-      return "<del>" + text + "</del>";
+      var attrs = this.convertAttributes(attributes);
+      return "<del" + attrs + ">" + text + "</del>";
     }
   }, {
     key: "link",
     value: function link(href, title, text, attributes) {
+      var attrs = this.convertAttributes(attributes);
       if (this.options.sanitize) {
         try {
           var prot = decodeURIComponent(_escape$unescape$HEADING_BOOK_CLASS_MAP$HEADING_MULTI_PART_CLASS_MAP$HEADING_DOCUMENT_CLASS_MAP.unescape(href)).replace(/[^\w:]/g, "").toLowerCase();
@@ -295,7 +300,7 @@ var Renderer = (function () {
           return "";
         }
       }
-      var out = "<a href=\"" + href + "\"";
+      var out = "<a" + attrs + " href=\"" + href + "\"";
       if (title) {
         out += " title=\"" + title + "\"";
       }
@@ -305,9 +310,11 @@ var Renderer = (function () {
   }, {
     key: "image",
     value: function image(href, title, text, attributes) {
+      var attrs = this.convertAttributes(attributes);
+
       if (!/http:|https:/.test(href)) href = "images/" + href;
 
-      var out = "<img src=\"" + href + "\" alt=\"" + text + "\"";
+      var out = "<img" + attrs + " src=\"" + href + "\" alt=\"" + text + "\"";
       if (title) {
         out += " title=\"" + title + "\"";
       }

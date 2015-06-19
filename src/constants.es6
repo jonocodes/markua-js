@@ -152,14 +152,14 @@ export let block = {
   text: /^[^\n]+/,
   break: /^ *[\n]{2,}/,
   attribute: {
-    group: /^(?:{)(?: *(?:("(?:[^\s"]|[ ])+")|('(?:[^\s']|[ ])+')|((?:[^\s])+))(?:: *)(?:("(?:[^\s"]|[ ])+")|('(?:[^\s']|[ ])+')|((?:[^\s])+)))(?:(?: *, *)(?: *(?:("(?:[^\s"]|[ ])+")|('(?:[^\s']|[ ])+')|((?:[^\s])+))(?:: *)(?:("(?:[^\s"]|[ ])+")|('(?:[^\s']|[ ])+')|((?:[^\s,])+))))*(?: *)(?:})(?: *)/,
+    group: /^attributeGroup/,
+    inlineGroup: /(?:{)(?: *(?:("(?:[^\s"]|[ ])+")|('(?:[^\s']|[ ])+')|((?:[^\s])+))(?:: *)(?:("(?:[^\s"]|[ ])+")|('(?:[^\s']|[ ])+')|((?:[^\s])+)))(?:(?: *, *)(?: *(?:("(?:[^\s"]|[ ])+")|('(?:[^\s']|[ ])+')|((?:[^\s])+))(?:: *)(?:("(?:[^\s"]|[ ])+")|('(?:[^\s']|[ ])+')|((?:[^\s,])+))))*(?: *)(?:})(?: *)/,
     value: /(?: *(?:(?:"((?:[^\s"]|[ ])+)")|(?:'((?:[^\s']|[ ])+)')|((?:[^\s])+))(?:: *)(?:(?:"((?:[^\s"]|[ ])+)")|(?:'((?:[^\s']|[ ])+)')|((?:[^\s])+)))/g
   },
-  number: /([0-9]+)/
+  number: /([0-9]+)/,
 };
 
 block.figure = replace(block.figure)(/figure/g, inline.image)();
-
 block.bullet = /(?:attribute)?(?:([*])|([a-zA-Z\d]+)(?:\)|\.)|([^\n]+)(?:\n(?::)))( *)/ui;
 block.bullet = replace(block.bullet)(/attribute/g, block.attribute.group)();
 block.item = /^( *)(bull) [^\n]*(?:\n(?!\1bull )[^\n]*)*/u;
@@ -178,7 +178,14 @@ block.paragraph = replace(block.paragraph)
   ('blockquote', block.blockquote)
   ();
 
+block.attribute.group = replace(block.attribute.group)(/attributeGroup/g, block.attribute.inlineGroup)();
+
 block.normal = ObjectAssign({}, block);
+
+/**
+ * Inline Attributes
+ */
+inline.normal.attribute = block.attribute;
 
 /**
  * Renderer constants

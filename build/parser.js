@@ -105,7 +105,7 @@ var Parser = (function () {
         case "attribute":
           {
             // Set the attributes for the next tag
-            this.attributes = _.extend({}, this.attributes, _.object(_.pluck(this.token.attributes, "key"), _.pluck(this.token.attributes, "value")));
+            this.attributes = this.token.attributes;
             return "";
           }
         case "figure":

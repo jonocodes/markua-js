@@ -1,5 +1,6 @@
 import { inline, escape } from "./constants"
 import Renderer from "./renderer"
+let _ = require("underscore");
 
 // Lexes and pipes tokens to the inline renderer
 class InlineLexer {
@@ -7,7 +8,8 @@ class InlineLexer {
     this.options = options;
     this.links = links;
     this.rules = inline.normal;
-
+    this.attributes = null;
+    this.prevAttributes = null;
     this.renderer = new Renderer();
 
     if (!this.links)
@@ -22,6 +24,10 @@ class InlineLexer {
   // lex and send tokens to the renderer
   output(src) {
     let cap, link, text, href, out = '';
+
+    // Clear the attributes unless the last thing was an attribute
+    if (!this.prevAttributes) this.attributes = null
+    this.prevAttributes = null;
 
     while (src) {
       // escape
@@ -43,16 +49,38 @@ class InlineLexer {
           text = escape(cap[1]);
           href = text;
         }
-        out += this.renderer.link(href, null, text);
+        out += this.renderer.link(href, null, text, this.attributes);
         continue;
       }
+
+      // attributes
+      if (cap = this.rules.attribute.inlineGroup.exec(src)) {
+        // Since there could be text before the match (middle of a paragraph)
+        // we need to cut the attributes out.
+        let index = src.search(this.rules.attribute.inlineGroup);
+        let length = cap[0].length
+
+        src = _.string.splice(src, index - 1, cap[0].length + 1);
+
+        let attributes = [];
+        let pair;
+
+        while ((pair = _.compact(this.rules.attribute.value.exec(cap[0]))).length) {
+          attributes.push({ key: pair[1], value: pair[2] });
+        }
+
+        this.attributes = attributes;
+        this.prevAttributes = true;
+        continue;
+      }
+
 
       // url (gfm)
       if (!this.inLink && (cap = this.rules.url.exec(src))) {
         src = src.substring(cap[0].length);
         text = escape(cap[1]);
         href = text;
-        out += this.renderer.link(href, null, text);
+        out += this.renderer.link(href, null, text, this.attributes);
         continue;
       }
 
@@ -88,21 +116,21 @@ class InlineLexer {
       // strong
       if (cap = this.rules.strong.exec(src)) {
         src = src.substring(cap[0].length);
-        out += this.renderer.strong(this.output(cap[2] || cap[1]));
+        out += this.renderer.strong(this.output(cap[2] || cap[1]), this.attributes);
         continue;
       }
 
       // em
       if (cap = this.rules.em.exec(src)) {
         src = src.substring(cap[0].length);
-        out += this.renderer.em(this.output(cap[2] || cap[1]));
+        out += this.renderer.em(this.output(cap[2] || cap[1]), this.attributes);
         continue;
       }
 
       // code
       if (cap = this.rules.code.exec(src)) {
         src = src.substring(cap[0].length);
-        out += this.renderer.codespan(escape(cap[2], true));
+        out += this.renderer.codespan(escape(cap[2], true), this.attributes);
         continue;
       }
 
@@ -116,7 +144,7 @@ class InlineLexer {
       // del (gfm)
       if (cap = this.rules.del.exec(src)) {
         src = src.substring(cap[0].length);
-        out += this.renderer.del(this.output(cap[1]));
+        out += this.renderer.del(this.output(cap[1]), this.attributes);
         continue;
       }
 
@@ -133,6 +161,9 @@ class InlineLexer {
       }
     }
 
+    // We have attributes that we have to put on the previous element
+    if (this.attributes)
+      console.log("TODO: @bradens, need to attach attrs to the previous element")
     return out;
   }
 
@@ -142,8 +173,8 @@ class InlineLexer {
         title = link.title ? escape(link.title) : null;
 
     return cap[0].charAt(0) !== '!'
-      ? this.renderer.link(href, title, this.output(cap[1]))
-      : this.renderer.image(href, title, escape(cap[1]));
+      ? this.renderer.link(href, title, this.output(cap[1]), this.attributes)
+      : this.renderer.image(href, title, escape(cap[1]), this.attributes);
   }
 
   // Turn dashes and stuff into special characters

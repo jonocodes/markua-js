@@ -28,6 +28,9 @@ class Renderer {
     }
     let attrString = " ";
 
+    // Convert the attributes into a more useful object for parsing
+    attributes = _.extend({}, _.object(_.pluck(attributes, "key"), _.pluck(attributes, "value")));
+
     // If we have a class specified in the tag that we are rendering, then make sure to add that
     // class as well.
     if (className) {
@@ -36,7 +39,7 @@ class Renderer {
     }
 
     _.each(_.keys(attributes), function(key, i) {
-      attrString += `${key}="${attributes[key]}"`;
+      attrString += ` ${key}="${attributes[key]}"`;
     });
     return attrString;;
   }
@@ -246,10 +249,12 @@ class Renderer {
   }
 
   del(text, attributes) {
-    return `<del>${text}</del>`;
+    let attrs = this.convertAttributes(attributes);
+    return `<del${attrs}>${text}</del>`;
   }
 
   link(href, title, text, attributes) {
+    let attrs = this.convertAttributes(attributes);
     if (this.options.sanitize) {
       try {
         var prot = decodeURIComponent(unescape(href))
@@ -262,7 +267,7 @@ class Renderer {
         return '';
       }
     }
-    var out = `<a href="${href}"`;
+    var out = `<a${attrs} href="${href}"`;
     if (title) {
       out += ` title="${title}"`;
     }
@@ -271,10 +276,12 @@ class Renderer {
   }
 
   image(href, title, text, attributes) {
+    let attrs = this.convertAttributes(attributes);
+
     if (!/http:|https:/.test(href))
       href = `images/${href}`;
 
-    var out = `<img src="${href}" alt="${text}"`;
+    var out = `<img${attrs} src="${href}" alt="${text}"`;
     if (title) {
       out += ` title="${title}"`;
     }
