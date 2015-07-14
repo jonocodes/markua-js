@@ -221,7 +221,7 @@ var _WebFileAccessor = require("./web_file_accessor");
 var _WebFileAccessor2 = _interopRequireWildcard(_WebFileAccessor);
 
 if (typeof window !== "undefined") window.markua = new _Markua2["default"]("/data/test_book", { fileAccessor: _WebFileAccessor2["default"], debug: true });
-}).call(this,require("1YiZ5S"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/fake_817801e1.js","/")
+}).call(this,require("1YiZ5S"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/fake_ee467f47.js","/")
 },{"./markua":6,"./web_file_accessor":11,"1YiZ5S":18,"buffer":14}],3:[function(require,module,exports){
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
 "use strict";
@@ -424,6 +424,19 @@ var InlineLexer = (function () {
 
         // text
         if (cap = this.rules.text.exec(src)) {
+          var inlineAttributesCapture = undefined;
+          if (inlineAttributesCapture = this.rules.attribute.inlineGroup) {
+            // We have found an attribute set in the text.  This means that
+            // we should create a span and attach the attributes to that span.
+            //
+            // Example
+            // input:
+            //    This is paragraph text { foo: bar } something.
+            // output:
+            //    <p>This is paragraph text <span foo="bar">something.</span>
+
+            console.log("Found a text with some inline attributes");
+          }
           src = src.substring(cap[0].length);
           out += _inline$escape.escape(this.smartypants(cap[0]));
           continue;

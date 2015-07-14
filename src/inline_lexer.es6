@@ -150,6 +150,19 @@ class InlineLexer {
 
       // text
       if (cap = this.rules.text.exec(src)) {
+        let inlineAttributesCapture;
+        if (inlineAttributesCapture = this.rules.attribute.inlineGroup) {
+          // We have found an attribute set in the text.  This means that
+          // we should create a span and attach the attributes to that span.
+          //
+          // Example
+          // input:
+          //    This is paragraph text { foo: bar } something.
+          // output:
+          //    <p>This is paragraph text <span foo="bar">something.</span>
+
+          console.log("Found a text with some inline attributes");
+        }
         src = src.substring(cap[0].length);
         out += escape(this.smartypants(cap[0]));
         continue;
