@@ -1,43 +1,54 @@
 var gulp = require("gulp");
-var babel = require("gulp-babel");
-var shell = require("gulp-shell");
-var rename = require("gulp-rename");
-var mocha = require("gulp-mocha");
-var browserify = require("gulp-browserify");
-var source = require("vinyl-source-stream");
-var sass = require("gulp-sass");
+    babel = require("gulp-babel"),
+    shell = require("gulp-shell"),
+    rename = require("gulp-rename"),
+    mocha = require("gulp-mocha"),
+    browserify = require("gulp-browserify"),
+    source = require("vinyl-source-stream"),
+    sass = require("gulp-sass"),
+    gls = require("gulp-live-server");
+
+var paths = {
+  html: './index.html',
+  data: './data/**/*',
+  build: './build',
+  index: './build/index.js',
+  scripts: './src/*.es6',
+  styles: './src/styles/*.scss'
+};
 
 gulp.task('build-styles', function() {
-  gulp.src("./src/styles/*.scss")
+  gulp.src(paths.styles)
     .pipe(sass())
     .on('error', function(error) {
       console.log(error.message);
     })
-    .pipe(gulp.dest('build'));
+    .pipe(gulp.dest(paths.build));
 });
 
 gulp.task('build-js', function() {
-  gulp.src("./src/*.es6")
+  gulp.src(paths.scripts)
     .pipe(babel())
     .on("error", function(error) {
       console.log(error.message);
     })
     .pipe(rename({ extname: ".js" }))
-    .pipe(gulp.dest('build'));
+    .pipe(gulp.dest(paths.build));
 });
 
 gulp.task('browserify', ['build-js'], function() {
-  return gulp.src('./build/index.js')
+  gulp.src(paths.index)
     .pipe(browserify({
       insertGlobals: true
     }))
     .pipe(rename('bundle.js'))
-    .pipe(gulp.dest('build'));
+    .pipe(gulp.dest(paths.build));
 });
 
-gulp.task('dev-web', ['browserify', 'build-styles'], function() {
-  gulp.watch("./src/styles/*", ["build-styles"]);
-  gulp.watch("./src/*", ["browserify"]);
+gulp.task('watch', ['build-js', 'build-styles'], function() {
+  gulp.watch("./src/styles/**/*", ['build-styles']);
+  gulp.watch("./src/*", ['browserify']);
+  gulp.watch("./index.html", ['assets']);
 });
 
 gulp.task('test', function() {
@@ -50,6 +61,23 @@ gulp.task('test', function() {
     }));
 });
 
-gulp.task('watch', function() {
-  gulp.watch('./src/*', ['build-js']);
+gulp.task('assets', function() {
+  gulp.src(paths.html).pipe(gulp.dest(paths.build))
+  gulp.src(paths.data).pipe(gulp.dest('./build/data/'))
 });
+
+gulp.task('serve', function() {
+  var server = gls.static('build', '8080');
+  server.start();
+
+  // use gulp.watch to trigger server actions(notify, start or stop)
+  gulp.watch(['./build/*'], function () {
+    server.notify.apply(server, arguments);
+  });
+});
+
+gulp.task('default', [
+  'serve',
+  'assets',
+  'watch'
+]);

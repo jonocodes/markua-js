@@ -80,8 +80,9 @@ class Markua {
         this.fileAccessor.get(chapter, (error, contents) => {
 
           // If we are given a cursor position, then insert that into the markua text
-          if (this.options.cursor && this.options.cursor.filename === chapter)
-            contents = _.string.splice(contents, this.options.cursor.position, 0, "{ data-markua-cursor-position: __markuaCursorPosition__ }\n")
+          // TODO: This will not work until inline attributes are done.
+          // if (this.options.cursor && this.options.cursor.filename === chapter)
+          //   contents = _.string.splice(contents, this.options.cursor.position, 0, "{ data-markua-cursor-position: __markuaCursorPosition__ }\n")
 
           cb(null, contents)
         });
@@ -91,13 +92,13 @@ class Markua {
 
   processChapters(chapters, done) {
     async.map(_.compact(chapters), (chapter, cb) => {
-      // try {
-      let tokens = Lexer.lex(chapter, this.options);
-      cb(null, Parser.parse(tokens, this.options));
-      // } catch (e) {
-        // console.error(e);
-        // cb(e);
-      // }
+      try {
+        let tokens = Lexer.lex(chapter, this.options);
+        cb(null, Parser.parse(tokens, this.options));
+      } catch (e) {
+        console.error(e);
+        cb(e);
+      }
     }, (error, results) => {
       // Concat it
       done(null, results.join("\n"));

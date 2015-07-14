@@ -26,7 +26,7 @@ class Parser {
       out += this.tok();
     }
     return out;
-  }
+  } 
 
   // Next Token
   next() {

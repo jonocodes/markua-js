@@ -1,0 +1,31 @@
+# Chapter Two
+
+Here are some quick Markdown examples to get you started.
+
+To start a new paragraph, hit the return key twice. You want to create a blank line between paragraphs.
+
+To *italicize*, surround a word in asterisks.
+
+To **bold**, use two asterisks.
+
+Here is a [link to the leanpub home-page](https://leanpub.com).
+
+Chapter 3 tells you how to make a preview of your book.
+
+* something
+* something else
+
+{ align: right }
+![The markua logo](markua_logo.svg)
+
+
+B> here is a bq
+B>
+B> aoentuaoentuaeo
+B> aotnehunatou
+B> atnehou
+
+
+aeouno
+
+<<(sample.rb)

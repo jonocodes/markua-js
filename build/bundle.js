@@ -1,10 +1,5 @@
 (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);throw new Error("Cannot find module '"+o+"'")}var f=n[o]={exports:{}};t[o][0].call(f.exports,function(e){var n=t[o][1][e];return s(n?n:e)},f,f.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
-'use strict';
-
-Object.defineProperty(exports, '__esModule', {
-  value: true
-});
 // Using some of the https://github.com/chjj/marked for a lot of the regexes
 // Copyright (c) 2011-2014, Christopher Jeffrey (https://github.com/chjj/)
 //
@@ -27,6 +22,11 @@ Object.defineProperty(exports, '__esModule', {
 // THE SOFTWARE.
 
 // Need this polyfill for Object.assign for now...
+'use strict';
+
+Object.defineProperty(exports, '__esModule', {
+  value: true
+});
 var ObjectAssign = require('object-assign');
 
 var noop = function noop() {};
@@ -53,9 +53,8 @@ var replace = function replace(regex, opt) {
   regex = regex.source;
   opt = opt || '';
   return function self(name, val) {
-    if (!name) {
-      return new RegExp(regex, opt);
-    }val = val.source || val;
+    if (!name) return new RegExp(regex, opt);
+    val = val.source || val;
     val = val.replace(/(^|[^\[])\^/g, '$1');
     regex = regex.replace(name, val);
     return self;
@@ -200,33 +199,33 @@ var HEADING_DOCUMENT_CLASS_MAP = {
 };
 exports.HEADING_DOCUMENT_CLASS_MAP = HEADING_DOCUMENT_CLASS_MAP;
 }).call(this,require("1YiZ5S"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/constants.js","/")
-},{"1YiZ5S":16,"buffer":12,"object-assign":17}],2:[function(require,module,exports){
+},{"1YiZ5S":18,"buffer":14,"object-assign":19}],2:[function(require,module,exports){
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
 "use strict";
 
-var _interopRequireWildcard = function (obj) { return obj && obj.__esModule ? obj : { "default": obj }; };
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
 
-var _Markua = require("./markua");
+var _markua = require("./markua");
 
-var _Markua2 = _interopRequireWildcard(_Markua);
+var _markua2 = _interopRequireDefault(_markua);
 
-var _WebFileAccessor = require("./web_file_accessor");
+var _web_file_accessor = require("./web_file_accessor");
 
-var _WebFileAccessor2 = _interopRequireWildcard(_WebFileAccessor);
+var _web_file_accessor2 = _interopRequireDefault(_web_file_accessor);
 
-if (typeof window !== "undefined") window.markua = new _Markua2["default"]("/data/test_book", { fileAccessor: _WebFileAccessor2["default"], debug: true });
-}).call(this,require("1YiZ5S"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/fake_4fb5dfb7.js","/")
-},{"./markua":5,"./web_file_accessor":9,"1YiZ5S":16,"buffer":12}],3:[function(require,module,exports){
+if (typeof window !== "undefined") window.markua = new _markua2["default"]("/data/test_book", { fileAccessor: _web_file_accessor2["default"], debug: true });
+}).call(this,require("1YiZ5S"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/fake_d5a00b75.js","/")
+},{"./markua":6,"./web_file_accessor":11,"1YiZ5S":18,"buffer":14}],3:[function(require,module,exports){
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
 "use strict";
-
-var _classCallCheck = function (instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } };
-
-var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
 
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
+
+var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 var FileAccessor = (function () {
   function FileAccessor(projectPath) {
@@ -248,21 +247,223 @@ var FileAccessor = (function () {
 exports["default"] = FileAccessor;
 module.exports = exports["default"];
 }).call(this,require("1YiZ5S"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/file_accessor.js","/")
-},{"1YiZ5S":16,"buffer":12}],4:[function(require,module,exports){
+},{"1YiZ5S":18,"buffer":14}],4:[function(require,module,exports){
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
 "use strict";
-
-var _classCallCheck = function (instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } };
-
-var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
 
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
 
-var _block = require("./constants");
+var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
 
-var _characterIsNext$decimalize = require("./util");
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var _constants = require("./constants");
+
+var _renderer = require("./renderer");
+
+var _renderer2 = _interopRequireDefault(_renderer);
+
+// Lexes and pipes tokens to the inline renderer
+
+var InlineLexer = (function () {
+  function InlineLexer(links, options) {
+    _classCallCheck(this, InlineLexer);
+
+    this.options = options;
+    this.links = links;
+    this.rules = _constants.inline.normal;
+
+    this.renderer = new _renderer2["default"]();
+
+    if (!this.links) throw new Error("Tokens array requires a `links` property.");
+  }
+
+  _createClass(InlineLexer, [{
+    key: "output",
+
+    // lex and send tokens to the renderer
+    value: function output(src) {
+      var cap = undefined,
+          link = undefined,
+          text = undefined,
+          href = undefined,
+          out = "";
+
+      while (src) {
+        // escape
+        if (cap = this.rules.escape.exec(src)) {
+          src = src.substring(cap[0].length);
+          out += cap[1];
+          continue;
+        }
+
+        // autolink
+        if (cap = this.rules.autolink.exec(src)) {
+          src = src.substring(cap[0].length);
+          if (cap[2] === "@") {
+            text = cap[1].charAt(6) === ":" ? cap[1].substring(7) : cap[1];
+            href = "mailto:" + text;
+          } else {
+            text = (0, _constants.escape)(cap[1]);
+            href = text;
+          }
+          out += this.renderer.link(href, null, text);
+          continue;
+        }
+
+        // url (gfm)
+        if (!this.inLink && (cap = this.rules.url.exec(src))) {
+          src = src.substring(cap[0].length);
+          text = (0, _constants.escape)(cap[1]);
+          href = text;
+          out += this.renderer.link(href, null, text);
+          continue;
+        }
+
+        // link
+        if (cap = this.rules.link.exec(src)) {
+          src = src.substring(cap[0].length);
+          this.inLink = true;
+          out += this.outputLink(cap, {
+            href: cap[2],
+            title: cap[3]
+          });
+          this.inLink = false;
+          continue;
+        }
+
+        // reflink, nolink
+        if ((cap = this.rules.reflink.exec(src)) || (cap = this.rules.nolink.exec(src))) {
+          src = src.substring(cap[0].length);
+          link = (cap[2] || cap[1]).replace(/\s+/g, " ");
+          link = this.links[link.toLowerCase()];
+          if (!link || !link.href) {
+            out += cap[0].charAt(0);
+            src = cap[0].substring(1) + src;
+            continue;
+          }
+          this.inLink = true;
+          out += this.outputLink(cap, link);
+          this.inLink = false;
+          continue;
+        }
+
+        // strong
+        if (cap = this.rules.strong.exec(src)) {
+          src = src.substring(cap[0].length);
+          out += this.renderer.strong(this.output(cap[2] || cap[1]));
+          continue;
+        }
+
+        // em
+        if (cap = this.rules.em.exec(src)) {
+          src = src.substring(cap[0].length);
+          out += this.renderer.em(this.output(cap[2] || cap[1]));
+          continue;
+        }
+
+        // code
+        if (cap = this.rules.code.exec(src)) {
+          src = src.substring(cap[0].length);
+          out += this.renderer.codespan((0, _constants.escape)(cap[2], true));
+          continue;
+        }
+
+        // br
+        if (cap = this.rules.br.exec(src)) {
+          src = src.substring(cap[0].length);
+          out += this.renderer.br();
+          continue;
+        }
+
+        // del (gfm)
+        if (cap = this.rules.del.exec(src)) {
+          src = src.substring(cap[0].length);
+          out += this.renderer.del(this.output(cap[1]));
+          continue;
+        }
+
+        // text
+        if (cap = this.rules.text.exec(src)) {
+          src = src.substring(cap[0].length);
+          out += (0, _constants.escape)(this.smartypants(cap[0]));
+          continue;
+        }
+
+        if (src) {
+          throw new Error("Infinite loop on byte: " + src.charCodeAt(0));
+        }
+      }
+
+      return out;
+    }
+  }, {
+    key: "outputLink",
+
+    // Compile a link or Image
+    value: function outputLink(cap, link) {
+      var href = (0, _constants.escape)(link.href),
+          title = link.title ? (0, _constants.escape)(link.title) : null;
+
+      return cap[0].charAt(0) !== "!" ? this.renderer.link(href, title, this.output(cap[1])) : this.renderer.image(href, title, (0, _constants.escape)(cap[1]));
+    }
+  }, {
+    key: "smartypants",
+
+    // Turn dashes and stuff into special characters
+    // -- SmartyPants
+    value: function smartypants(text) {
+      return text
+      // em-dashes
+      .replace(/--/g, "—")
+      // opening singles
+      .replace(/(^|[-\u2014/(\[{"\s])'/g, "$1‘")
+      // closing singles & apostrophes
+      .replace(/'/g, "’")
+      // opening doubles
+      .replace(/(^|[-\u2014/(\[{\u2018\s])"/g, "$1“")
+      // closing doubles
+      .replace(/"/g, "”")
+      // ellipses
+      .replace(/\.{3}/g, "…");
+    }
+  }], [{
+    key: "output",
+
+    // Exposed output function
+    value: function output(src, links, options) {
+      return new InlineLexer(links, options).output(src);
+    }
+  }]);
+
+  return InlineLexer;
+})();
+
+// Expose rules
+InlineLexer.rules = _constants.inline;
+
+exports["default"] = InlineLexer;
+module.exports = exports["default"];
+}).call(this,require("1YiZ5S"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/inline_lexer.js","/")
+},{"./constants":1,"./renderer":9,"1YiZ5S":18,"buffer":14}],5:[function(require,module,exports){
+(function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var _constants = require("./constants");
+
+var _util = require("./util");
 
 var _ = require("underscore");
 
@@ -270,14 +471,14 @@ var _ = require("underscore");
 
 var Lexer = (function () {
   function Lexer() {
-    var options = arguments[0] === undefined ? {} : arguments[0];
+    var options = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
 
     _classCallCheck(this, Lexer);
 
     this.tokens = [];
     this.tokens.links = {};
     this.options = options;
-    this.rules = _block.block.normal;
+    this.rules = _constants.block.normal;
     this.warnings = [];
   }
 
@@ -447,7 +648,7 @@ var Lexer = (function () {
               code = undefined;
 
           // Read the file, output a codeblock with that file's language
-          var file = ext ? "" + fileWithoutExt + "." + ext : fileWithoutExt;
+          var file = ext ? fileWithoutExt + "." + ext : fileWithoutExt;
 
           if (code = this.options.fileAccessor.getSync(file, "code")) {
             this.tokens.push({
@@ -511,7 +712,7 @@ var Lexer = (function () {
                     current = _this.rules.list.alphabetized.exec(item) && _this.rules.list.alphabetized.exec(item)[1] || null;
 
                     // Warn for alpha list
-                    if (prevIndex !== null && !_characterIsNext$decimalize.characterIsNext(current, prevIndex)) _this.warnings.push(warning);
+                    if (prevIndex !== null && !(0, _util.characterIsNext)(current, prevIndex)) _this.warnings.push(warning);
 
                     return current;
                   case "numeral":
@@ -519,7 +720,7 @@ var Lexer = (function () {
                     if (current) bull = current = current.substr(0, current.length - 1);
 
                     // Warn for roman numerals
-                    if (prevIndex && _characterIsNext$decimalize.decimalize(current) !== _characterIsNext$decimalize.decimalize(prevIndex) + 1) _this.warnings.push(warning);
+                    if (prevIndex && (0, _util.decimalize)(current) !== (0, _util.decimalize)(prevIndex) + 1) _this.warnings.push(warning);
 
                     return current;
                   case "bullet":
@@ -670,35 +871,35 @@ var Lexer = (function () {
 exports["default"] = Lexer;
 module.exports = exports["default"];
 }).call(this,require("1YiZ5S"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/lexer.js","/")
-},{"./constants":1,"./util":8,"1YiZ5S":16,"buffer":12,"underscore":85}],5:[function(require,module,exports){
+},{"./constants":1,"./util":10,"1YiZ5S":18,"buffer":14,"underscore":87}],6:[function(require,module,exports){
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
 "use strict";
-
-var _interopRequireWildcard = function (obj) { return obj && obj.__esModule ? obj : { "default": obj }; };
-
-var _classCallCheck = function (instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } };
-
-var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
 
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
 
-var _Lexer = require("./lexer");
+var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
 
-var _Lexer2 = _interopRequireWildcard(_Lexer);
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
 
-var _Parser = require("./parser");
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
-var _Parser2 = _interopRequireWildcard(_Parser);
+var _lexer = require("./lexer");
 
-var _nativeFileAccessor = require("./native_file_accessor");
+var _lexer2 = _interopRequireDefault(_lexer);
 
-var _nativeFileAccessor2 = _interopRequireWildcard(_nativeFileAccessor);
+var _parser = require("./parser");
 
-var _webFileAccessor = require("./web_file_accessor");
+var _parser2 = _interopRequireDefault(_parser);
 
-var _webFileAccessor2 = _interopRequireWildcard(_webFileAccessor);
+var _native_file_accessor = require("./native_file_accessor");
+
+var _native_file_accessor2 = _interopRequireDefault(_native_file_accessor);
+
+var _web_file_accessor = require("./web_file_accessor");
+
+var _web_file_accessor2 = _interopRequireDefault(_web_file_accessor);
 
 var ObjectAssign = require("object-assign");
 var _ = require("underscore");
@@ -706,7 +907,7 @@ _.string = require("underscore.string");
 var async = require("async");
 
 var DEFAULT_OPTIONS = {
-  fileAccessor: _nativeFileAccessor2["default"],
+  fileAccessor: _native_file_accessor2["default"],
   tables: true,
   breaks: false,
   sanitize: false,
@@ -734,7 +935,7 @@ var Markua = (function () {
   _createClass(Markua, [{
     key: "run",
     value: function run(cb) {
-      var runOptions = arguments[1] === undefined ? {} : arguments[1];
+      var runOptions = arguments.length <= 1 || arguments[1] === undefined ? {} : arguments[1];
 
       this.options = _.extend(this.options, runOptions);
 
@@ -784,7 +985,9 @@ var Markua = (function () {
           _this.fileAccessor.get(chapter, function (error, contents) {
 
             // If we are given a cursor position, then insert that into the markua text
-            if (_this.options.cursor && _this.options.cursor.filename === chapter) contents = _.string.splice(contents, _this.options.cursor.position, 0, "{ data-markua-cursor-position: __markuaCursorPosition__ }\n");
+            // TODO: This will not work until inline attributes are done.
+            // if (this.options.cursor && this.options.cursor.filename === chapter)
+            //   contents = _.string.splice(contents, this.options.cursor.position, 0, "{ data-markua-cursor-position: __markuaCursorPosition__ }\n")
 
             cb(null, contents);
           });
@@ -797,13 +1000,13 @@ var Markua = (function () {
       var _this2 = this;
 
       async.map(_.compact(chapters), function (chapter, cb) {
-        // try {
-        var tokens = _Lexer2["default"].lex(chapter, _this2.options);
-        cb(null, _Parser2["default"].parse(tokens, _this2.options));
-        // } catch (e) {
-        // console.error(e);
-        // cb(e);
-        // }
+        try {
+          var tokens = _lexer2["default"].lex(chapter, _this2.options);
+          cb(null, _parser2["default"].parse(tokens, _this2.options));
+        } catch (e) {
+          console.error(e);
+          cb(e);
+        }
       }, function (error, results) {
         // Concat it
         done(null, results.join("\n"));
@@ -814,30 +1017,32 @@ var Markua = (function () {
   return Markua;
 })();
 
-Markua.WebFileAccessor = _webFileAccessor2["default"];
+Markua.WebFileAccessor = _web_file_accessor2["default"];
 
 exports["default"] = Markua;
 module.exports = exports["default"];
 }).call(this,require("1YiZ5S"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/markua.js","/")
-},{"./lexer":4,"./native_file_accessor":6,"./parser":7,"./web_file_accessor":9,"1YiZ5S":16,"async":10,"buffer":12,"object-assign":17,"underscore":85,"underscore.string":41}],6:[function(require,module,exports){
+},{"./lexer":5,"./native_file_accessor":7,"./parser":8,"./web_file_accessor":11,"1YiZ5S":18,"async":12,"buffer":14,"object-assign":19,"underscore":87,"underscore.string":43}],7:[function(require,module,exports){
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
 "use strict";
-
-var _interopRequireWildcard = function (obj) { return obj && obj.__esModule ? obj : { "default": obj }; };
-
-var _classCallCheck = function (instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } };
-
-var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
-
-var _inherits = function (subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) subClass.__proto__ = superClass; };
 
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
 
-var _FileAccessor2 = require("./file_accessor");
+var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
 
-var _FileAccessor3 = _interopRequireWildcard(_FileAccessor2);
+var _get = function get(_x, _x2, _x3) { var _again = true; _function: while (_again) { var object = _x, property = _x2, receiver = _x3; desc = parent = getter = undefined; _again = false; if (object === null) object = Function.prototype; var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { _x = parent; _x2 = property; _x3 = receiver; _again = true; continue _function; } } else if ("value" in desc) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } } };
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) subClass.__proto__ = superClass; }
+
+var _file_accessor = require("./file_accessor");
+
+var _file_accessor2 = _interopRequireDefault(_file_accessor);
 
 var fs,
     path = require("path");
@@ -849,15 +1054,13 @@ try {
 }
 
 var NativeFileAccessor = (function (_FileAccessor) {
+  _inherits(NativeFileAccessor, _FileAccessor);
+
   function NativeFileAccessor() {
     _classCallCheck(this, NativeFileAccessor);
 
-    if (_FileAccessor != null) {
-      _FileAccessor.apply(this, arguments);
-    }
+    _get(Object.getPrototypeOf(NativeFileAccessor.prototype), "constructor", this).apply(this, arguments);
   }
-
-  _inherits(NativeFileAccessor, _FileAccessor);
 
   _createClass(NativeFileAccessor, [{
     key: "get",
@@ -880,16 +1083,552 @@ var NativeFileAccessor = (function (_FileAccessor) {
   }]);
 
   return NativeFileAccessor;
-})(_FileAccessor3["default"]);
+})(_file_accessor2["default"]);
 
 exports["default"] = NativeFileAccessor;
 module.exports = exports["default"];
 }).call(this,require("1YiZ5S"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/native_file_accessor.js","/")
-},{"./file_accessor":3,"1YiZ5S":16,"buffer":12,"fs":11,"path":15}],7:[function(require,module,exports){
+},{"./file_accessor":3,"1YiZ5S":18,"buffer":14,"fs":13,"path":17}],8:[function(require,module,exports){
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
+"use strict";
 
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var _renderer = require("./renderer");
+
+var _renderer2 = _interopRequireDefault(_renderer);
+
+var _inline_lexer = require("./inline_lexer");
+
+var _inline_lexer2 = _interopRequireDefault(_inline_lexer);
+
+var _ = require("underscore");
+
+var Parser = (function () {
+  function Parser() {
+    var options = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
+
+    _classCallCheck(this, Parser);
+
+    this.options = options;
+    this.tokens = [];
+    this.token = null;
+    this.renderer = new _renderer2["default"]();
+    this.renderer.options = this.options;
+  }
+
+  _createClass(Parser, [{
+    key: "parse",
+
+    // Parse all the tokens
+    value: function parse(src) {
+      this.inline = new _inline_lexer2["default"](src.links, this.options);
+      this.tokens = src.reverse();
+
+      var out = "";
+      while (this.next()) {
+        out += this.tok();
+      }
+      return out;
+    }
+  }, {
+    key: "next",
+
+    // Next Token
+    value: function next() {
+      return this.token = this.tokens.pop();
+    }
+  }, {
+    key: "peek",
+
+    // Preview Next Token
+    value: function peek() {
+      return this.tokens[this.tokens.length - 1] || 0;
+    }
+  }, {
+    key: "parseText",
+
+    // Parse Text Tokens
+    value: function parseText() {
+      var body = this.token.text;
+
+      while (this.peek().type === "text") {
+        body += "\n" + this.next().text;
+      }
+
+      return this.inline.output(body);
+    }
+  }, {
+    key: "tok",
+
+    // Parse Current Token
+    value: function tok() {
+      var attributes = _.clone(this.attributes);
+      if (this.token.type !== "attribute") this.attributes = null;
+      switch (this.token.type) {
+        case "space":
+          {
+            return "";
+          }
+        case "hr":
+          {
+            return this.renderer.hr(attributes);
+          }
+        case "cursor":
+          {
+            return this.renderer.cursor();
+          }
+        case "heading":
+          {
+            return this.renderer.heading(this.inline.output(this.token.text), this.token.depth, this.token.text, attributes);
+          }
+        case "code":
+          {
+            return this.renderer.code(this.token.text, this.token.lang, this.token.escaped, attributes);
+          }
+        case "attribute":
+          {
+            // Set the attributes for the next tag
+            this.attributes = _.extend({}, this.attributes, _.object(_.pluck(this.token.attributes, "key"), _.pluck(this.token.attributes, "value")));
+            return "";
+          }
+        case "figure":
+          {
+            return this.renderer.figure(this.token.alt, this.token.image, this.token.caption, attributes);
+          }
+        case "table":
+          {
+            var header = "",
+                body = "",
+                i,
+                row,
+                cell,
+                flags,
+                j;
+
+            // header
+            cell = "";
+            for (i = 0; i < this.token.header.length; i++) {
+              flags = { header: true, align: this.token.align[i] };
+              cell += this.renderer.tablecell(this.inline.output(this.token.header[i]), { header: true, align: this.token.align[i] });
+            }
+            header += this.renderer.tablerow(cell);
+
+            for (i = 0; i < this.token.cells.length; i++) {
+              row = this.token.cells[i];
+
+              cell = "";
+              for (j = 0; j < row.length; j++) {
+                cell += this.renderer.tablecell(this.inline.output(row[j]), { header: false, align: this.token.align[j] });
+              }
+
+              body += this.renderer.tablerow(cell);
+            }
+            return this.renderer.table(header, body, attributes);
+          }
+        case "aside_start":
+          {
+            var body = "";
+
+            while (this.next().type !== "aside_end") {
+              body += this.tok();
+            }
+
+            return this.renderer.aside(body, attributes);
+          }
+        case "blurb_start":
+          {
+            var body = "";
+
+            while (this.next().type !== "blurb_end") {
+              body += this.tok();
+            }
+
+            return this.renderer.blurb(body, attributes);
+          }
+        case "blockquote_start":
+          {
+            var body = "";
+
+            while (this.next().type !== "blockquote_end") {
+              body += this.tok();
+            }
+
+            return this.renderer.blockquote(body, attributes);
+          }
+        case "list_start":
+          {
+            var body = "",
+                listType = this.token.listType,
+                start = this.token.start;
+
+            while (this.next().type !== "list_end") {
+              body += this.tok();
+            }
+
+            return this.renderer.list(body, listType, start, attributes);
+          }
+        case "list_item_start":
+          {
+            var body = "";
+
+            var _listType = this.token.listType,
+                title = this.token.bullet;
+
+            while (this.next().type !== "list_item_end") {
+              body += this.token.type === "text" ? this.parseText() : this.tok();
+            }
+
+            if (_listType === "definition") return this.renderer.definitionListItem(body, title, attributes);else return this.renderer.listitem(body, attributes);
+          }
+        case "paragraph":
+          {
+            return this.renderer.paragraph(this.inline.output(this.token.text), attributes);
+          }
+        case "text":
+          {
+            return this.renderer.paragraph(this.parseText(), attributes);
+          }
+      }
+    }
+  }], [{
+    key: "parse",
+    value: function parse(src, options) {
+      return new Parser(options).parse(src);
+    }
+  }]);
+
+  return Parser;
+})();
+
+exports["default"] = Parser;
+module.exports = exports["default"];
 }).call(this,require("1YiZ5S"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/parser.js","/")
-},{"1YiZ5S":16,"buffer":12}],8:[function(require,module,exports){
+},{"./inline_lexer":4,"./renderer":9,"1YiZ5S":18,"buffer":14,"underscore":87}],9:[function(require,module,exports){
+(function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var _constants = require("./constants");
+
+var _util = require("./util");
+
+var _ = require("underscore");
+
+var Renderer = (function () {
+  function Renderer() {
+    var options = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
+
+    _classCallCheck(this, Renderer);
+
+    this.options = options;
+  }
+
+  _createClass(Renderer, [{
+    key: "getHeadingClass",
+
+    // Return the correct heading class for the type of book that we are writing.
+    value: function getHeadingClass(level) {
+      switch (this.options.bookType) {
+        case "book":
+          return _constants.HEADING_BOOK_CLASS_MAP[level];
+        case "multi-part-book":
+          return _constants.HEADING_MULTI_PART_CLASS_MAP[level];
+        case "document":
+          return _constants.HEADING_DOCUMENT_CLASS_MAP[level];
+        default:
+          return "";
+      }
+    }
+  }, {
+    key: "convertAttributes",
+
+    // Take a object of attributes, and return a string that will be placed on the tag.
+    value: function convertAttributes(attributes, className) {
+      if (!attributes) {
+        return className ? " class=\"" + className + "\"" : "";
+      }
+      var attrString = " ";
+
+      // If we have a class specified in the tag that we are rendering, then make sure to add that
+      // class as well.
+      if (className) {
+        attrString += attributes["class"] ? "class=\"" + className + " " + attributes["class"] + "\" " : "class=\"" + className + "\"";
+        delete attributes["class"];
+      }
+
+      _.each(_.keys(attributes), function (key, i) {
+        attrString += key + "=\"" + attributes[key] + "\"";
+      });
+      return attrString;;
+    }
+  }, {
+    key: "code",
+    value: function code(_code, lang, escaped, attributes) {
+      // override the language from the attribute if we have to.
+      if (attributes && attributes["lang"]) {
+        lang = attributes["lang"];
+        delete attributes["lang"];
+      }
+
+      var attributesString = this.convertAttributes(attributes);
+
+      if (this.options.highlight) {
+        var out = this.options.highlight(_code, lang);
+        if (out !== null && out !== _code) {
+          escaped = true;
+          _code = out;
+        }
+      }
+
+      if (!lang) {
+        return "<pre" + attributesString + "><code>" + (escaped ? _code : (0, _constants.escape)(_code, true)) + "\n</code></pre>";
+      }
+
+      return "<pre" + attributesString + "><code class=\"" + this.options.langPrefix + (0, _constants.escape)(lang, true) + "\">" + (escaped ? _code : (0, _constants.escape)(_code, true)) + "\n</code></pre>\n";
+    }
+  }, {
+    key: "aside",
+    value: function aside(text, attributes) {
+      var attrs = this.convertAttributes(attributes, "aside");
+      return "<div" + attrs + ">\n" + text + "</div>\n";
+    }
+  }, {
+    key: "blurb",
+    value: function blurb(text, attributes) {
+      var attrs = this.convertAttributes(attributes, "blurb");
+      return "<div" + attrs + ">\n" + text + "</div>\n";
+    }
+  }, {
+    key: "blockquote",
+    value: function blockquote(quote, attributes) {
+      var attrs = this.convertAttributes(attributes);
+      return "<blockquote" + attrs + ">\n" + quote + "</blockquote>\n";
+    }
+  }, {
+    key: "figure",
+    value: function figure(altText, image, captionText, attributes) {
+      var _ref = attributes || {};
+
+      var align = _ref.align;
+      var alt = _ref.alt;
+      var caption = _ref.caption;
+
+      // Take em out
+      attributes = _.omit(attributes, "align", "alt", "caption");
+
+      // Determine the class
+      var className = "figure";
+      className += align ? " " + align : "";
+
+      // Figure out alt-text and caption
+      alt = altText || alt || "";
+      caption = captionText || caption;
+
+      // Get the other attributes
+      var attrs = this.convertAttributes(attributes, className);
+
+      var div = "<div" + attrs + ">\n  " + this.image(image, null, alt) + "\n" + this.caption(caption) + "</div>\n";
+      return div;
+    }
+  }, {
+    key: "caption",
+    value: function caption(text, attributes) {
+      var attrs = this.convertAttributes(attributes, "caption");
+      return text ? "  <p" + attrs + ">" + text + "</p>\n" : "";
+    }
+  }, {
+    key: "heading",
+    value: function heading(text, level, raw, attributes) {
+      var id = undefined;
+
+      if (attributes && attributes.id) {
+        id = attributes.id;
+        delete attributes["id"];
+      } else {
+        id = this.options.headerPrefix + raw.toLowerCase().replace(/[^\w]+/g, "-");
+      }
+
+      var attrs = this.convertAttributes(attributes, this.getHeadingClass(level));
+
+      return "<h" + level + ("" + attrs) + (" id=" + id + ">") + text + "</h" + level + ">\n";
+    }
+  }, {
+    key: "hr",
+    value: function hr(attributes) {
+      var attrs = this.convertAttributes(attributes);
+      return "<hr" + attrs + ">\n";
+    }
+  }, {
+    key: "list",
+    value: function list(body, listType, start, attributes) {
+      var typeTag,
+          typeAttribute = "",
+          startAttr = "";
+      start = start.substr(0, start.length - 1);
+
+      // Figure out the type of list, add some attributes
+      switch (listType) {
+        case "bullet":
+          typeTag = "ul";
+          break;
+        case "alphabetized":
+          typeTag = "ol";
+          typeAttribute = " type=\"" + (start === start.toUpperCase() ? "A" : "a") + "\"";
+          startAttr = start.toUpperCase() === "A" ? "" : " start=\"" + (_util.ALPHABET.indexOf(start.toUpperCase()) + 1) + "\"";
+          break;
+        case "definition":
+          typeTag = "dl";
+          break;
+        case "numeral":
+          typeTag = "ol";
+          typeAttribute = " type=\"" + (start === start.toUpperCase() ? "I" : "i") + "\"";
+          startAttr = (start = (0, _util.decimalize)(start) || 0) && start !== 1 ? " start=\"" + start + "\"" : "";
+          break;
+        case "number":
+          typeTag = "ol";
+          startAttr = start && start !== "1" ? " start=\"" + start + "\"" : "";
+          break;
+        default:
+          typeTag = "ol";
+      }
+
+      // Get the generic attributes for the list
+      var genericAttrs = this.convertAttributes(attributes);
+
+      return "<" + typeTag + typeAttribute + startAttr + genericAttrs + ">\n" + body + "</" + typeTag + ">\n";
+    }
+  }, {
+    key: "definitionListItem",
+    value: function definitionListItem(text, title, attributes) {
+      var attrs = this.convertAttributes(attributes);
+      return "<dt" + attrs + ">" + title + "</dt>\n<dd>" + text + "</dd>\n";
+    }
+  }, {
+    key: "listitem",
+    value: function listitem(text, attributes) {
+      var attrs = this.convertAttributes(attributes);
+      return "<li" + attrs + ">" + text + "</li>\n";
+    }
+  }, {
+    key: "paragraph",
+    value: function paragraph(text, attributes) {
+      text = text.replace(/\n/g, "<br/>\n");
+      var attrs = this.convertAttributes(attributes);
+      return "<p" + attrs + ">" + text + "</p>\n";
+    }
+  }, {
+    key: "table",
+    value: function table(header, body, attributes) {
+      var attrs = this.convertAttributes(attributes);
+      return "<table" + attrs + ">\n" + "<thead>\n" + header + "</thead>\n" + "<tbody>\n" + body + "</tbody>\n" + "</table>\n";
+    }
+  }, {
+    key: "tablerow",
+    value: function tablerow(content, attributes) {
+      var attrs = this.convertAttributes(attributes);
+      return "<tr" + attrs + ">\n" + content + "</tr>\n";
+    }
+  }, {
+    key: "tablecell",
+    value: function tablecell(content, flags, attributes) {
+      var type = flags.header ? "th" : "td";
+      var tag = flags.align ? "<" + type + " style=\"text-align: " + flags.align + "\">" : "<" + type + ">";
+      return tag + content + "</" + type + ">\n";
+    }
+  }, {
+    key: "cursor",
+
+    // Cursor
+    value: function cursor() {
+      return "<span id=\"__markuaCursorPosition__\"></span>";
+    }
+  }, {
+    key: "strong",
+
+    // span level renderer
+    value: function strong(text, attributes) {
+      var attrs = this.convertAttributes(attributes);
+      return "<strong" + attrs + ">" + text + "</strong>";
+    }
+  }, {
+    key: "em",
+    value: function em(text, attributes) {
+      var attrs = this.convertAttributes(attributes);
+      return "<em" + attrs + ">" + text + "</em>";
+    }
+  }, {
+    key: "codespan",
+    value: function codespan(text, attributes) {
+      var attrs = this.convertAttributes(attributes);
+      return "<code" + attrs + ">" + text + "</code>";
+    }
+  }, {
+    key: "br",
+    value: function br() {
+      return "<br>";
+    }
+  }, {
+    key: "del",
+    value: function del(text, attributes) {
+      return "<del>" + text + "</del>";
+    }
+  }, {
+    key: "link",
+    value: function link(href, title, text, attributes) {
+      if (this.options.sanitize) {
+        try {
+          var prot = decodeURIComponent((0, _constants.unescape)(href)).replace(/[^\w:]/g, "").toLowerCase();
+        } catch (e) {
+          return "";
+        }
+        if (prot.indexOf("javascript:") === 0 || prot.indexOf("vbscript:") === 0) {
+          return "";
+        }
+      }
+      var out = "<a href=\"" + href + "\"";
+      if (title) {
+        out += " title=\"" + title + "\"";
+      }
+      out += ">" + text + "</a>";
+      return out;
+    }
+  }, {
+    key: "image",
+    value: function image(href, title, text, attributes) {
+      if (!/http:|https:/.test(href)) href = "images/" + href;
+
+      var out = "<img src=\"" + href + "\" alt=\"" + text + "\"";
+      if (title) {
+        out += " title=\"" + title + "\"";
+      }
+      out += "/>";
+      return out;
+    }
+  }]);
+
+  return Renderer;
+})();
+
+exports["default"] = Renderer;
+module.exports = exports["default"];
+}).call(this,require("1YiZ5S"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/renderer.js","/")
+},{"./constants":1,"./util":10,"1YiZ5S":18,"buffer":14,"underscore":87}],10:[function(require,module,exports){
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
 'use strict';
 
@@ -946,54 +1685,50 @@ var decimalize = function decimalize(romanNumeral) {
 };
 exports.decimalize = decimalize;
 }).call(this,require("1YiZ5S"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/util.js","/")
-},{"1YiZ5S":16,"buffer":12}],9:[function(require,module,exports){
+},{"1YiZ5S":18,"buffer":14}],11:[function(require,module,exports){
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
 "use strict";
-
-var _interopRequireWildcard = function (obj) { return obj && obj.__esModule ? obj : { "default": obj }; };
-
-var _classCallCheck = function (instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } };
-
-var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
-
-var _inherits = function (subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) subClass.__proto__ = superClass; };
 
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
 
-var _FileAccessor2 = require("./file_accessor");
+var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
 
-var _FileAccessor3 = _interopRequireWildcard(_FileAccessor2);
+var _get = function get(_x3, _x4, _x5) { var _again = true; _function: while (_again) { var object = _x3, property = _x4, receiver = _x5; desc = parent = getter = undefined; _again = false; if (object === null) object = Function.prototype; var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { _x3 = parent; _x4 = property; _x5 = receiver; _again = true; continue _function; } } else if ("value" in desc) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } } };
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) subClass.__proto__ = superClass; }
+
+var _file_accessor = require("./file_accessor");
+
+var _file_accessor2 = _interopRequireDefault(_file_accessor);
 
 var WebFileAccessor = (function (_FileAccessor) {
+  _inherits(WebFileAccessor, _FileAccessor);
+
   function WebFileAccessor() {
     _classCallCheck(this, WebFileAccessor);
 
-    if (_FileAccessor != null) {
-      _FileAccessor.apply(this, arguments);
-    }
+    _get(Object.getPrototypeOf(WebFileAccessor.prototype), "constructor", this).apply(this, arguments);
   }
-
-  _inherits(WebFileAccessor, _FileAccessor);
 
   _createClass(WebFileAccessor, [{
     key: "getFilePrefix",
     value: function getFilePrefix(type) {
-      if (type === "code") {
-        return "" + this.projectPath + "/code";
-      } else {
-        return this.projectPath;
-      }
+      if (type === "code") return this.projectPath + "/code";else return this.projectPath;
     }
   }, {
     key: "get",
 
     // Retrieves a file from our client side data (faked)
     value: function get(filePath, cb) {
-      var type = arguments[2] === undefined ? "manuscript" : arguments[2];
+      var type = arguments.length <= 2 || arguments[2] === undefined ? "manuscript" : arguments[2];
 
-      var item = window.fileData["" + this.getFilePrefix(type) + "/" + filePath];
+      var item = window.fileData[this.getFilePrefix(type) + "/" + filePath];
       cb(null, item);
     }
   }, {
@@ -1002,19 +1737,19 @@ var WebFileAccessor = (function (_FileAccessor) {
     // This is required for the code block imports, maybe do the file retrieval in an async method as a pre
     // or post processing step
     value: function getSync(filePath) {
-      var type = arguments[1] === undefined ? "manuscript" : arguments[1];
+      var type = arguments.length <= 1 || arguments[1] === undefined ? "manuscript" : arguments[1];
 
-      return window.fileData["" + this.getFilePrefix(type) + "/" + filePath];
+      return window.fileData[this.getFilePrefix(type) + "/" + filePath];
     }
   }]);
 
   return WebFileAccessor;
-})(_FileAccessor3["default"]);
+})(_file_accessor2["default"]);
 
 exports["default"] = WebFileAccessor;
 module.exports = exports["default"];
 }).call(this,require("1YiZ5S"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/web_file_accessor.js","/")
-},{"./file_accessor":3,"1YiZ5S":16,"buffer":12}],10:[function(require,module,exports){
+},{"./file_accessor":3,"1YiZ5S":18,"buffer":14}],12:[function(require,module,exports){
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
 /*!
  * async
@@ -1060,9 +1795,6 @@ module.exports = exports["default"];
     };
 
     var _each = function (arr, iterator) {
-        if (arr.forEach) {
-            return arr.forEach(iterator);
-        }
         for (var i = 0; i < arr.length; i += 1) {
             iterator(arr[i], i, arr);
         }
@@ -1839,23 +2571,26 @@ module.exports = exports["default"];
             pause: function () {
                 if (q.paused === true) { return; }
                 q.paused = true;
-                q.process();
             },
             resume: function () {
                 if (q.paused === false) { return; }
                 q.paused = false;
-                q.process();
+                // Need to call q.process once per concurrent
+                // worker to preserve full concurrency after pause
+                for (var w = 1; w <= q.concurrency; w++) {
+                    async.setImmediate(q.process);
+                }
             }
         };
         return q;
     };
-    
+
     async.priorityQueue = function (worker, concurrency) {
-        
+
         function _compareTasks(a, b){
           return a.priority - b.priority;
         };
-        
+
         function _binarySearch(sequence, item, compare) {
           var beg = -1,
               end = sequence.length - 1;
@@ -1869,7 +2604,7 @@ module.exports = exports["default"];
           }
           return beg;
         }
-        
+
         function _insert(q, data, priority, callback) {
           if (!q.started){
             q.started = true;
@@ -1891,7 +2626,7 @@ module.exports = exports["default"];
                   priority: priority,
                   callback: typeof callback === 'function' ? callback : null
               };
-              
+
               q.tasks.splice(_binarySearch(q.tasks, item, _compareTasks) + 1, 0, item);
 
               if (q.saturated && q.tasks.length === q.concurrency) {
@@ -1900,15 +2635,15 @@ module.exports = exports["default"];
               async.setImmediate(q.process);
           });
         }
-        
+
         // Start with a normal queue
         var q = async.queue(worker, concurrency);
-        
+
         // Override push to accept second parameter representing priority
         q.push = function (data, priority, callback) {
           _insert(q, data, priority, callback);
         };
-        
+
         // Remove unshift function
         delete q.unshift;
 
@@ -2141,9 +2876,9 @@ module.exports = exports["default"];
 }());
 
 }).call(this,require("1YiZ5S"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/../node_modules/async/lib/async.js","/../node_modules/async/lib")
-},{"1YiZ5S":16,"buffer":12}],11:[function(require,module,exports){
+},{"1YiZ5S":18,"buffer":14}],13:[function(require,module,exports){
 
-},{"1YiZ5S":16,"buffer":12}],12:[function(require,module,exports){
+},{"1YiZ5S":18,"buffer":14}],14:[function(require,module,exports){
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
 /*!
  * The buffer module from node.js, for the browser.
@@ -3256,7 +3991,7 @@ function assert (test, message) {
 }
 
 }).call(this,require("1YiZ5S"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/../node_modules/gulp-browserify/node_modules/browserify/node_modules/buffer/index.js","/../node_modules/gulp-browserify/node_modules/browserify/node_modules/buffer")
-},{"1YiZ5S":16,"base64-js":13,"buffer":12,"ieee754":14}],13:[function(require,module,exports){
+},{"1YiZ5S":18,"base64-js":15,"buffer":14,"ieee754":16}],15:[function(require,module,exports){
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
 var lookup = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
 
@@ -3384,95 +4119,95 @@ var lookup = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
 }(typeof exports === 'undefined' ? (this.base64js = {}) : exports))
 
 }).call(this,require("1YiZ5S"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/../node_modules/gulp-browserify/node_modules/browserify/node_modules/buffer/node_modules/base64-js/lib/b64.js","/../node_modules/gulp-browserify/node_modules/browserify/node_modules/buffer/node_modules/base64-js/lib")
-},{"1YiZ5S":16,"buffer":12}],14:[function(require,module,exports){
+},{"1YiZ5S":18,"buffer":14}],16:[function(require,module,exports){
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
-exports.read = function(buffer, offset, isLE, mLen, nBytes) {
-  var e, m,
-      eLen = nBytes * 8 - mLen - 1,
-      eMax = (1 << eLen) - 1,
-      eBias = eMax >> 1,
-      nBits = -7,
-      i = isLE ? (nBytes - 1) : 0,
-      d = isLE ? -1 : 1,
-      s = buffer[offset + i];
+exports.read = function (buffer, offset, isLE, mLen, nBytes) {
+  var e, m
+  var eLen = nBytes * 8 - mLen - 1
+  var eMax = (1 << eLen) - 1
+  var eBias = eMax >> 1
+  var nBits = -7
+  var i = isLE ? (nBytes - 1) : 0
+  var d = isLE ? -1 : 1
+  var s = buffer[offset + i]
 
-  i += d;
+  i += d
 
-  e = s & ((1 << (-nBits)) - 1);
-  s >>= (-nBits);
-  nBits += eLen;
-  for (; nBits > 0; e = e * 256 + buffer[offset + i], i += d, nBits -= 8);
+  e = s & ((1 << (-nBits)) - 1)
+  s >>= (-nBits)
+  nBits += eLen
+  for (; nBits > 0; e = e * 256 + buffer[offset + i], i += d, nBits -= 8) {}
 
-  m = e & ((1 << (-nBits)) - 1);
-  e >>= (-nBits);
-  nBits += mLen;
-  for (; nBits > 0; m = m * 256 + buffer[offset + i], i += d, nBits -= 8);
+  m = e & ((1 << (-nBits)) - 1)
+  e >>= (-nBits)
+  nBits += mLen
+  for (; nBits > 0; m = m * 256 + buffer[offset + i], i += d, nBits -= 8) {}
 
   if (e === 0) {
-    e = 1 - eBias;
+    e = 1 - eBias
   } else if (e === eMax) {
-    return m ? NaN : ((s ? -1 : 1) * Infinity);
+    return m ? NaN : ((s ? -1 : 1) * Infinity)
   } else {
-    m = m + Math.pow(2, mLen);
-    e = e - eBias;
+    m = m + Math.pow(2, mLen)
+    e = e - eBias
   }
-  return (s ? -1 : 1) * m * Math.pow(2, e - mLen);
-};
+  return (s ? -1 : 1) * m * Math.pow(2, e - mLen)
+}
 
-exports.write = function(buffer, value, offset, isLE, mLen, nBytes) {
-  var e, m, c,
-      eLen = nBytes * 8 - mLen - 1,
-      eMax = (1 << eLen) - 1,
-      eBias = eMax >> 1,
-      rt = (mLen === 23 ? Math.pow(2, -24) - Math.pow(2, -77) : 0),
-      i = isLE ? 0 : (nBytes - 1),
-      d = isLE ? 1 : -1,
-      s = value < 0 || (value === 0 && 1 / value < 0) ? 1 : 0;
+exports.write = function (buffer, value, offset, isLE, mLen, nBytes) {
+  var e, m, c
+  var eLen = nBytes * 8 - mLen - 1
+  var eMax = (1 << eLen) - 1
+  var eBias = eMax >> 1
+  var rt = (mLen === 23 ? Math.pow(2, -24) - Math.pow(2, -77) : 0)
+  var i = isLE ? 0 : (nBytes - 1)
+  var d = isLE ? 1 : -1
+  var s = value < 0 || (value === 0 && 1 / value < 0) ? 1 : 0
 
-  value = Math.abs(value);
+  value = Math.abs(value)
 
   if (isNaN(value) || value === Infinity) {
-    m = isNaN(value) ? 1 : 0;
-    e = eMax;
+    m = isNaN(value) ? 1 : 0
+    e = eMax
   } else {
-    e = Math.floor(Math.log(value) / Math.LN2);
+    e = Math.floor(Math.log(value) / Math.LN2)
     if (value * (c = Math.pow(2, -e)) < 1) {
-      e--;
-      c *= 2;
+      e--
+      c *= 2
     }
     if (e + eBias >= 1) {
-      value += rt / c;
+      value += rt / c
     } else {
-      value += rt * Math.pow(2, 1 - eBias);
+      value += rt * Math.pow(2, 1 - eBias)
     }
     if (value * c >= 2) {
-      e++;
-      c /= 2;
+      e++
+      c /= 2
     }
 
     if (e + eBias >= eMax) {
-      m = 0;
-      e = eMax;
+      m = 0
+      e = eMax
     } else if (e + eBias >= 1) {
-      m = (value * c - 1) * Math.pow(2, mLen);
-      e = e + eBias;
+      m = (value * c - 1) * Math.pow(2, mLen)
+      e = e + eBias
     } else {
-      m = value * Math.pow(2, eBias - 1) * Math.pow(2, mLen);
-      e = 0;
+      m = value * Math.pow(2, eBias - 1) * Math.pow(2, mLen)
+      e = 0
     }
   }
 
-  for (; mLen >= 8; buffer[offset + i] = m & 0xff, i += d, m /= 256, mLen -= 8);
+  for (; mLen >= 8; buffer[offset + i] = m & 0xff, i += d, m /= 256, mLen -= 8) {}
 
-  e = (e << mLen) | m;
-  eLen += mLen;
-  for (; eLen > 0; buffer[offset + i] = e & 0xff, i += d, e /= 256, eLen -= 8);
+  e = (e << mLen) | m
+  eLen += mLen
+  for (; eLen > 0; buffer[offset + i] = e & 0xff, i += d, e /= 256, eLen -= 8) {}
 
-  buffer[offset + i - d] |= s * 128;
-};
+  buffer[offset + i - d] |= s * 128
+}
 
 }).call(this,require("1YiZ5S"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/../node_modules/gulp-browserify/node_modules/browserify/node_modules/buffer/node_modules/ieee754/index.js","/../node_modules/gulp-browserify/node_modules/browserify/node_modules/buffer/node_modules/ieee754")
-},{"1YiZ5S":16,"buffer":12}],15:[function(require,module,exports){
+},{"1YiZ5S":18,"buffer":14}],17:[function(require,module,exports){
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
 // Copyright Joyent, Inc. and other Node contributors.
 //
@@ -3700,7 +4435,7 @@ var substr = 'ab'.substr(-1) === 'b'
 ;
 
 }).call(this,require("1YiZ5S"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/../node_modules/gulp-browserify/node_modules/browserify/node_modules/path-browserify/index.js","/../node_modules/gulp-browserify/node_modules/browserify/node_modules/path-browserify")
-},{"1YiZ5S":16,"buffer":12}],16:[function(require,module,exports){
+},{"1YiZ5S":18,"buffer":14}],18:[function(require,module,exports){
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
 // shim for using process in browser
 
@@ -3767,7 +4502,7 @@ process.chdir = function (dir) {
 };
 
 }).call(this,require("1YiZ5S"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/../node_modules/gulp-browserify/node_modules/browserify/node_modules/process/browser.js","/../node_modules/gulp-browserify/node_modules/browserify/node_modules/process")
-},{"1YiZ5S":16,"buffer":12}],17:[function(require,module,exports){
+},{"1YiZ5S":18,"buffer":14}],19:[function(require,module,exports){
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
 'use strict';
 
@@ -3797,7 +4532,7 @@ module.exports = Object.assign || function (target, source) {
 };
 
 }).call(this,require("1YiZ5S"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/../node_modules/object-assign/index.js","/../node_modules/object-assign")
-},{"1YiZ5S":16,"buffer":12}],18:[function(require,module,exports){
+},{"1YiZ5S":18,"buffer":14}],20:[function(require,module,exports){
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
 var trim = require('./trim');
 var decap = require('./decapitalize');
@@ -3815,7 +4550,7 @@ module.exports = function camelize(str, decapitalize) {
 };
 
 }).call(this,require("1YiZ5S"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/../node_modules/underscore.string/camelize.js","/../node_modules/underscore.string")
-},{"./decapitalize":26,"./trim":78,"1YiZ5S":16,"buffer":12}],19:[function(require,module,exports){
+},{"./decapitalize":28,"./trim":80,"1YiZ5S":18,"buffer":14}],21:[function(require,module,exports){
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
 var makeString = require('./helper/makeString');
 
@@ -3827,7 +4562,7 @@ module.exports = function capitalize(str, lowercaseRest) {
 };
 
 }).call(this,require("1YiZ5S"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/../node_modules/underscore.string/capitalize.js","/../node_modules/underscore.string")
-},{"./helper/makeString":36,"1YiZ5S":16,"buffer":12}],20:[function(require,module,exports){
+},{"./helper/makeString":38,"1YiZ5S":18,"buffer":14}],22:[function(require,module,exports){
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
 var makeString = require('./helper/makeString');
 
@@ -3836,7 +4571,7 @@ module.exports = function chars(str) {
 };
 
 }).call(this,require("1YiZ5S"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/../node_modules/underscore.string/chars.js","/../node_modules/underscore.string")
-},{"./helper/makeString":36,"1YiZ5S":16,"buffer":12}],21:[function(require,module,exports){
+},{"./helper/makeString":38,"1YiZ5S":18,"buffer":14}],23:[function(require,module,exports){
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
 module.exports = function chop(str, step) {
   if (str == null) return [];
@@ -3846,7 +4581,7 @@ module.exports = function chop(str, step) {
 };
 
 }).call(this,require("1YiZ5S"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/../node_modules/underscore.string/chop.js","/../node_modules/underscore.string")
-},{"1YiZ5S":16,"buffer":12}],22:[function(require,module,exports){
+},{"1YiZ5S":18,"buffer":14}],24:[function(require,module,exports){
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
 var capitalize = require('./capitalize');
 var camelize = require('./camelize');
@@ -3858,7 +4593,7 @@ module.exports = function classify(str) {
 };
 
 }).call(this,require("1YiZ5S"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/../node_modules/underscore.string/classify.js","/../node_modules/underscore.string")
-},{"./camelize":18,"./capitalize":19,"./helper/makeString":36,"1YiZ5S":16,"buffer":12}],23:[function(require,module,exports){
+},{"./camelize":20,"./capitalize":21,"./helper/makeString":38,"1YiZ5S":18,"buffer":14}],25:[function(require,module,exports){
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
 var trim = require('./trim');
 
@@ -3867,7 +4602,7 @@ module.exports = function clean(str) {
 };
 
 }).call(this,require("1YiZ5S"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/../node_modules/underscore.string/clean.js","/../node_modules/underscore.string")
-},{"./trim":78,"1YiZ5S":16,"buffer":12}],24:[function(require,module,exports){
+},{"./trim":80,"1YiZ5S":18,"buffer":14}],26:[function(require,module,exports){
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
 var makeString = require('./helper/makeString');
 
@@ -3881,7 +4616,7 @@ module.exports = function(str, substr) {
 };
 
 }).call(this,require("1YiZ5S"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/../node_modules/underscore.string/count.js","/../node_modules/underscore.string")
-},{"./helper/makeString":36,"1YiZ5S":16,"buffer":12}],25:[function(require,module,exports){
+},{"./helper/makeString":38,"1YiZ5S":18,"buffer":14}],27:[function(require,module,exports){
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
 var trim = require('./trim');
 
@@ -3890,7 +4625,7 @@ module.exports = function dasherize(str) {
 };
 
 }).call(this,require("1YiZ5S"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/../node_modules/underscore.string/dasherize.js","/../node_modules/underscore.string")
-},{"./trim":78,"1YiZ5S":16,"buffer":12}],26:[function(require,module,exports){
+},{"./trim":80,"1YiZ5S":18,"buffer":14}],28:[function(require,module,exports){
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
 var makeString = require('./helper/makeString');
 
@@ -3900,7 +4635,7 @@ module.exports = function decapitalize(str) {
 };
 
 }).call(this,require("1YiZ5S"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/../node_modules/underscore.string/decapitalize.js","/../node_modules/underscore.string")
-},{"./helper/makeString":36,"1YiZ5S":16,"buffer":12}],27:[function(require,module,exports){
+},{"./helper/makeString":38,"1YiZ5S":18,"buffer":14}],29:[function(require,module,exports){
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
 var makeString = require('./helper/makeString');
 
@@ -3932,7 +4667,7 @@ module.exports = function dedent(str, pattern) {
 };
 
 }).call(this,require("1YiZ5S"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/../node_modules/underscore.string/dedent.js","/../node_modules/underscore.string")
-},{"./helper/makeString":36,"1YiZ5S":16,"buffer":12}],28:[function(require,module,exports){
+},{"./helper/makeString":38,"1YiZ5S":18,"buffer":14}],30:[function(require,module,exports){
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
 var makeString = require('./helper/makeString');
 var toPositive = require('./helper/toPositive');
@@ -3949,7 +4684,7 @@ module.exports = function endsWith(str, ends, position) {
 };
 
 }).call(this,require("1YiZ5S"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/../node_modules/underscore.string/endsWith.js","/../node_modules/underscore.string")
-},{"./helper/makeString":36,"./helper/toPositive":38,"1YiZ5S":16,"buffer":12}],29:[function(require,module,exports){
+},{"./helper/makeString":38,"./helper/toPositive":40,"1YiZ5S":18,"buffer":14}],31:[function(require,module,exports){
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
 var makeString = require('./helper/makeString');
 var escapeChars = require('./helper/escapeChars');
@@ -3971,7 +4706,7 @@ module.exports = function escapeHTML(str) {
 };
 
 }).call(this,require("1YiZ5S"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/../node_modules/underscore.string/escapeHTML.js","/../node_modules/underscore.string")
-},{"./helper/escapeChars":33,"./helper/makeString":36,"1YiZ5S":16,"buffer":12}],30:[function(require,module,exports){
+},{"./helper/escapeChars":35,"./helper/makeString":38,"1YiZ5S":18,"buffer":14}],32:[function(require,module,exports){
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
 module.exports = function() {
   var result = {};
@@ -3985,7 +4720,7 @@ module.exports = function() {
 };
 
 }).call(this,require("1YiZ5S"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/../node_modules/underscore.string/exports.js","/../node_modules/underscore.string")
-},{"1YiZ5S":16,"buffer":12}],31:[function(require,module,exports){
+},{"1YiZ5S":18,"buffer":14}],33:[function(require,module,exports){
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
 var makeString = require('./makeString');
 
@@ -3998,7 +4733,7 @@ module.exports = function adjacent(str, direction) {
 };
 
 }).call(this,require("1YiZ5S"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/../node_modules/underscore.string/helper/adjacent.js","/../node_modules/underscore.string/helper")
-},{"./makeString":36,"1YiZ5S":16,"buffer":12}],32:[function(require,module,exports){
+},{"./makeString":38,"1YiZ5S":18,"buffer":14}],34:[function(require,module,exports){
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
 var escapeRegExp = require('./escapeRegExp');
 
@@ -4012,7 +4747,7 @@ module.exports = function defaultToWhiteSpace(characters) {
 };
 
 }).call(this,require("1YiZ5S"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/../node_modules/underscore.string/helper/defaultToWhiteSpace.js","/../node_modules/underscore.string/helper")
-},{"./escapeRegExp":34,"1YiZ5S":16,"buffer":12}],33:[function(require,module,exports){
+},{"./escapeRegExp":36,"1YiZ5S":18,"buffer":14}],35:[function(require,module,exports){
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
 /* We're explicitly defining the list of entities we want to escape.
 nbsp is an HTML entity, but we don't want to escape all space characters in a string, hence its omission in this map.
@@ -4035,7 +4770,7 @@ var escapeChars = {
 module.exports = escapeChars;
 
 }).call(this,require("1YiZ5S"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/../node_modules/underscore.string/helper/escapeChars.js","/../node_modules/underscore.string/helper")
-},{"1YiZ5S":16,"buffer":12}],34:[function(require,module,exports){
+},{"1YiZ5S":18,"buffer":14}],36:[function(require,module,exports){
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
 var makeString = require('./makeString');
 
@@ -4044,7 +4779,7 @@ module.exports = function escapeRegExp(str) {
 };
 
 }).call(this,require("1YiZ5S"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/../node_modules/underscore.string/helper/escapeRegExp.js","/../node_modules/underscore.string/helper")
-},{"./makeString":36,"1YiZ5S":16,"buffer":12}],35:[function(require,module,exports){
+},{"./makeString":38,"1YiZ5S":18,"buffer":14}],37:[function(require,module,exports){
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
 /*
 We're explicitly defining the list of entities that might see in escape HTML strings
@@ -4067,7 +4802,7 @@ var htmlEntities = {
 module.exports = htmlEntities;
 
 }).call(this,require("1YiZ5S"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/../node_modules/underscore.string/helper/htmlEntities.js","/../node_modules/underscore.string/helper")
-},{"1YiZ5S":16,"buffer":12}],36:[function(require,module,exports){
+},{"1YiZ5S":18,"buffer":14}],38:[function(require,module,exports){
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
 /**
  * Ensure some object is a coerced to a string
@@ -4078,7 +4813,7 @@ module.exports = function makeString(object) {
 };
 
 }).call(this,require("1YiZ5S"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/../node_modules/underscore.string/helper/makeString.js","/../node_modules/underscore.string/helper")
-},{"1YiZ5S":16,"buffer":12}],37:[function(require,module,exports){
+},{"1YiZ5S":18,"buffer":14}],39:[function(require,module,exports){
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
 module.exports = function strRepeat(str, qty){
   if (qty < 1) return '';
@@ -4091,14 +4826,14 @@ module.exports = function strRepeat(str, qty){
 };
 
 }).call(this,require("1YiZ5S"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/../node_modules/underscore.string/helper/strRepeat.js","/../node_modules/underscore.string/helper")
-},{"1YiZ5S":16,"buffer":12}],38:[function(require,module,exports){
+},{"1YiZ5S":18,"buffer":14}],40:[function(require,module,exports){
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
 module.exports = function toPositive(number) {
   return number < 0 ? 0 : (+number || 0);
 };
 
 }).call(this,require("1YiZ5S"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/../node_modules/underscore.string/helper/toPositive.js","/../node_modules/underscore.string/helper")
-},{"1YiZ5S":16,"buffer":12}],39:[function(require,module,exports){
+},{"1YiZ5S":18,"buffer":14}],41:[function(require,module,exports){
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
 var capitalize = require('./capitalize');
 var underscored = require('./underscored');
@@ -4109,7 +4844,7 @@ module.exports = function humanize(str) {
 };
 
 }).call(this,require("1YiZ5S"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/../node_modules/underscore.string/humanize.js","/../node_modules/underscore.string")
-},{"./capitalize":19,"./trim":78,"./underscored":80,"1YiZ5S":16,"buffer":12}],40:[function(require,module,exports){
+},{"./capitalize":21,"./trim":80,"./underscored":82,"1YiZ5S":18,"buffer":14}],42:[function(require,module,exports){
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
 var makeString = require('./helper/makeString');
 
@@ -4119,7 +4854,7 @@ module.exports = function include(str, needle) {
 };
 
 }).call(this,require("1YiZ5S"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/../node_modules/underscore.string/include.js","/../node_modules/underscore.string")
-},{"./helper/makeString":36,"1YiZ5S":16,"buffer":12}],41:[function(require,module,exports){
+},{"./helper/makeString":38,"1YiZ5S":18,"buffer":14}],43:[function(require,module,exports){
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
 //  Underscore.string
 //  (c) 2010 Esa-Matti Suuronen <esa-matti aet suuronen dot org>
@@ -4259,7 +4994,7 @@ for (var key in prototypeMethods) prototype2method(prototypeMethods[key]);
 module.exports = s;
 
 }).call(this,require("1YiZ5S"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/../node_modules/underscore.string/index.js","/../node_modules/underscore.string")
-},{"./camelize":18,"./capitalize":19,"./chars":20,"./chop":21,"./classify":22,"./clean":23,"./count":24,"./dasherize":25,"./decapitalize":26,"./dedent":27,"./endsWith":28,"./escapeHTML":29,"./exports":30,"./helper/escapeRegExp":34,"./humanize":39,"./include":40,"./insert":42,"./isBlank":43,"./join":44,"./levenshtein":45,"./lines":46,"./lpad":47,"./lrpad":48,"./ltrim":49,"./naturalCmp":50,"./numberFormat":51,"./pad":52,"./pred":53,"./prune":54,"./quote":55,"./repeat":56,"./replaceAll":57,"./reverse":58,"./rpad":59,"./rtrim":60,"./slugify":61,"./splice":62,"./sprintf":63,"./startsWith":64,"./strLeft":65,"./strLeftBack":66,"./strRight":67,"./strRightBack":68,"./stripTags":69,"./succ":70,"./surround":71,"./swapCase":72,"./titleize":73,"./toBoolean":74,"./toNumber":75,"./toSentence":76,"./toSentenceSerial":77,"./trim":78,"./truncate":79,"./underscored":80,"./unescapeHTML":81,"./unquote":82,"./vsprintf":83,"./words":84,"1YiZ5S":16,"buffer":12}],42:[function(require,module,exports){
+},{"./camelize":20,"./capitalize":21,"./chars":22,"./chop":23,"./classify":24,"./clean":25,"./count":26,"./dasherize":27,"./decapitalize":28,"./dedent":29,"./endsWith":30,"./escapeHTML":31,"./exports":32,"./helper/escapeRegExp":36,"./humanize":41,"./include":42,"./insert":44,"./isBlank":45,"./join":46,"./levenshtein":47,"./lines":48,"./lpad":49,"./lrpad":50,"./ltrim":51,"./naturalCmp":52,"./numberFormat":53,"./pad":54,"./pred":55,"./prune":56,"./quote":57,"./repeat":58,"./replaceAll":59,"./reverse":60,"./rpad":61,"./rtrim":62,"./slugify":63,"./splice":64,"./sprintf":65,"./startsWith":66,"./strLeft":67,"./strLeftBack":68,"./strRight":69,"./strRightBack":70,"./stripTags":71,"./succ":72,"./surround":73,"./swapCase":74,"./titleize":75,"./toBoolean":76,"./toNumber":77,"./toSentence":78,"./toSentenceSerial":79,"./trim":80,"./truncate":81,"./underscored":82,"./unescapeHTML":83,"./unquote":84,"./vsprintf":85,"./words":86,"1YiZ5S":18,"buffer":14}],44:[function(require,module,exports){
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
 var splice = require('./splice');
 
@@ -4268,7 +5003,7 @@ module.exports = function insert(str, i, substr) {
 };
 
 }).call(this,require("1YiZ5S"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/../node_modules/underscore.string/insert.js","/../node_modules/underscore.string")
-},{"./splice":62,"1YiZ5S":16,"buffer":12}],43:[function(require,module,exports){
+},{"./splice":64,"1YiZ5S":18,"buffer":14}],45:[function(require,module,exports){
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
 var makeString = require('./helper/makeString');
 
@@ -4277,7 +5012,7 @@ module.exports = function isBlank(str) {
 };
 
 }).call(this,require("1YiZ5S"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/../node_modules/underscore.string/isBlank.js","/../node_modules/underscore.string")
-},{"./helper/makeString":36,"1YiZ5S":16,"buffer":12}],44:[function(require,module,exports){
+},{"./helper/makeString":38,"1YiZ5S":18,"buffer":14}],46:[function(require,module,exports){
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
 var makeString = require('./helper/makeString');
 var slice = [].slice;
@@ -4290,7 +5025,7 @@ module.exports = function join() {
 };
 
 }).call(this,require("1YiZ5S"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/../node_modules/underscore.string/join.js","/../node_modules/underscore.string")
-},{"./helper/makeString":36,"1YiZ5S":16,"buffer":12}],45:[function(require,module,exports){
+},{"./helper/makeString":38,"1YiZ5S":18,"buffer":14}],47:[function(require,module,exports){
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
 var makeString = require('./helper/makeString');
 
@@ -4346,7 +5081,7 @@ module.exports = function levenshtein(str1, str2) {
 };
 
 }).call(this,require("1YiZ5S"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/../node_modules/underscore.string/levenshtein.js","/../node_modules/underscore.string")
-},{"./helper/makeString":36,"1YiZ5S":16,"buffer":12}],46:[function(require,module,exports){
+},{"./helper/makeString":38,"1YiZ5S":18,"buffer":14}],48:[function(require,module,exports){
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
 module.exports = function lines(str) {
   if (str == null) return [];
@@ -4354,7 +5089,7 @@ module.exports = function lines(str) {
 };
 
 }).call(this,require("1YiZ5S"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/../node_modules/underscore.string/lines.js","/../node_modules/underscore.string")
-},{"1YiZ5S":16,"buffer":12}],47:[function(require,module,exports){
+},{"1YiZ5S":18,"buffer":14}],49:[function(require,module,exports){
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
 var pad = require('./pad');
 
@@ -4363,7 +5098,7 @@ module.exports = function lpad(str, length, padStr) {
 };
 
 }).call(this,require("1YiZ5S"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/../node_modules/underscore.string/lpad.js","/../node_modules/underscore.string")
-},{"./pad":52,"1YiZ5S":16,"buffer":12}],48:[function(require,module,exports){
+},{"./pad":54,"1YiZ5S":18,"buffer":14}],50:[function(require,module,exports){
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
 var pad = require('./pad');
 
@@ -4372,7 +5107,7 @@ module.exports = function lrpad(str, length, padStr) {
 };
 
 }).call(this,require("1YiZ5S"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/../node_modules/underscore.string/lrpad.js","/../node_modules/underscore.string")
-},{"./pad":52,"1YiZ5S":16,"buffer":12}],49:[function(require,module,exports){
+},{"./pad":54,"1YiZ5S":18,"buffer":14}],51:[function(require,module,exports){
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
 var makeString = require('./helper/makeString');
 var defaultToWhiteSpace = require('./helper/defaultToWhiteSpace');
@@ -4386,7 +5121,7 @@ module.exports = function ltrim(str, characters) {
 };
 
 }).call(this,require("1YiZ5S"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/../node_modules/underscore.string/ltrim.js","/../node_modules/underscore.string")
-},{"./helper/defaultToWhiteSpace":32,"./helper/makeString":36,"1YiZ5S":16,"buffer":12}],50:[function(require,module,exports){
+},{"./helper/defaultToWhiteSpace":34,"./helper/makeString":38,"1YiZ5S":18,"buffer":14}],52:[function(require,module,exports){
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
 module.exports = function naturalCmp(str1, str2) {
   if (str1 == str2) return 0;
@@ -4419,7 +5154,7 @@ module.exports = function naturalCmp(str1, str2) {
 };
 
 }).call(this,require("1YiZ5S"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/../node_modules/underscore.string/naturalCmp.js","/../node_modules/underscore.string")
-},{"1YiZ5S":16,"buffer":12}],51:[function(require,module,exports){
+},{"1YiZ5S":18,"buffer":14}],53:[function(require,module,exports){
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
 module.exports = function numberFormat(number, dec, dsep, tsep) {
   if (isNaN(number) || number == null) return '';
@@ -4435,7 +5170,7 @@ module.exports = function numberFormat(number, dec, dsep, tsep) {
 };
 
 }).call(this,require("1YiZ5S"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/../node_modules/underscore.string/numberFormat.js","/../node_modules/underscore.string")
-},{"1YiZ5S":16,"buffer":12}],52:[function(require,module,exports){
+},{"1YiZ5S":18,"buffer":14}],54:[function(require,module,exports){
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
 var makeString = require('./helper/makeString');
 var strRepeat = require('./helper/strRepeat');
@@ -4465,7 +5200,7 @@ module.exports = function pad(str, length, padStr, type) {
 };
 
 }).call(this,require("1YiZ5S"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/../node_modules/underscore.string/pad.js","/../node_modules/underscore.string")
-},{"./helper/makeString":36,"./helper/strRepeat":37,"1YiZ5S":16,"buffer":12}],53:[function(require,module,exports){
+},{"./helper/makeString":38,"./helper/strRepeat":39,"1YiZ5S":18,"buffer":14}],55:[function(require,module,exports){
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
 var adjacent = require('./helper/adjacent');
 
@@ -4474,7 +5209,7 @@ module.exports = function succ(str) {
 };
 
 }).call(this,require("1YiZ5S"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/../node_modules/underscore.string/pred.js","/../node_modules/underscore.string")
-},{"./helper/adjacent":31,"1YiZ5S":16,"buffer":12}],54:[function(require,module,exports){
+},{"./helper/adjacent":33,"1YiZ5S":18,"buffer":14}],56:[function(require,module,exports){
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
 /**
  * _s.prune: a more elegant version of truncate
@@ -4505,7 +5240,7 @@ module.exports = function prune(str, length, pruneStr) {
 };
 
 }).call(this,require("1YiZ5S"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/../node_modules/underscore.string/prune.js","/../node_modules/underscore.string")
-},{"./helper/makeString":36,"./rtrim":60,"1YiZ5S":16,"buffer":12}],55:[function(require,module,exports){
+},{"./helper/makeString":38,"./rtrim":62,"1YiZ5S":18,"buffer":14}],57:[function(require,module,exports){
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
 var surround = require('./surround');
 
@@ -4514,7 +5249,7 @@ module.exports = function quote(str, quoteChar) {
 };
 
 }).call(this,require("1YiZ5S"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/../node_modules/underscore.string/quote.js","/../node_modules/underscore.string")
-},{"./surround":71,"1YiZ5S":16,"buffer":12}],56:[function(require,module,exports){
+},{"./surround":73,"1YiZ5S":18,"buffer":14}],58:[function(require,module,exports){
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
 var makeString = require('./helper/makeString');
 var strRepeat = require('./helper/strRepeat');
@@ -4533,7 +5268,7 @@ module.exports = function repeat(str, qty, separator) {
 };
 
 }).call(this,require("1YiZ5S"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/../node_modules/underscore.string/repeat.js","/../node_modules/underscore.string")
-},{"./helper/makeString":36,"./helper/strRepeat":37,"1YiZ5S":16,"buffer":12}],57:[function(require,module,exports){
+},{"./helper/makeString":38,"./helper/strRepeat":39,"1YiZ5S":18,"buffer":14}],59:[function(require,module,exports){
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
 var makeString = require('./helper/makeString');
 
@@ -4545,7 +5280,7 @@ module.exports = function replaceAll(str, find, replace, ignorecase) {
 };
 
 }).call(this,require("1YiZ5S"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/../node_modules/underscore.string/replaceAll.js","/../node_modules/underscore.string")
-},{"./helper/makeString":36,"1YiZ5S":16,"buffer":12}],58:[function(require,module,exports){
+},{"./helper/makeString":38,"1YiZ5S":18,"buffer":14}],60:[function(require,module,exports){
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
 var chars = require('./chars');
 
@@ -4554,7 +5289,7 @@ module.exports = function reverse(str) {
 };
 
 }).call(this,require("1YiZ5S"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/../node_modules/underscore.string/reverse.js","/../node_modules/underscore.string")
-},{"./chars":20,"1YiZ5S":16,"buffer":12}],59:[function(require,module,exports){
+},{"./chars":22,"1YiZ5S":18,"buffer":14}],61:[function(require,module,exports){
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
 var pad = require('./pad');
 
@@ -4563,7 +5298,7 @@ module.exports = function rpad(str, length, padStr) {
 };
 
 }).call(this,require("1YiZ5S"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/../node_modules/underscore.string/rpad.js","/../node_modules/underscore.string")
-},{"./pad":52,"1YiZ5S":16,"buffer":12}],60:[function(require,module,exports){
+},{"./pad":54,"1YiZ5S":18,"buffer":14}],62:[function(require,module,exports){
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
 var makeString = require('./helper/makeString');
 var defaultToWhiteSpace = require('./helper/defaultToWhiteSpace');
@@ -4577,7 +5312,7 @@ module.exports = function rtrim(str, characters) {
 };
 
 }).call(this,require("1YiZ5S"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/../node_modules/underscore.string/rtrim.js","/../node_modules/underscore.string")
-},{"./helper/defaultToWhiteSpace":32,"./helper/makeString":36,"1YiZ5S":16,"buffer":12}],61:[function(require,module,exports){
+},{"./helper/defaultToWhiteSpace":34,"./helper/makeString":38,"1YiZ5S":18,"buffer":14}],63:[function(require,module,exports){
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
 var makeString = require('./helper/makeString');
 var defaultToWhiteSpace = require('./helper/defaultToWhiteSpace');
@@ -4598,7 +5333,7 @@ module.exports = function slugify(str) {
 };
 
 }).call(this,require("1YiZ5S"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/../node_modules/underscore.string/slugify.js","/../node_modules/underscore.string")
-},{"./dasherize":25,"./helper/defaultToWhiteSpace":32,"./helper/makeString":36,"./trim":78,"1YiZ5S":16,"buffer":12}],62:[function(require,module,exports){
+},{"./dasherize":27,"./helper/defaultToWhiteSpace":34,"./helper/makeString":38,"./trim":80,"1YiZ5S":18,"buffer":14}],64:[function(require,module,exports){
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
 var chars = require('./chars');
 
@@ -4609,7 +5344,7 @@ module.exports = function splice(str, i, howmany, substr) {
 };
 
 }).call(this,require("1YiZ5S"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/../node_modules/underscore.string/splice.js","/../node_modules/underscore.string")
-},{"./chars":20,"1YiZ5S":16,"buffer":12}],63:[function(require,module,exports){
+},{"./chars":22,"1YiZ5S":18,"buffer":14}],65:[function(require,module,exports){
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
 // sprintf() for JavaScript 0.7-beta1
 // http://www.diveintojavascript.com/projects/javascript-sprintf
@@ -4737,7 +5472,7 @@ var sprintf = (function() {
 module.exports = sprintf;
 
 }).call(this,require("1YiZ5S"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/../node_modules/underscore.string/sprintf.js","/../node_modules/underscore.string")
-},{"./helper/strRepeat":37,"1YiZ5S":16,"buffer":12}],64:[function(require,module,exports){
+},{"./helper/strRepeat":39,"1YiZ5S":18,"buffer":14}],66:[function(require,module,exports){
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
 var makeString = require('./helper/makeString');
 var toPositive = require('./helper/toPositive');
@@ -4750,7 +5485,7 @@ module.exports = function startsWith(str, starts, position) {
 };
 
 }).call(this,require("1YiZ5S"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/../node_modules/underscore.string/startsWith.js","/../node_modules/underscore.string")
-},{"./helper/makeString":36,"./helper/toPositive":38,"1YiZ5S":16,"buffer":12}],65:[function(require,module,exports){
+},{"./helper/makeString":38,"./helper/toPositive":40,"1YiZ5S":18,"buffer":14}],67:[function(require,module,exports){
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
 var makeString = require('./helper/makeString');
 
@@ -4762,7 +5497,7 @@ module.exports = function strLeft(str, sep) {
 };
 
 }).call(this,require("1YiZ5S"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/../node_modules/underscore.string/strLeft.js","/../node_modules/underscore.string")
-},{"./helper/makeString":36,"1YiZ5S":16,"buffer":12}],66:[function(require,module,exports){
+},{"./helper/makeString":38,"1YiZ5S":18,"buffer":14}],68:[function(require,module,exports){
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
 var makeString = require('./helper/makeString');
 
@@ -4774,7 +5509,7 @@ module.exports = function strLeftBack(str, sep) {
 };
 
 }).call(this,require("1YiZ5S"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/../node_modules/underscore.string/strLeftBack.js","/../node_modules/underscore.string")
-},{"./helper/makeString":36,"1YiZ5S":16,"buffer":12}],67:[function(require,module,exports){
+},{"./helper/makeString":38,"1YiZ5S":18,"buffer":14}],69:[function(require,module,exports){
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
 var makeString = require('./helper/makeString');
 
@@ -4786,7 +5521,7 @@ module.exports = function strRight(str, sep) {
 };
 
 }).call(this,require("1YiZ5S"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/../node_modules/underscore.string/strRight.js","/../node_modules/underscore.string")
-},{"./helper/makeString":36,"1YiZ5S":16,"buffer":12}],68:[function(require,module,exports){
+},{"./helper/makeString":38,"1YiZ5S":18,"buffer":14}],70:[function(require,module,exports){
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
 var makeString = require('./helper/makeString');
 
@@ -4798,7 +5533,7 @@ module.exports = function strRightBack(str, sep) {
 };
 
 }).call(this,require("1YiZ5S"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/../node_modules/underscore.string/strRightBack.js","/../node_modules/underscore.string")
-},{"./helper/makeString":36,"1YiZ5S":16,"buffer":12}],69:[function(require,module,exports){
+},{"./helper/makeString":38,"1YiZ5S":18,"buffer":14}],71:[function(require,module,exports){
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
 var makeString = require('./helper/makeString');
 
@@ -4807,7 +5542,7 @@ module.exports = function stripTags(str) {
 };
 
 }).call(this,require("1YiZ5S"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/../node_modules/underscore.string/stripTags.js","/../node_modules/underscore.string")
-},{"./helper/makeString":36,"1YiZ5S":16,"buffer":12}],70:[function(require,module,exports){
+},{"./helper/makeString":38,"1YiZ5S":18,"buffer":14}],72:[function(require,module,exports){
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
 var adjacent = require('./helper/adjacent');
 
@@ -4816,14 +5551,14 @@ module.exports = function succ(str) {
 };
 
 }).call(this,require("1YiZ5S"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/../node_modules/underscore.string/succ.js","/../node_modules/underscore.string")
-},{"./helper/adjacent":31,"1YiZ5S":16,"buffer":12}],71:[function(require,module,exports){
+},{"./helper/adjacent":33,"1YiZ5S":18,"buffer":14}],73:[function(require,module,exports){
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
 module.exports = function surround(str, wrapper) {
   return [wrapper, str, wrapper].join('');
 };
 
 }).call(this,require("1YiZ5S"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/../node_modules/underscore.string/surround.js","/../node_modules/underscore.string")
-},{"1YiZ5S":16,"buffer":12}],72:[function(require,module,exports){
+},{"1YiZ5S":18,"buffer":14}],74:[function(require,module,exports){
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
 var makeString = require('./helper/makeString');
 
@@ -4834,7 +5569,7 @@ module.exports = function swapCase(str) {
 };
 
 }).call(this,require("1YiZ5S"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/../node_modules/underscore.string/swapCase.js","/../node_modules/underscore.string")
-},{"./helper/makeString":36,"1YiZ5S":16,"buffer":12}],73:[function(require,module,exports){
+},{"./helper/makeString":38,"1YiZ5S":18,"buffer":14}],75:[function(require,module,exports){
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
 var makeString = require('./helper/makeString');
 
@@ -4845,7 +5580,7 @@ module.exports = function titleize(str) {
 };
 
 }).call(this,require("1YiZ5S"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/../node_modules/underscore.string/titleize.js","/../node_modules/underscore.string")
-},{"./helper/makeString":36,"1YiZ5S":16,"buffer":12}],74:[function(require,module,exports){
+},{"./helper/makeString":38,"1YiZ5S":18,"buffer":14}],76:[function(require,module,exports){
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
 var trim = require('./trim');
 
@@ -4869,7 +5604,7 @@ module.exports = function toBoolean(str, trueValues, falseValues) {
 };
 
 }).call(this,require("1YiZ5S"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/../node_modules/underscore.string/toBoolean.js","/../node_modules/underscore.string")
-},{"./trim":78,"1YiZ5S":16,"buffer":12}],75:[function(require,module,exports){
+},{"./trim":80,"1YiZ5S":18,"buffer":14}],77:[function(require,module,exports){
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
 var trim = require('./trim');
 
@@ -4880,7 +5615,7 @@ module.exports = function toNumber(num, precision) {
 };
 
 }).call(this,require("1YiZ5S"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/../node_modules/underscore.string/toNumber.js","/../node_modules/underscore.string")
-},{"./trim":78,"1YiZ5S":16,"buffer":12}],76:[function(require,module,exports){
+},{"./trim":80,"1YiZ5S":18,"buffer":14}],78:[function(require,module,exports){
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
 var rtrim = require('./rtrim');
 
@@ -4896,7 +5631,7 @@ module.exports = function toSentence(array, separator, lastSeparator, serial) {
 };
 
 }).call(this,require("1YiZ5S"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/../node_modules/underscore.string/toSentence.js","/../node_modules/underscore.string")
-},{"./rtrim":60,"1YiZ5S":16,"buffer":12}],77:[function(require,module,exports){
+},{"./rtrim":62,"1YiZ5S":18,"buffer":14}],79:[function(require,module,exports){
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
 var toSentence = require('./toSentence');
 
@@ -4905,7 +5640,7 @@ module.exports = function toSentenceSerial(array, sep, lastSep) {
 };
 
 }).call(this,require("1YiZ5S"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/../node_modules/underscore.string/toSentenceSerial.js","/../node_modules/underscore.string")
-},{"./toSentence":76,"1YiZ5S":16,"buffer":12}],78:[function(require,module,exports){
+},{"./toSentence":78,"1YiZ5S":18,"buffer":14}],80:[function(require,module,exports){
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
 var makeString = require('./helper/makeString');
 var defaultToWhiteSpace = require('./helper/defaultToWhiteSpace');
@@ -4919,7 +5654,7 @@ module.exports = function trim(str, characters) {
 };
 
 }).call(this,require("1YiZ5S"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/../node_modules/underscore.string/trim.js","/../node_modules/underscore.string")
-},{"./helper/defaultToWhiteSpace":32,"./helper/makeString":36,"1YiZ5S":16,"buffer":12}],79:[function(require,module,exports){
+},{"./helper/defaultToWhiteSpace":34,"./helper/makeString":38,"1YiZ5S":18,"buffer":14}],81:[function(require,module,exports){
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
 var makeString = require('./helper/makeString');
 
@@ -4931,7 +5666,7 @@ module.exports = function truncate(str, length, truncateStr) {
 };
 
 }).call(this,require("1YiZ5S"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/../node_modules/underscore.string/truncate.js","/../node_modules/underscore.string")
-},{"./helper/makeString":36,"1YiZ5S":16,"buffer":12}],80:[function(require,module,exports){
+},{"./helper/makeString":38,"1YiZ5S":18,"buffer":14}],82:[function(require,module,exports){
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
 var trim = require('./trim');
 
@@ -4940,7 +5675,7 @@ module.exports = function underscored(str) {
 };
 
 }).call(this,require("1YiZ5S"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/../node_modules/underscore.string/underscored.js","/../node_modules/underscore.string")
-},{"./trim":78,"1YiZ5S":16,"buffer":12}],81:[function(require,module,exports){
+},{"./trim":80,"1YiZ5S":18,"buffer":14}],83:[function(require,module,exports){
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
 var makeString = require('./helper/makeString');
 var htmlEntities = require('./helper/htmlEntities');
@@ -4962,7 +5697,7 @@ module.exports = function unescapeHTML(str) {
 };
 
 }).call(this,require("1YiZ5S"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/../node_modules/underscore.string/unescapeHTML.js","/../node_modules/underscore.string")
-},{"./helper/htmlEntities":35,"./helper/makeString":36,"1YiZ5S":16,"buffer":12}],82:[function(require,module,exports){
+},{"./helper/htmlEntities":37,"./helper/makeString":38,"1YiZ5S":18,"buffer":14}],84:[function(require,module,exports){
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
 module.exports = function unquote(str, quoteChar) {
   quoteChar = quoteChar || '"';
@@ -4972,7 +5707,7 @@ module.exports = function unquote(str, quoteChar) {
 };
 
 }).call(this,require("1YiZ5S"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/../node_modules/underscore.string/unquote.js","/../node_modules/underscore.string")
-},{"1YiZ5S":16,"buffer":12}],83:[function(require,module,exports){
+},{"1YiZ5S":18,"buffer":14}],85:[function(require,module,exports){
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
 var sprintf = require('./sprintf');
 
@@ -4982,7 +5717,7 @@ module.exports = function vsprintf(fmt, argv) {
 };
 
 }).call(this,require("1YiZ5S"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/../node_modules/underscore.string/vsprintf.js","/../node_modules/underscore.string")
-},{"./sprintf":63,"1YiZ5S":16,"buffer":12}],84:[function(require,module,exports){
+},{"./sprintf":65,"1YiZ5S":18,"buffer":14}],86:[function(require,module,exports){
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
 var isBlank = require('./isBlank');
 var trim = require('./trim');
@@ -4993,7 +5728,7 @@ module.exports = function words(str, delimiter) {
 };
 
 }).call(this,require("1YiZ5S"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/../node_modules/underscore.string/words.js","/../node_modules/underscore.string")
-},{"./isBlank":43,"./trim":78,"1YiZ5S":16,"buffer":12}],85:[function(require,module,exports){
+},{"./isBlank":45,"./trim":80,"1YiZ5S":18,"buffer":14}],87:[function(require,module,exports){
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
 //     Underscore.js 1.8.3
 //     http://underscorejs.org
@@ -6545,4 +7280,4 @@ module.exports = function words(str, delimiter) {
 }.call(this));
 
 }).call(this,require("1YiZ5S"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/../node_modules/underscore/underscore.js","/../node_modules/underscore")
-},{"1YiZ5S":16,"buffer":12}]},{},[2])
+},{"1YiZ5S":18,"buffer":14}]},{},[2])

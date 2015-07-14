@@ -1,35 +1,35 @@
 "use strict";
 
-var _interopRequireWildcard = function (obj) { return obj && obj.__esModule ? obj : { "default": obj }; };
-
-var _classCallCheck = function (instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } };
-
-var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
-
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
 
-var _Renderer = require("./renderer");
+var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
 
-var _Renderer2 = _interopRequireWildcard(_Renderer);
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
 
-var _InlineLexer = require("./inline_lexer");
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
-var _InlineLexer2 = _interopRequireWildcard(_InlineLexer);
+var _renderer = require("./renderer");
+
+var _renderer2 = _interopRequireDefault(_renderer);
+
+var _inline_lexer = require("./inline_lexer");
+
+var _inline_lexer2 = _interopRequireDefault(_inline_lexer);
 
 var _ = require("underscore");
 
 var Parser = (function () {
   function Parser() {
-    var options = arguments[0] === undefined ? {} : arguments[0];
+    var options = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
 
     _classCallCheck(this, Parser);
 
     this.options = options;
     this.tokens = [];
     this.token = null;
-    this.renderer = new _Renderer2["default"]();
+    this.renderer = new _renderer2["default"]();
     this.renderer.options = this.options;
   }
 
@@ -38,7 +38,7 @@ var Parser = (function () {
 
     // Parse all the tokens
     value: function parse(src) {
-      this.inline = new _InlineLexer2["default"](src.links, this.options);
+      this.inline = new _inline_lexer2["default"](src.links, this.options);
       this.tokens = src.reverse();
 
       var out = "";
@@ -195,11 +195,7 @@ var Parser = (function () {
               body += this.token.type === "text" ? this.parseText() : this.tok();
             }
 
-            if (_listType === "definition") {
-              return this.renderer.definitionListItem(body, title, attributes);
-            } else {
-              return this.renderer.listitem(body, attributes);
-            }
+            if (_listType === "definition") return this.renderer.definitionListItem(body, title, attributes);else return this.renderer.listitem(body, attributes);
           }
         case "paragraph":
           {

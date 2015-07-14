@@ -1,16 +1,16 @@
 "use strict";
 
-var _classCallCheck = function (instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } };
-
-var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
-
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
 
-var _block = require("./constants");
+var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
 
-var _characterIsNext$decimalize = require("./util");
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var _constants = require("./constants");
+
+var _util = require("./util");
 
 var _ = require("underscore");
 
@@ -18,14 +18,14 @@ var _ = require("underscore");
 
 var Lexer = (function () {
   function Lexer() {
-    var options = arguments[0] === undefined ? {} : arguments[0];
+    var options = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
 
     _classCallCheck(this, Lexer);
 
     this.tokens = [];
     this.tokens.links = {};
     this.options = options;
-    this.rules = _block.block.normal;
+    this.rules = _constants.block.normal;
     this.warnings = [];
   }
 
@@ -195,7 +195,7 @@ var Lexer = (function () {
               code = undefined;
 
           // Read the file, output a codeblock with that file's language
-          var file = ext ? "" + fileWithoutExt + "." + ext : fileWithoutExt;
+          var file = ext ? fileWithoutExt + "." + ext : fileWithoutExt;
 
           if (code = this.options.fileAccessor.getSync(file, "code")) {
             this.tokens.push({
@@ -259,7 +259,7 @@ var Lexer = (function () {
                     current = _this.rules.list.alphabetized.exec(item) && _this.rules.list.alphabetized.exec(item)[1] || null;
 
                     // Warn for alpha list
-                    if (prevIndex !== null && !_characterIsNext$decimalize.characterIsNext(current, prevIndex)) _this.warnings.push(warning);
+                    if (prevIndex !== null && !(0, _util.characterIsNext)(current, prevIndex)) _this.warnings.push(warning);
 
                     return current;
                   case "numeral":
@@ -267,7 +267,7 @@ var Lexer = (function () {
                     if (current) bull = current = current.substr(0, current.length - 1);
 
                     // Warn for roman numerals
-                    if (prevIndex && _characterIsNext$decimalize.decimalize(current) !== _characterIsNext$decimalize.decimalize(prevIndex) + 1) _this.warnings.push(warning);
+                    if (prevIndex && (0, _util.decimalize)(current) !== (0, _util.decimalize)(prevIndex) + 1) _this.warnings.push(warning);
 
                     return current;
                   case "bullet":
