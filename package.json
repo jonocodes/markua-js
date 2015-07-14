@@ -1,6 +1,6 @@
 {
   "name": "markua-js",
-  "version": "1.0.0",
+  "version": "0.0.1",
   "description": "A markua implementation in javascript.",
   "main": "build/markua.js",
   "scripts": {
