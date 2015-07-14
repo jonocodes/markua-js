@@ -28,4 +28,3 @@ Run the markua executable by running `./markua`, symlink it to somewhere like
 
 #### TODO
 See the issues list [here](https://github.com/bradens/markua-js/issues)
-
