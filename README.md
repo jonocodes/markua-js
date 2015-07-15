@@ -27,4 +27,4 @@ Run the markua executable by running `./markua`, symlink it to somewhere like
 `usr/local/bin` for ease of use.
 
 #### TODO
-See the issues list [here](https://github.com/bradens/markua-js/issues)
+See the issues list [here](https://github.com/markuadoc/markua-js/issues)
