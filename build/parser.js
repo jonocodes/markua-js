@@ -20,6 +20,10 @@ var _inline_lexer2 = _interopRequireDefault(_inline_lexer);
 
 var _ = require("underscore");
 
+// Class used to parse the tokens created by the Lexer, then call out to the
+// appropriate render method to ouput the html.  Could have different renderers
+// plugged into it.
+
 var Parser = (function () {
   function Parser() {
     var options = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
@@ -36,7 +40,7 @@ var Parser = (function () {
   _createClass(Parser, [{
     key: "parse",
 
-    // Parse all the tokens
+    // Parse all the tokens, one by one.
     value: function parse(src) {
       this.inline = new _inline_lexer2["default"](src.links, this.options);
       this.tokens = src.reverse();
@@ -89,10 +93,6 @@ var Parser = (function () {
         case "hr":
           {
             return this.renderer.hr(attributes);
-          }
-        case "cursor":
-          {
-            return this.renderer.cursor();
           }
         case "heading":
           {
@@ -209,6 +209,8 @@ var Parser = (function () {
     }
   }], [{
     key: "parse",
+
+    // Static method to start parsing a token set
     value: function parse(src, options) {
       return new Parser(options).parse(src);
     }

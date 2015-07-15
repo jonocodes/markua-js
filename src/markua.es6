@@ -23,7 +23,7 @@ const DEFAULT_OPTIONS = {
 
 class Markua {
   // Run the markua book generator on a given project path.
-  constructor(projectPath, options) {
+  constructor(projectPath = null, options) {
     this.projectPath = projectPath;
     this.options = ObjectAssign(DEFAULT_OPTIONS, options);
     this.options.projectPath = projectPath;
@@ -31,7 +31,12 @@ class Markua {
     this.options.fileAccessor = this.fileAccessor;
   }
 
-  run (cb, runOptions = {}) {
+  runSource(source, cb, runOptions = {}) {
+    this.options = _.extend(this.options, runOptions);
+    this.processChapters([source], cb);
+  }
+
+  run(cb, runOptions = {}) {
     this.options = _.extend(this.options, runOptions);
 
     // First, get all the chapters in the book using book.txt

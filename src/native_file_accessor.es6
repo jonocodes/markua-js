@@ -8,6 +8,13 @@ try {
 }
 
 class NativeFileAccessor extends FileAccessor {
+  getFilePrefix(type) {
+    if (type === "code")
+      return `${this.projectPath}/code`;
+    else
+      return this.projectPath;
+  }
+
   // Override
   get(filePath, cb) {
     fs.readFile(path.join(this.projectPath, filePath), { encoding: "utf8" }, function(error, contents) {
@@ -18,8 +25,8 @@ class NativeFileAccessor extends FileAccessor {
 
   // This is required for the code block imports, maybe do the file retrieval in an async method as a pre
   // or post processing step
-  getSync(filePath) {
-    return fs.readFileSync(path.join(this.projectPath, filePath), { encoding: "utf8" }).toString();
+  getSync(filePath, type = "manuscript") {
+    return fs.readFileSync(path.join(this.getFilePrefix(type), filePath), { encoding: "utf8" }).toString();
   }
 }
 

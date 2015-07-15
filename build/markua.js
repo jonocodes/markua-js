@@ -48,6 +48,8 @@ var Markua = (function () {
   // Run the markua book generator on a given project path.
 
   function Markua(projectPath, options) {
+    if (projectPath === undefined) projectPath = null;
+
     _classCallCheck(this, Markua);
 
     this.projectPath = projectPath;
@@ -58,6 +60,14 @@ var Markua = (function () {
   }
 
   _createClass(Markua, [{
+    key: "runSource",
+    value: function runSource(source, cb) {
+      var runOptions = arguments.length <= 2 || arguments[2] === undefined ? {} : arguments[2];
+
+      this.options = _.extend(this.options, runOptions);
+      this.processChapters([source], cb);
+    }
+  }, {
     key: "run",
     value: function run(cb) {
       var runOptions = arguments.length <= 1 || arguments[1] === undefined ? {} : arguments[1];
