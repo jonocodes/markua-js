@@ -62,6 +62,7 @@ gulp.task('test', function() {
 });
 
 gulp.task('assets', function() {
+  gulp.src('./node_modules/babel-core/browser-polyfill.min.js').pipe(gulp.dest(paths.build))
   gulp.src(paths.html).pipe(gulp.dest(paths.build))
   gulp.src(paths.data).pipe(gulp.dest('./build/data/'))
 });
