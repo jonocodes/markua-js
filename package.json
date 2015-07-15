@@ -8,7 +8,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/bradens/markua-js"
+    "url": "https://github.com/markuadoc/markua-js"
   },
   "keywords": [
     "markua",
@@ -19,9 +19,9 @@
   "author": "Braden Simpson",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/bradens/markua-js/issues"
+    "url": "https://github.com/markuadoc/markua-js/issues"
   },
-  "homepage": "https://github.com/bradens/markua-js",
+  "homepage": "https://github.com/markuadoc/markua-js",
   "dependencies": {
     "async": "^0.9.0",
     "babel-core": "^5.1.10",
