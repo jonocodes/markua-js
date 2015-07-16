@@ -2,7 +2,7 @@
 
 ## Warning: This is an alpha build, and should be used with extreme caution. Everything could change.
 
-### A javascript implementation for the [markua specification](https://markua.com)
+### A javascript implementation for the [markua specification](http://markua.com)
 
 Many thanks to the authors of [marked](https://github.com/chjj/marked), from which
 a large amount of the regexes were taken.
