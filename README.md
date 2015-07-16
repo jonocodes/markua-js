@@ -24,7 +24,16 @@ of [nodejs](http://nodejs.org).
 #### Running
 
 Run the markua executable by running `./markua`, symlink it to somewhere like
-`usr/local/bin` for ease of use.
+`usr/local/bin` for ease of use.  
+
+You may try passing in stdin like to see the raw markua -> html conversion: 
+
+`echo '# Heading 1' | ./markua` 
+
+or you can run it against a directory (correctly organized to the markua standard, see [/data/test_book](https://github.com/markuadoc/markua-js/tree/master/data/test_book)) like this: 
+
+`./markua /path/to/directory`
+
 
 #### TODO
 See the issues list [here](https://github.com/markuadoc/markua-js/issues)
