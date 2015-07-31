@@ -1,8 +1,3 @@
-'use strict';
-
-Object.defineProperty(exports, '__esModule', {
-  value: true
-});
 // Using some of the https://github.com/chjj/marked for a lot of the regexes
 // Copyright (c) 2011-2014, Christopher Jeffrey (https://github.com/chjj/)
 //
@@ -25,6 +20,11 @@ Object.defineProperty(exports, '__esModule', {
 // THE SOFTWARE.
 
 // Need this polyfill for Object.assign for now...
+'use strict';
+
+Object.defineProperty(exports, '__esModule', {
+  value: true
+});
 var ObjectAssign = require('object-assign');
 
 var noop = function noop() {};
@@ -51,9 +51,8 @@ var replace = function replace(regex, opt) {
   regex = regex.source;
   opt = opt || '';
   return function self(name, val) {
-    if (!name) {
-      return new RegExp(regex, opt);
-    }val = val.source || val;
+    if (!name) return new RegExp(regex, opt);
+    val = val.source || val;
     val = val.replace(/(^|[^\[])\^/g, '$1');
     regex = regex.replace(name, val);
     return self;
@@ -147,7 +146,8 @@ var block = {
     inlineGroup: /(?:{)(?: *(?:("(?:[^\s"]|[ ])+")|('(?:[^\s']|[ ])+')|((?:[^\s])+))(?:: *)(?:("(?:[^\s"]|[ ])+")|('(?:[^\s']|[ ])+')|((?:[^\s])+)))(?:(?: *, *)(?: *(?:("(?:[^\s"]|[ ])+")|('(?:[^\s']|[ ])+')|((?:[^\s])+))(?:: *)(?:("(?:[^\s"]|[ ])+")|('(?:[^\s']|[ ])+')|((?:[^\s,])+))))*(?: *)(?:})(?: *)/,
     value: /(?: *(?:(?:"((?:[^\s"]|[ ])+)")|(?:'((?:[^\s']|[ ])+)')|((?:[^\s])+))(?:: *)(?:(?:"((?:[^\s"]|[ ])+)")|(?:'((?:[^\s']|[ ])+)')|((?:[^\s])+)))/g
   },
-  number: /([0-9]+)/ };
+  number: /([0-9]+)/
+};
 
 exports.block = block;
 block.figure = replace(block.figure)(/figure/g, inline.image)();

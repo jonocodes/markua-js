@@ -1,20 +1,20 @@
 "use strict";
 
-var _interopRequireWildcard = function (obj) { return obj && obj.__esModule ? obj : { "default": obj }; };
-
-var _classCallCheck = function (instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } };
-
-var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
-
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
 
-var _inline$escape = require("./constants");
+var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
 
-var _Renderer = require("./renderer");
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
 
-var _Renderer2 = _interopRequireWildcard(_Renderer);
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var _constants = require("./constants");
+
+var _renderer = require("./renderer");
+
+var _renderer2 = _interopRequireDefault(_renderer);
 
 var _ = require("underscore");
 
@@ -26,10 +26,10 @@ var InlineLexer = (function () {
 
     this.options = options;
     this.links = links;
-    this.rules = _inline$escape.inline.normal;
+    this.rules = _constants.inline.normal;
     this.attributes = null;
     this.prevAttributes = null;
-    this.renderer = new _Renderer2["default"]();
+    this.renderer = new _renderer2["default"]();
 
     if (!this.links) throw new Error("Tokens array requires a `links` property.");
   }
@@ -64,7 +64,7 @@ var InlineLexer = (function () {
             text = cap[1].charAt(6) === ":" ? cap[1].substring(7) : cap[1];
             href = "mailto:" + text;
           } else {
-            text = _inline$escape.escape(cap[1]);
+            text = (0, _constants.escape)(cap[1]);
             href = text;
           }
           out += this.renderer.link(href, null, text, this.attributes);
@@ -95,7 +95,7 @@ var InlineLexer = (function () {
         // url (gfm)
         if (!this.inLink && (cap = this.rules.url.exec(src))) {
           src = src.substring(cap[0].length);
-          text = _inline$escape.escape(cap[1]);
+          text = (0, _constants.escape)(cap[1]);
           href = text;
           out += this.renderer.link(href, null, text, this.attributes);
           continue;
@@ -146,7 +146,7 @@ var InlineLexer = (function () {
         // code
         if (cap = this.rules.code.exec(src)) {
           src = src.substring(cap[0].length);
-          out += this.renderer.codespan(_inline$escape.escape(cap[2], true), this.attributes);
+          out += this.renderer.codespan((0, _constants.escape)(cap[2], true), this.attributes);
           continue;
         }
 
@@ -180,7 +180,7 @@ var InlineLexer = (function () {
             console.log("Found a text with some inline attributes");
           }
           src = src.substring(cap[0].length);
-          out += _inline$escape.escape(this.smartypants(cap[0]));
+          out += (0, _constants.escape)(this.smartypants(cap[0]));
           continue;
         }
 
@@ -198,10 +198,10 @@ var InlineLexer = (function () {
 
     // Compile a link or Image
     value: function outputLink(cap, link) {
-      var href = _inline$escape.escape(link.href),
-          title = link.title ? _inline$escape.escape(link.title) : null;
+      var href = (0, _constants.escape)(link.href),
+          title = link.title ? (0, _constants.escape)(link.title) : null;
 
-      return cap[0].charAt(0) !== "!" ? this.renderer.link(href, title, this.output(cap[1]), this.attributes) : this.renderer.image(href, title, _inline$escape.escape(cap[1]), this.attributes);
+      return cap[0].charAt(0) !== "!" ? this.renderer.link(href, title, this.output(cap[1]), this.attributes) : this.renderer.image(href, title, (0, _constants.escape)(cap[1]), this.attributes);
     }
   }, {
     key: "smartypants",
@@ -236,7 +236,7 @@ var InlineLexer = (function () {
 })();
 
 // Expose rules
-InlineLexer.rules = _inline$escape.inline;
+InlineLexer.rules = _constants.inline;
 
 exports["default"] = InlineLexer;
 module.exports = exports["default"];

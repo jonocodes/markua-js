@@ -1,22 +1,22 @@
 "use strict";
 
-var _classCallCheck = function (instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } };
-
-var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
-
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
 
-var _escape$unescape$HEADING_BOOK_CLASS_MAP$HEADING_MULTI_PART_CLASS_MAP$HEADING_DOCUMENT_CLASS_MAP = require("./constants");
+var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
 
-var _decimalize$ALPHABET = require("./util");
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var _constants = require("./constants");
+
+var _util = require("./util");
 
 var _ = require("underscore");
 
 var Renderer = (function () {
   function Renderer() {
-    var options = arguments[0] === undefined ? {} : arguments[0];
+    var options = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
 
     _classCallCheck(this, Renderer);
 
@@ -30,11 +30,11 @@ var Renderer = (function () {
     value: function getHeadingClass(level) {
       switch (this.options.bookType) {
         case "book":
-          return _escape$unescape$HEADING_BOOK_CLASS_MAP$HEADING_MULTI_PART_CLASS_MAP$HEADING_DOCUMENT_CLASS_MAP.HEADING_BOOK_CLASS_MAP[level];
+          return _constants.HEADING_BOOK_CLASS_MAP[level];
         case "multi-part-book":
-          return _escape$unescape$HEADING_BOOK_CLASS_MAP$HEADING_MULTI_PART_CLASS_MAP$HEADING_DOCUMENT_CLASS_MAP.HEADING_MULTI_PART_CLASS_MAP[level];
+          return _constants.HEADING_MULTI_PART_CLASS_MAP[level];
         case "document":
-          return _escape$unescape$HEADING_BOOK_CLASS_MAP$HEADING_MULTI_PART_CLASS_MAP$HEADING_DOCUMENT_CLASS_MAP.HEADING_DOCUMENT_CLASS_MAP[level];
+          return _constants.HEADING_DOCUMENT_CLASS_MAP[level];
         default:
           return "";
       }
@@ -66,39 +66,29 @@ var Renderer = (function () {
     }
   }, {
     key: "code",
-    value: (function (_code) {
-      function code(_x, _x2, _x3, _x4) {
-        return _code.apply(this, arguments);
-      }
-
-      code.toString = function () {
-        return _code.toString();
-      };
-
-      return code;
-    })(function (code, lang, escaped, attributes) {
+    value: function code(_code, lang, escaped, attributes) {
       // override the language from the attribute if we have to.
-      if (attributes && attributes.lang) {
-        lang = attributes.lang;
-        delete attributes.lang;
+      if (attributes && attributes["lang"]) {
+        lang = attributes["lang"];
+        delete attributes["lang"];
       }
 
       var attributesString = this.convertAttributes(attributes);
 
       if (this.options.highlight) {
-        var out = this.options.highlight(code, lang);
-        if (out !== null && out !== code) {
+        var out = this.options.highlight(_code, lang);
+        if (out !== null && out !== _code) {
           escaped = true;
-          code = out;
+          _code = out;
         }
       }
 
       if (!lang) {
-        return "<pre" + attributesString + "><code>" + (escaped ? code : _escape$unescape$HEADING_BOOK_CLASS_MAP$HEADING_MULTI_PART_CLASS_MAP$HEADING_DOCUMENT_CLASS_MAP.escape(code, true)) + "\n</code></pre>";
+        return "<pre" + attributesString + "><code>" + (escaped ? _code : (0, _constants.escape)(_code, true)) + "\n</code></pre>";
       }
 
-      return "<pre" + attributesString + "><code class=\"" + this.options.langPrefix + _escape$unescape$HEADING_BOOK_CLASS_MAP$HEADING_MULTI_PART_CLASS_MAP$HEADING_DOCUMENT_CLASS_MAP.escape(lang, true) + "\">" + (escaped ? code : _escape$unescape$HEADING_BOOK_CLASS_MAP$HEADING_MULTI_PART_CLASS_MAP$HEADING_DOCUMENT_CLASS_MAP.escape(code, true)) + "\n</code></pre>\n";
-    })
+      return "<pre" + attributesString + "><code class=\"" + this.options.langPrefix + (0, _constants.escape)(lang, true) + "\">" + (escaped ? _code : (0, _constants.escape)(_code, true)) + "\n</code></pre>\n";
+    }
   }, {
     key: "aside",
     value: function aside(text, attributes) {
@@ -156,7 +146,7 @@ var Renderer = (function () {
 
       if (attributes && attributes.id) {
         id = attributes.id;
-        delete attributes.id;
+        delete attributes["id"];
       } else {
         id = this.options.headerPrefix + raw.toLowerCase().replace(/[^\w]+/g, "-");
       }
@@ -187,7 +177,7 @@ var Renderer = (function () {
         case "alphabetized":
           typeTag = "ol";
           typeAttribute = " type=\"" + (start === start.toUpperCase() ? "A" : "a") + "\"";
-          startAttr = start.toUpperCase() === "A" ? "" : " start=\"" + (_decimalize$ALPHABET.ALPHABET.indexOf(start.toUpperCase()) + 1) + "\"";
+          startAttr = start.toUpperCase() === "A" ? "" : " start=\"" + (_util.ALPHABET.indexOf(start.toUpperCase()) + 1) + "\"";
           break;
         case "definition":
           typeTag = "dl";
@@ -195,7 +185,7 @@ var Renderer = (function () {
         case "numeral":
           typeTag = "ol";
           typeAttribute = " type=\"" + (start === start.toUpperCase() ? "I" : "i") + "\"";
-          startAttr = (start = _decimalize$ALPHABET.decimalize(start) || 0) && start !== 1 ? " start=\"" + start + "\"" : "";
+          startAttr = (start = (0, _util.decimalize)(start) || 0) && start !== 1 ? " start=\"" + start + "\"" : "";
           break;
         case "number":
           typeTag = "ol";
@@ -208,7 +198,7 @@ var Renderer = (function () {
       // Get the generic attributes for the list
       var genericAttrs = this.convertAttributes(attributes);
 
-      return "<" + typeTag + "" + typeAttribute + "" + startAttr + "" + genericAttrs + ">\n" + body + "</" + typeTag + ">\n";
+      return "<" + typeTag + typeAttribute + startAttr + genericAttrs + ">\n" + body + "</" + typeTag + ">\n";
     }
   }, {
     key: "definitionListItem",
@@ -225,7 +215,7 @@ var Renderer = (function () {
   }, {
     key: "paragraph",
     value: function paragraph(text, attributes) {
-      text = text.replace(/\n/g, "<br/>");
+      text = text.replace(/\n/g, "<br/>\n");
       var attrs = this.convertAttributes(attributes);
       return "<p" + attrs + ">" + text + "</p>\n";
     }
@@ -292,7 +282,7 @@ var Renderer = (function () {
       var attrs = this.convertAttributes(attributes);
       if (this.options.sanitize) {
         try {
-          var prot = decodeURIComponent(_escape$unescape$HEADING_BOOK_CLASS_MAP$HEADING_MULTI_PART_CLASS_MAP$HEADING_DOCUMENT_CLASS_MAP.unescape(href)).replace(/[^\w:]/g, "").toLowerCase();
+          var prot = decodeURIComponent((0, _constants.unescape)(href)).replace(/[^\w:]/g, "").toLowerCase();
         } catch (e) {
           return "";
         }

@@ -193,7 +193,7 @@ class Renderer {
   }
 
   paragraph(text, attributes) {
-    text = text.replace(/\n/g, '<br/>');
+    text = text.replace(/\n/g, '<br/>\n');
     let attrs = this.convertAttributes(attributes);
     return `<p${attrs}>${text}</p>\n`;
   }

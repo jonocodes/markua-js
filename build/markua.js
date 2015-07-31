@@ -1,30 +1,30 @@
 "use strict";
 
-var _interopRequireWildcard = function (obj) { return obj && obj.__esModule ? obj : { "default": obj }; };
-
-var _classCallCheck = function (instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } };
-
-var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
-
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
 
-var _Lexer = require("./lexer");
+var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
 
-var _Lexer2 = _interopRequireWildcard(_Lexer);
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
 
-var _Parser = require("./parser");
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
-var _Parser2 = _interopRequireWildcard(_Parser);
+var _lexer = require("./lexer");
 
-var _nativeFileAccessor = require("./native_file_accessor");
+var _lexer2 = _interopRequireDefault(_lexer);
 
-var _nativeFileAccessor2 = _interopRequireWildcard(_nativeFileAccessor);
+var _parser = require("./parser");
 
-var _webFileAccessor = require("./web_file_accessor");
+var _parser2 = _interopRequireDefault(_parser);
 
-var _webFileAccessor2 = _interopRequireWildcard(_webFileAccessor);
+var _native_file_accessor = require("./native_file_accessor");
+
+var _native_file_accessor2 = _interopRequireDefault(_native_file_accessor);
+
+var _web_file_accessor = require("./web_file_accessor");
+
+var _web_file_accessor2 = _interopRequireDefault(_web_file_accessor);
 
 var ObjectAssign = require("object-assign");
 var _ = require("underscore");
@@ -32,7 +32,7 @@ _.string = require("underscore.string");
 var async = require("async");
 
 var DEFAULT_OPTIONS = {
-  fileAccessor: _nativeFileAccessor2["default"],
+  fileAccessor: _native_file_accessor2["default"],
   tables: true,
   breaks: false,
   sanitize: false,
@@ -48,6 +48,8 @@ var Markua = (function () {
   // Run the markua book generator on a given project path.
 
   function Markua(projectPath, options) {
+    if (projectPath === undefined) projectPath = null;
+
     _classCallCheck(this, Markua);
 
     this.projectPath = projectPath;
@@ -58,9 +60,17 @@ var Markua = (function () {
   }
 
   _createClass(Markua, [{
+    key: "runSource",
+    value: function runSource(source, cb) {
+      var runOptions = arguments.length <= 2 || arguments[2] === undefined ? {} : arguments[2];
+
+      this.options = _.extend(this.options, runOptions);
+      this.processChapters([source], cb);
+    }
+  }, {
     key: "run",
     value: function run(cb) {
-      var runOptions = arguments[1] === undefined ? {} : arguments[1];
+      var runOptions = arguments.length <= 1 || arguments[1] === undefined ? {} : arguments[1];
 
       this.options = _.extend(this.options, runOptions);
 
@@ -110,6 +120,7 @@ var Markua = (function () {
           _this.fileAccessor.get(chapter, function (error, contents) {
 
             // If we are given a cursor position, then insert that into the markua text
+            // TODO: This will not work until inline attributes are done.
             if (_this.options.cursor && _this.options.cursor.filename === chapter) contents = _.string.splice(contents, _this.options.cursor.position, 0, "{ data-markua-cursor-position: __markuaCursorPosition__ }\n");
 
             cb(null, contents);
@@ -123,13 +134,13 @@ var Markua = (function () {
       var _this2 = this;
 
       async.map(_.compact(chapters), function (chapter, cb) {
-        // try {
-        var tokens = _Lexer2["default"].lex(chapter, _this2.options);
-        cb(null, _Parser2["default"].parse(tokens, _this2.options));
-        // } catch (e) {
-        // console.error(e);
-        // cb(e);
-        // }
+        try {
+          var tokens = _lexer2["default"].lex(chapter, _this2.options);
+          cb(null, _parser2["default"].parse(tokens, _this2.options));
+        } catch (e) {
+          console.error(e);
+          cb(e);
+        }
       }, function (error, results) {
         // Concat it
         done(null, results.join("\n"));
@@ -140,7 +151,7 @@ var Markua = (function () {
   return Markua;
 })();
 
-Markua.WebFileAccessor = _webFileAccessor2["default"];
+Markua.WebFileAccessor = _web_file_accessor2["default"];
 
 exports["default"] = Markua;
 module.exports = exports["default"];

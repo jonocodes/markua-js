@@ -1,8 +1,11 @@
 import Renderer from "./renderer";
 import InlineLexer from "./inline_lexer";
 
-var _ = require("underscore")
+let _ = require("underscore")
 
+// Class used to parse the tokens created by the Lexer, then call out to the
+// appropriate render method to ouput the html.  Could have different renderers
+// plugged into it.
 class Parser {
   constructor(options = {}) {
     this.options = options;
@@ -12,11 +15,12 @@ class Parser {
     this.renderer.options = this.options;
   }
 
+  // Static method to start parsing a token set
   static parse(src, options) {
     return new Parser(options).parse(src);
   }
 
-  // Parse all the tokens
+  // Parse all the tokens, one by one.
   parse(src) {
     this.inline = new InlineLexer(src.links, this.options);
     this.tokens = src.reverse();
@@ -59,9 +63,6 @@ class Parser {
       }
       case 'hr': {
         return this.renderer.hr(attributes);
-      }
-      case 'cursor': {
-        return this.renderer.cursor();
       }
       case 'heading': {
         return this.renderer.heading(

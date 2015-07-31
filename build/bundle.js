@@ -1,10 +1,5 @@
 (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);throw new Error("Cannot find module '"+o+"'")}var f=n[o]={exports:{}};t[o][0].call(f.exports,function(e){var n=t[o][1][e];return s(n?n:e)},f,f.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
-'use strict';
-
-Object.defineProperty(exports, '__esModule', {
-  value: true
-});
 // Using some of the https://github.com/chjj/marked for a lot of the regexes
 // Copyright (c) 2011-2014, Christopher Jeffrey (https://github.com/chjj/)
 //
@@ -27,6 +22,11 @@ Object.defineProperty(exports, '__esModule', {
 // THE SOFTWARE.
 
 // Need this polyfill for Object.assign for now...
+'use strict';
+
+Object.defineProperty(exports, '__esModule', {
+  value: true
+});
 var ObjectAssign = require('object-assign');
 
 var noop = function noop() {};
@@ -53,9 +53,8 @@ var replace = function replace(regex, opt) {
   regex = regex.source;
   opt = opt || '';
   return function self(name, val) {
-    if (!name) {
-      return new RegExp(regex, opt);
-    }val = val.source || val;
+    if (!name) return new RegExp(regex, opt);
+    val = val.source || val;
     val = val.replace(/(^|[^\[])\^/g, '$1');
     regex = regex.replace(name, val);
     return self;
@@ -149,7 +148,8 @@ var block = {
     inlineGroup: /(?:{)(?: *(?:("(?:[^\s"]|[ ])+")|('(?:[^\s']|[ ])+')|((?:[^\s])+))(?:: *)(?:("(?:[^\s"]|[ ])+")|('(?:[^\s']|[ ])+')|((?:[^\s])+)))(?:(?: *, *)(?: *(?:("(?:[^\s"]|[ ])+")|('(?:[^\s']|[ ])+')|((?:[^\s])+))(?:: *)(?:("(?:[^\s"]|[ ])+")|('(?:[^\s']|[ ])+')|((?:[^\s,])+))))*(?: *)(?:})(?: *)/,
     value: /(?: *(?:(?:"((?:[^\s"]|[ ])+)")|(?:'((?:[^\s']|[ ])+)')|((?:[^\s])+))(?:: *)(?:(?:"((?:[^\s"]|[ ])+)")|(?:'((?:[^\s']|[ ])+)')|((?:[^\s])+)))/g
   },
-  number: /([0-9]+)/ };
+  number: /([0-9]+)/
+};
 
 exports.block = block;
 block.figure = replace(block.figure)(/figure/g, inline.image)();
@@ -210,29 +210,29 @@ exports.HEADING_DOCUMENT_CLASS_MAP = HEADING_DOCUMENT_CLASS_MAP;
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
 "use strict";
 
-var _interopRequireWildcard = function (obj) { return obj && obj.__esModule ? obj : { "default": obj }; };
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
 
-var _Markua = require("./markua");
+var _markua = require("./markua");
 
-var _Markua2 = _interopRequireWildcard(_Markua);
+var _markua2 = _interopRequireDefault(_markua);
 
-var _WebFileAccessor = require("./web_file_accessor");
+var _web_file_accessor = require("./web_file_accessor");
 
-var _WebFileAccessor2 = _interopRequireWildcard(_WebFileAccessor);
+var _web_file_accessor2 = _interopRequireDefault(_web_file_accessor);
 
-if (typeof window !== "undefined") window.markua = new _Markua2["default"]("/data/test_book", { fileAccessor: _WebFileAccessor2["default"], debug: true });
-}).call(this,require("1YiZ5S"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/fake_ee467f47.js","/")
+if (typeof window !== "undefined") window.markua = new _markua2["default"]("/data/test_book", { fileAccessor: _web_file_accessor2["default"], debug: true });
+}).call(this,require("1YiZ5S"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/fake_8a4c0262.js","/")
 },{"./markua":6,"./web_file_accessor":11,"1YiZ5S":18,"buffer":14}],3:[function(require,module,exports){
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
 "use strict";
 
-var _classCallCheck = function (instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } };
-
-var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
-
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
+
+var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 var FileAccessor = (function () {
   function FileAccessor(projectPath) {
@@ -258,21 +258,21 @@ module.exports = exports["default"];
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
 "use strict";
 
-var _interopRequireWildcard = function (obj) { return obj && obj.__esModule ? obj : { "default": obj }; };
-
-var _classCallCheck = function (instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } };
-
-var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
-
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
 
-var _inline$escape = require("./constants");
+var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
 
-var _Renderer = require("./renderer");
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
 
-var _Renderer2 = _interopRequireWildcard(_Renderer);
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var _constants = require("./constants");
+
+var _renderer = require("./renderer");
+
+var _renderer2 = _interopRequireDefault(_renderer);
 
 var _ = require("underscore");
 
@@ -284,10 +284,10 @@ var InlineLexer = (function () {
 
     this.options = options;
     this.links = links;
-    this.rules = _inline$escape.inline.normal;
+    this.rules = _constants.inline.normal;
     this.attributes = null;
     this.prevAttributes = null;
-    this.renderer = new _Renderer2["default"]();
+    this.renderer = new _renderer2["default"]();
 
     if (!this.links) throw new Error("Tokens array requires a `links` property.");
   }
@@ -322,7 +322,7 @@ var InlineLexer = (function () {
             text = cap[1].charAt(6) === ":" ? cap[1].substring(7) : cap[1];
             href = "mailto:" + text;
           } else {
-            text = _inline$escape.escape(cap[1]);
+            text = (0, _constants.escape)(cap[1]);
             href = text;
           }
           out += this.renderer.link(href, null, text, this.attributes);
@@ -353,7 +353,7 @@ var InlineLexer = (function () {
         // url (gfm)
         if (!this.inLink && (cap = this.rules.url.exec(src))) {
           src = src.substring(cap[0].length);
-          text = _inline$escape.escape(cap[1]);
+          text = (0, _constants.escape)(cap[1]);
           href = text;
           out += this.renderer.link(href, null, text, this.attributes);
           continue;
@@ -404,7 +404,7 @@ var InlineLexer = (function () {
         // code
         if (cap = this.rules.code.exec(src)) {
           src = src.substring(cap[0].length);
-          out += this.renderer.codespan(_inline$escape.escape(cap[2], true), this.attributes);
+          out += this.renderer.codespan((0, _constants.escape)(cap[2], true), this.attributes);
           continue;
         }
 
@@ -438,7 +438,7 @@ var InlineLexer = (function () {
             console.log("Found a text with some inline attributes");
           }
           src = src.substring(cap[0].length);
-          out += _inline$escape.escape(this.smartypants(cap[0]));
+          out += (0, _constants.escape)(this.smartypants(cap[0]));
           continue;
         }
 
@@ -456,10 +456,10 @@ var InlineLexer = (function () {
 
     // Compile a link or Image
     value: function outputLink(cap, link) {
-      var href = _inline$escape.escape(link.href),
-          title = link.title ? _inline$escape.escape(link.title) : null;
+      var href = (0, _constants.escape)(link.href),
+          title = link.title ? (0, _constants.escape)(link.title) : null;
 
-      return cap[0].charAt(0) !== "!" ? this.renderer.link(href, title, this.output(cap[1]), this.attributes) : this.renderer.image(href, title, _inline$escape.escape(cap[1]), this.attributes);
+      return cap[0].charAt(0) !== "!" ? this.renderer.link(href, title, this.output(cap[1]), this.attributes) : this.renderer.image(href, title, (0, _constants.escape)(cap[1]), this.attributes);
     }
   }, {
     key: "smartypants",
@@ -494,7 +494,7 @@ var InlineLexer = (function () {
 })();
 
 // Expose rules
-InlineLexer.rules = _inline$escape.inline;
+InlineLexer.rules = _constants.inline;
 
 exports["default"] = InlineLexer;
 module.exports = exports["default"];
@@ -503,17 +503,17 @@ module.exports = exports["default"];
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
 "use strict";
 
-var _classCallCheck = function (instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } };
-
-var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
-
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
 
-var _block = require("./constants");
+var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
 
-var _characterIsNext$decimalize = require("./util");
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var _constants = require("./constants");
+
+var _util = require("./util");
 
 var _ = require("underscore");
 
@@ -521,14 +521,14 @@ var _ = require("underscore");
 
 var Lexer = (function () {
   function Lexer() {
-    var options = arguments[0] === undefined ? {} : arguments[0];
+    var options = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
 
     _classCallCheck(this, Lexer);
 
     this.tokens = [];
     this.tokens.links = {};
     this.options = options;
-    this.rules = _block.block.normal;
+    this.rules = _constants.block.normal;
     this.warnings = [];
   }
 
@@ -698,7 +698,7 @@ var Lexer = (function () {
               code = undefined;
 
           // Read the file, output a codeblock with that file's language
-          var file = ext ? "" + fileWithoutExt + "." + ext : fileWithoutExt;
+          var file = ext ? fileWithoutExt + "." + ext : fileWithoutExt;
 
           if (code = this.options.fileAccessor.getSync(file, "code")) {
             this.tokens.push({
@@ -762,7 +762,7 @@ var Lexer = (function () {
                     current = _this.rules.list.alphabetized.exec(item) && _this.rules.list.alphabetized.exec(item)[1] || null;
 
                     // Warn for alpha list
-                    if (prevIndex !== null && !_characterIsNext$decimalize.characterIsNext(current, prevIndex)) _this.warnings.push(warning);
+                    if (prevIndex !== null && !(0, _util.characterIsNext)(current, prevIndex)) _this.warnings.push(warning);
 
                     return current;
                   case "numeral":
@@ -770,7 +770,7 @@ var Lexer = (function () {
                     if (current) bull = current = current.substr(0, current.length - 1);
 
                     // Warn for roman numerals
-                    if (prevIndex && _characterIsNext$decimalize.decimalize(current) !== _characterIsNext$decimalize.decimalize(prevIndex) + 1) _this.warnings.push(warning);
+                    if (prevIndex && (0, _util.decimalize)(current) !== (0, _util.decimalize)(prevIndex) + 1) _this.warnings.push(warning);
 
                     return current;
                   case "bullet":
@@ -925,31 +925,31 @@ module.exports = exports["default"];
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
 "use strict";
 
-var _interopRequireWildcard = function (obj) { return obj && obj.__esModule ? obj : { "default": obj }; };
-
-var _classCallCheck = function (instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } };
-
-var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
-
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
 
-var _Lexer = require("./lexer");
+var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
 
-var _Lexer2 = _interopRequireWildcard(_Lexer);
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
 
-var _Parser = require("./parser");
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
-var _Parser2 = _interopRequireWildcard(_Parser);
+var _lexer = require("./lexer");
 
-var _nativeFileAccessor = require("./native_file_accessor");
+var _lexer2 = _interopRequireDefault(_lexer);
 
-var _nativeFileAccessor2 = _interopRequireWildcard(_nativeFileAccessor);
+var _parser = require("./parser");
 
-var _webFileAccessor = require("./web_file_accessor");
+var _parser2 = _interopRequireDefault(_parser);
 
-var _webFileAccessor2 = _interopRequireWildcard(_webFileAccessor);
+var _native_file_accessor = require("./native_file_accessor");
+
+var _native_file_accessor2 = _interopRequireDefault(_native_file_accessor);
+
+var _web_file_accessor = require("./web_file_accessor");
+
+var _web_file_accessor2 = _interopRequireDefault(_web_file_accessor);
 
 var ObjectAssign = require("object-assign");
 var _ = require("underscore");
@@ -957,7 +957,7 @@ _.string = require("underscore.string");
 var async = require("async");
 
 var DEFAULT_OPTIONS = {
-  fileAccessor: _nativeFileAccessor2["default"],
+  fileAccessor: _native_file_accessor2["default"],
   tables: true,
   breaks: false,
   sanitize: false,
@@ -973,6 +973,8 @@ var Markua = (function () {
   // Run the markua book generator on a given project path.
 
   function Markua(projectPath, options) {
+    if (projectPath === undefined) projectPath = null;
+
     _classCallCheck(this, Markua);
 
     this.projectPath = projectPath;
@@ -983,9 +985,17 @@ var Markua = (function () {
   }
 
   _createClass(Markua, [{
+    key: "runSource",
+    value: function runSource(source, cb) {
+      var runOptions = arguments.length <= 2 || arguments[2] === undefined ? {} : arguments[2];
+
+      this.options = _.extend(this.options, runOptions);
+      this.processChapters([source], cb);
+    }
+  }, {
     key: "run",
     value: function run(cb) {
-      var runOptions = arguments[1] === undefined ? {} : arguments[1];
+      var runOptions = arguments.length <= 1 || arguments[1] === undefined ? {} : arguments[1];
 
       this.options = _.extend(this.options, runOptions);
 
@@ -1035,7 +1045,9 @@ var Markua = (function () {
           _this.fileAccessor.get(chapter, function (error, contents) {
 
             // If we are given a cursor position, then insert that into the markua text
-            if (_this.options.cursor && _this.options.cursor.filename === chapter) contents = _.string.splice(contents, _this.options.cursor.position, 0, "{ data-markua-cursor-position: __markuaCursorPosition__ }\n");
+            // TODO: This will not work until inline attributes are done.
+            // if (this.options.cursor && this.options.cursor.filename === chapter)
+            //   contents = _.string.splice(contents, this.options.cursor.position, 0, "{ data-markua-cursor-position: __markuaCursorPosition__ }\n")
 
             cb(null, contents);
           });
@@ -1048,13 +1060,13 @@ var Markua = (function () {
       var _this2 = this;
 
       async.map(_.compact(chapters), function (chapter, cb) {
-        // try {
-        var tokens = _Lexer2["default"].lex(chapter, _this2.options);
-        cb(null, _Parser2["default"].parse(tokens, _this2.options));
-        // } catch (e) {
-        // console.error(e);
-        // cb(e);
-        // }
+        try {
+          var tokens = _lexer2["default"].lex(chapter, _this2.options);
+          cb(null, _parser2["default"].parse(tokens, _this2.options));
+        } catch (e) {
+          console.error(e);
+          cb(e);
+        }
       }, function (error, results) {
         // Concat it
         done(null, results.join("\n"));
@@ -1065,7 +1077,7 @@ var Markua = (function () {
   return Markua;
 })();
 
-Markua.WebFileAccessor = _webFileAccessor2["default"];
+Markua.WebFileAccessor = _web_file_accessor2["default"];
 
 exports["default"] = Markua;
 module.exports = exports["default"];
@@ -1074,21 +1086,23 @@ module.exports = exports["default"];
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
 "use strict";
 
-var _interopRequireWildcard = function (obj) { return obj && obj.__esModule ? obj : { "default": obj }; };
-
-var _classCallCheck = function (instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } };
-
-var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
-
-var _inherits = function (subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) subClass.__proto__ = superClass; };
-
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
 
-var _FileAccessor2 = require("./file_accessor");
+var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
 
-var _FileAccessor3 = _interopRequireWildcard(_FileAccessor2);
+var _get = function get(_x2, _x3, _x4) { var _again = true; _function: while (_again) { var object = _x2, property = _x3, receiver = _x4; desc = parent = getter = undefined; _again = false; if (object === null) object = Function.prototype; var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { _x2 = parent; _x3 = property; _x4 = receiver; _again = true; continue _function; } } else if ("value" in desc) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } } };
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) subClass.__proto__ = superClass; }
+
+var _file_accessor = require("./file_accessor");
+
+var _file_accessor2 = _interopRequireDefault(_file_accessor);
 
 var fs,
     path = require("path");
@@ -1100,17 +1114,20 @@ try {
 }
 
 var NativeFileAccessor = (function (_FileAccessor) {
+  _inherits(NativeFileAccessor, _FileAccessor);
+
   function NativeFileAccessor() {
     _classCallCheck(this, NativeFileAccessor);
 
-    if (_FileAccessor != null) {
-      _FileAccessor.apply(this, arguments);
-    }
+    _get(Object.getPrototypeOf(NativeFileAccessor.prototype), "constructor", this).apply(this, arguments);
   }
 
-  _inherits(NativeFileAccessor, _FileAccessor);
-
   _createClass(NativeFileAccessor, [{
+    key: "getFilePrefix",
+    value: function getFilePrefix(type) {
+      if (type === "code") return this.projectPath + "/code";else return this.projectPath;
+    }
+  }, {
     key: "get",
 
     // Override
@@ -1126,12 +1143,14 @@ var NativeFileAccessor = (function (_FileAccessor) {
     // This is required for the code block imports, maybe do the file retrieval in an async method as a pre
     // or post processing step
     value: function getSync(filePath) {
-      return fs.readFileSync(path.join(this.projectPath, filePath), { encoding: "utf8" }).toString();
+      var type = arguments.length <= 1 || arguments[1] === undefined ? "manuscript" : arguments[1];
+
+      return fs.readFileSync(path.join(this.getFilePrefix(type), filePath), { encoding: "utf8" }).toString();
     }
   }]);
 
   return NativeFileAccessor;
-})(_FileAccessor3["default"]);
+})(_file_accessor2["default"]);
 
 exports["default"] = NativeFileAccessor;
 module.exports = exports["default"];
@@ -1140,45 +1159,49 @@ module.exports = exports["default"];
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
 "use strict";
 
-var _interopRequireWildcard = function (obj) { return obj && obj.__esModule ? obj : { "default": obj }; };
-
-var _classCallCheck = function (instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } };
-
-var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
-
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
 
-var _Renderer = require("./renderer");
+var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
 
-var _Renderer2 = _interopRequireWildcard(_Renderer);
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
 
-var _InlineLexer = require("./inline_lexer");
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
-var _InlineLexer2 = _interopRequireWildcard(_InlineLexer);
+var _renderer = require("./renderer");
+
+var _renderer2 = _interopRequireDefault(_renderer);
+
+var _inline_lexer = require("./inline_lexer");
+
+var _inline_lexer2 = _interopRequireDefault(_inline_lexer);
 
 var _ = require("underscore");
 
+// Class used to parse the tokens created by the Lexer, then call out to the
+// appropriate render method to ouput the html.  Could have different renderers
+// plugged into it.
+
 var Parser = (function () {
   function Parser() {
-    var options = arguments[0] === undefined ? {} : arguments[0];
+    var options = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
 
     _classCallCheck(this, Parser);
 
     this.options = options;
     this.tokens = [];
     this.token = null;
-    this.renderer = new _Renderer2["default"]();
+    this.renderer = new _renderer2["default"]();
     this.renderer.options = this.options;
   }
 
   _createClass(Parser, [{
     key: "parse",
 
-    // Parse all the tokens
+    // Parse all the tokens, one by one.
     value: function parse(src) {
-      this.inline = new _InlineLexer2["default"](src.links, this.options);
+      this.inline = new _inline_lexer2["default"](src.links, this.options);
       this.tokens = src.reverse();
 
       var out = "";
@@ -1229,10 +1252,6 @@ var Parser = (function () {
         case "hr":
           {
             return this.renderer.hr(attributes);
-          }
-        case "cursor":
-          {
-            return this.renderer.cursor();
           }
         case "heading":
           {
@@ -1335,11 +1354,7 @@ var Parser = (function () {
               body += this.token.type === "text" ? this.parseText() : this.tok();
             }
 
-            if (_listType === "definition") {
-              return this.renderer.definitionListItem(body, title, attributes);
-            } else {
-              return this.renderer.listitem(body, attributes);
-            }
+            if (_listType === "definition") return this.renderer.definitionListItem(body, title, attributes);else return this.renderer.listitem(body, attributes);
           }
         case "paragraph":
           {
@@ -1353,6 +1368,8 @@ var Parser = (function () {
     }
   }], [{
     key: "parse",
+
+    // Static method to start parsing a token set
     value: function parse(src, options) {
       return new Parser(options).parse(src);
     }
@@ -1368,23 +1385,23 @@ module.exports = exports["default"];
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
 "use strict";
 
-var _classCallCheck = function (instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } };
-
-var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
-
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
 
-var _escape$unescape$HEADING_BOOK_CLASS_MAP$HEADING_MULTI_PART_CLASS_MAP$HEADING_DOCUMENT_CLASS_MAP = require("./constants");
+var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
 
-var _decimalize$ALPHABET = require("./util");
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var _constants = require("./constants");
+
+var _util = require("./util");
 
 var _ = require("underscore");
 
 var Renderer = (function () {
   function Renderer() {
-    var options = arguments[0] === undefined ? {} : arguments[0];
+    var options = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
 
     _classCallCheck(this, Renderer);
 
@@ -1398,11 +1415,11 @@ var Renderer = (function () {
     value: function getHeadingClass(level) {
       switch (this.options.bookType) {
         case "book":
-          return _escape$unescape$HEADING_BOOK_CLASS_MAP$HEADING_MULTI_PART_CLASS_MAP$HEADING_DOCUMENT_CLASS_MAP.HEADING_BOOK_CLASS_MAP[level];
+          return _constants.HEADING_BOOK_CLASS_MAP[level];
         case "multi-part-book":
-          return _escape$unescape$HEADING_BOOK_CLASS_MAP$HEADING_MULTI_PART_CLASS_MAP$HEADING_DOCUMENT_CLASS_MAP.HEADING_MULTI_PART_CLASS_MAP[level];
+          return _constants.HEADING_MULTI_PART_CLASS_MAP[level];
         case "document":
-          return _escape$unescape$HEADING_BOOK_CLASS_MAP$HEADING_MULTI_PART_CLASS_MAP$HEADING_DOCUMENT_CLASS_MAP.HEADING_DOCUMENT_CLASS_MAP[level];
+          return _constants.HEADING_DOCUMENT_CLASS_MAP[level];
         default:
           return "";
       }
@@ -1434,39 +1451,29 @@ var Renderer = (function () {
     }
   }, {
     key: "code",
-    value: (function (_code) {
-      function code(_x, _x2, _x3, _x4) {
-        return _code.apply(this, arguments);
-      }
-
-      code.toString = function () {
-        return _code.toString();
-      };
-
-      return code;
-    })(function (code, lang, escaped, attributes) {
+    value: function code(_code, lang, escaped, attributes) {
       // override the language from the attribute if we have to.
-      if (attributes && attributes.lang) {
-        lang = attributes.lang;
-        delete attributes.lang;
+      if (attributes && attributes["lang"]) {
+        lang = attributes["lang"];
+        delete attributes["lang"];
       }
 
       var attributesString = this.convertAttributes(attributes);
 
       if (this.options.highlight) {
-        var out = this.options.highlight(code, lang);
-        if (out !== null && out !== code) {
+        var out = this.options.highlight(_code, lang);
+        if (out !== null && out !== _code) {
           escaped = true;
-          code = out;
+          _code = out;
         }
       }
 
       if (!lang) {
-        return "<pre" + attributesString + "><code>" + (escaped ? code : _escape$unescape$HEADING_BOOK_CLASS_MAP$HEADING_MULTI_PART_CLASS_MAP$HEADING_DOCUMENT_CLASS_MAP.escape(code, true)) + "\n</code></pre>";
+        return "<pre" + attributesString + "><code>" + (escaped ? _code : (0, _constants.escape)(_code, true)) + "\n</code></pre>";
       }
 
-      return "<pre" + attributesString + "><code class=\"" + this.options.langPrefix + _escape$unescape$HEADING_BOOK_CLASS_MAP$HEADING_MULTI_PART_CLASS_MAP$HEADING_DOCUMENT_CLASS_MAP.escape(lang, true) + "\">" + (escaped ? code : _escape$unescape$HEADING_BOOK_CLASS_MAP$HEADING_MULTI_PART_CLASS_MAP$HEADING_DOCUMENT_CLASS_MAP.escape(code, true)) + "\n</code></pre>\n";
-    })
+      return "<pre" + attributesString + "><code class=\"" + this.options.langPrefix + (0, _constants.escape)(lang, true) + "\">" + (escaped ? _code : (0, _constants.escape)(_code, true)) + "\n</code></pre>\n";
+    }
   }, {
     key: "aside",
     value: function aside(text, attributes) {
@@ -1524,7 +1531,7 @@ var Renderer = (function () {
 
       if (attributes && attributes.id) {
         id = attributes.id;
-        delete attributes.id;
+        delete attributes["id"];
       } else {
         id = this.options.headerPrefix + raw.toLowerCase().replace(/[^\w]+/g, "-");
       }
@@ -1555,7 +1562,7 @@ var Renderer = (function () {
         case "alphabetized":
           typeTag = "ol";
           typeAttribute = " type=\"" + (start === start.toUpperCase() ? "A" : "a") + "\"";
-          startAttr = start.toUpperCase() === "A" ? "" : " start=\"" + (_decimalize$ALPHABET.ALPHABET.indexOf(start.toUpperCase()) + 1) + "\"";
+          startAttr = start.toUpperCase() === "A" ? "" : " start=\"" + (_util.ALPHABET.indexOf(start.toUpperCase()) + 1) + "\"";
           break;
         case "definition":
           typeTag = "dl";
@@ -1563,7 +1570,7 @@ var Renderer = (function () {
         case "numeral":
           typeTag = "ol";
           typeAttribute = " type=\"" + (start === start.toUpperCase() ? "I" : "i") + "\"";
-          startAttr = (start = _decimalize$ALPHABET.decimalize(start) || 0) && start !== 1 ? " start=\"" + start + "\"" : "";
+          startAttr = (start = (0, _util.decimalize)(start) || 0) && start !== 1 ? " start=\"" + start + "\"" : "";
           break;
         case "number":
           typeTag = "ol";
@@ -1576,7 +1583,7 @@ var Renderer = (function () {
       // Get the generic attributes for the list
       var genericAttrs = this.convertAttributes(attributes);
 
-      return "<" + typeTag + "" + typeAttribute + "" + startAttr + "" + genericAttrs + ">\n" + body + "</" + typeTag + ">\n";
+      return "<" + typeTag + typeAttribute + startAttr + genericAttrs + ">\n" + body + "</" + typeTag + ">\n";
     }
   }, {
     key: "definitionListItem",
@@ -1593,7 +1600,7 @@ var Renderer = (function () {
   }, {
     key: "paragraph",
     value: function paragraph(text, attributes) {
-      text = text.replace(/\n/g, "<br/>");
+      text = text.replace(/\n/g, "<br/>\n");
       var attrs = this.convertAttributes(attributes);
       return "<p" + attrs + ">" + text + "</p>\n";
     }
@@ -1660,7 +1667,7 @@ var Renderer = (function () {
       var attrs = this.convertAttributes(attributes);
       if (this.options.sanitize) {
         try {
-          var prot = decodeURIComponent(_escape$unescape$HEADING_BOOK_CLASS_MAP$HEADING_MULTI_PART_CLASS_MAP$HEADING_DOCUMENT_CLASS_MAP.unescape(href)).replace(/[^\w:]/g, "").toLowerCase();
+          var prot = decodeURIComponent((0, _constants.unescape)(href)).replace(/[^\w:]/g, "").toLowerCase();
         } catch (e) {
           return "";
         }
@@ -1758,50 +1765,46 @@ exports.decimalize = decimalize;
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
 "use strict";
 
-var _interopRequireWildcard = function (obj) { return obj && obj.__esModule ? obj : { "default": obj }; };
-
-var _classCallCheck = function (instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } };
-
-var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
-
-var _inherits = function (subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) subClass.__proto__ = superClass; };
-
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
 
-var _FileAccessor2 = require("./file_accessor");
+var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
 
-var _FileAccessor3 = _interopRequireWildcard(_FileAccessor2);
+var _get = function get(_x3, _x4, _x5) { var _again = true; _function: while (_again) { var object = _x3, property = _x4, receiver = _x5; desc = parent = getter = undefined; _again = false; if (object === null) object = Function.prototype; var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { _x3 = parent; _x4 = property; _x5 = receiver; _again = true; continue _function; } } else if ("value" in desc) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } } };
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) subClass.__proto__ = superClass; }
+
+var _file_accessor = require("./file_accessor");
+
+var _file_accessor2 = _interopRequireDefault(_file_accessor);
 
 var WebFileAccessor = (function (_FileAccessor) {
+  _inherits(WebFileAccessor, _FileAccessor);
+
   function WebFileAccessor() {
     _classCallCheck(this, WebFileAccessor);
 
-    if (_FileAccessor != null) {
-      _FileAccessor.apply(this, arguments);
-    }
+    _get(Object.getPrototypeOf(WebFileAccessor.prototype), "constructor", this).apply(this, arguments);
   }
-
-  _inherits(WebFileAccessor, _FileAccessor);
 
   _createClass(WebFileAccessor, [{
     key: "getFilePrefix",
     value: function getFilePrefix(type) {
-      if (type === "code") {
-        return "" + this.projectPath + "/code";
-      } else {
-        return this.projectPath;
-      }
+      if (type === "code") return this.projectPath + "/code";else return this.projectPath;
     }
   }, {
     key: "get",
 
     // Retrieves a file from our client side data (faked)
     value: function get(filePath, cb) {
-      var type = arguments[2] === undefined ? "manuscript" : arguments[2];
+      var type = arguments.length <= 2 || arguments[2] === undefined ? "manuscript" : arguments[2];
 
-      var item = window.fileData["" + this.getFilePrefix(type) + "/" + filePath];
+      var item = window.fileData[this.getFilePrefix(type) + "/" + filePath];
       cb(null, item);
     }
   }, {
@@ -1810,14 +1813,14 @@ var WebFileAccessor = (function (_FileAccessor) {
     // This is required for the code block imports, maybe do the file retrieval in an async method as a pre
     // or post processing step
     value: function getSync(filePath) {
-      var type = arguments[1] === undefined ? "manuscript" : arguments[1];
+      var type = arguments.length <= 1 || arguments[1] === undefined ? "manuscript" : arguments[1];
 
-      return window.fileData["" + this.getFilePrefix(type) + "/" + filePath];
+      return window.fileData[this.getFilePrefix(type) + "/" + filePath];
     }
   }]);
 
   return WebFileAccessor;
-})(_FileAccessor3["default"]);
+})(_file_accessor2["default"]);
 
 exports["default"] = WebFileAccessor;
 module.exports = exports["default"];
@@ -1868,9 +1871,6 @@ module.exports = exports["default"];
     };
 
     var _each = function (arr, iterator) {
-        if (arr.forEach) {
-            return arr.forEach(iterator);
-        }
         for (var i = 0; i < arr.length; i += 1) {
             iterator(arr[i], i, arr);
         }
@@ -2647,23 +2647,26 @@ module.exports = exports["default"];
             pause: function () {
                 if (q.paused === true) { return; }
                 q.paused = true;
-                q.process();
             },
             resume: function () {
                 if (q.paused === false) { return; }
                 q.paused = false;
-                q.process();
+                // Need to call q.process once per concurrent
+                // worker to preserve full concurrency after pause
+                for (var w = 1; w <= q.concurrency; w++) {
+                    async.setImmediate(q.process);
+                }
             }
         };
         return q;
     };
-    
+
     async.priorityQueue = function (worker, concurrency) {
-        
+
         function _compareTasks(a, b){
           return a.priority - b.priority;
         };
-        
+
         function _binarySearch(sequence, item, compare) {
           var beg = -1,
               end = sequence.length - 1;
@@ -2677,7 +2680,7 @@ module.exports = exports["default"];
           }
           return beg;
         }
-        
+
         function _insert(q, data, priority, callback) {
           if (!q.started){
             q.started = true;
@@ -2699,7 +2702,7 @@ module.exports = exports["default"];
                   priority: priority,
                   callback: typeof callback === 'function' ? callback : null
               };
-              
+
               q.tasks.splice(_binarySearch(q.tasks, item, _compareTasks) + 1, 0, item);
 
               if (q.saturated && q.tasks.length === q.concurrency) {
@@ -2708,15 +2711,15 @@ module.exports = exports["default"];
               async.setImmediate(q.process);
           });
         }
-        
+
         // Start with a normal queue
         var q = async.queue(worker, concurrency);
-        
+
         // Override push to accept second parameter representing priority
         q.push = function (data, priority, callback) {
           _insert(q, data, priority, callback);
         };
-        
+
         // Remove unshift function
         delete q.unshift;
 
@@ -4194,90 +4197,90 @@ var lookup = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
 }).call(this,require("1YiZ5S"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/../node_modules/gulp-browserify/node_modules/browserify/node_modules/buffer/node_modules/base64-js/lib/b64.js","/../node_modules/gulp-browserify/node_modules/browserify/node_modules/buffer/node_modules/base64-js/lib")
 },{"1YiZ5S":18,"buffer":14}],16:[function(require,module,exports){
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
-exports.read = function(buffer, offset, isLE, mLen, nBytes) {
-  var e, m,
-      eLen = nBytes * 8 - mLen - 1,
-      eMax = (1 << eLen) - 1,
-      eBias = eMax >> 1,
-      nBits = -7,
-      i = isLE ? (nBytes - 1) : 0,
-      d = isLE ? -1 : 1,
-      s = buffer[offset + i];
+exports.read = function (buffer, offset, isLE, mLen, nBytes) {
+  var e, m
+  var eLen = nBytes * 8 - mLen - 1
+  var eMax = (1 << eLen) - 1
+  var eBias = eMax >> 1
+  var nBits = -7
+  var i = isLE ? (nBytes - 1) : 0
+  var d = isLE ? -1 : 1
+  var s = buffer[offset + i]
 
-  i += d;
+  i += d
 
-  e = s & ((1 << (-nBits)) - 1);
-  s >>= (-nBits);
-  nBits += eLen;
-  for (; nBits > 0; e = e * 256 + buffer[offset + i], i += d, nBits -= 8);
+  e = s & ((1 << (-nBits)) - 1)
+  s >>= (-nBits)
+  nBits += eLen
+  for (; nBits > 0; e = e * 256 + buffer[offset + i], i += d, nBits -= 8) {}
 
-  m = e & ((1 << (-nBits)) - 1);
-  e >>= (-nBits);
-  nBits += mLen;
-  for (; nBits > 0; m = m * 256 + buffer[offset + i], i += d, nBits -= 8);
+  m = e & ((1 << (-nBits)) - 1)
+  e >>= (-nBits)
+  nBits += mLen
+  for (; nBits > 0; m = m * 256 + buffer[offset + i], i += d, nBits -= 8) {}
 
   if (e === 0) {
-    e = 1 - eBias;
+    e = 1 - eBias
   } else if (e === eMax) {
-    return m ? NaN : ((s ? -1 : 1) * Infinity);
+    return m ? NaN : ((s ? -1 : 1) * Infinity)
   } else {
-    m = m + Math.pow(2, mLen);
-    e = e - eBias;
+    m = m + Math.pow(2, mLen)
+    e = e - eBias
   }
-  return (s ? -1 : 1) * m * Math.pow(2, e - mLen);
-};
+  return (s ? -1 : 1) * m * Math.pow(2, e - mLen)
+}
 
-exports.write = function(buffer, value, offset, isLE, mLen, nBytes) {
-  var e, m, c,
-      eLen = nBytes * 8 - mLen - 1,
-      eMax = (1 << eLen) - 1,
-      eBias = eMax >> 1,
-      rt = (mLen === 23 ? Math.pow(2, -24) - Math.pow(2, -77) : 0),
-      i = isLE ? 0 : (nBytes - 1),
-      d = isLE ? 1 : -1,
-      s = value < 0 || (value === 0 && 1 / value < 0) ? 1 : 0;
+exports.write = function (buffer, value, offset, isLE, mLen, nBytes) {
+  var e, m, c
+  var eLen = nBytes * 8 - mLen - 1
+  var eMax = (1 << eLen) - 1
+  var eBias = eMax >> 1
+  var rt = (mLen === 23 ? Math.pow(2, -24) - Math.pow(2, -77) : 0)
+  var i = isLE ? 0 : (nBytes - 1)
+  var d = isLE ? 1 : -1
+  var s = value < 0 || (value === 0 && 1 / value < 0) ? 1 : 0
 
-  value = Math.abs(value);
+  value = Math.abs(value)
 
   if (isNaN(value) || value === Infinity) {
-    m = isNaN(value) ? 1 : 0;
-    e = eMax;
+    m = isNaN(value) ? 1 : 0
+    e = eMax
   } else {
-    e = Math.floor(Math.log(value) / Math.LN2);
+    e = Math.floor(Math.log(value) / Math.LN2)
     if (value * (c = Math.pow(2, -e)) < 1) {
-      e--;
-      c *= 2;
+      e--
+      c *= 2
     }
     if (e + eBias >= 1) {
-      value += rt / c;
+      value += rt / c
     } else {
-      value += rt * Math.pow(2, 1 - eBias);
+      value += rt * Math.pow(2, 1 - eBias)
     }
     if (value * c >= 2) {
-      e++;
-      c /= 2;
+      e++
+      c /= 2
     }
 
     if (e + eBias >= eMax) {
-      m = 0;
-      e = eMax;
+      m = 0
+      e = eMax
     } else if (e + eBias >= 1) {
-      m = (value * c - 1) * Math.pow(2, mLen);
-      e = e + eBias;
+      m = (value * c - 1) * Math.pow(2, mLen)
+      e = e + eBias
     } else {
-      m = value * Math.pow(2, eBias - 1) * Math.pow(2, mLen);
-      e = 0;
+      m = value * Math.pow(2, eBias - 1) * Math.pow(2, mLen)
+      e = 0
     }
   }
 
-  for (; mLen >= 8; buffer[offset + i] = m & 0xff, i += d, m /= 256, mLen -= 8);
+  for (; mLen >= 8; buffer[offset + i] = m & 0xff, i += d, m /= 256, mLen -= 8) {}
 
-  e = (e << mLen) | m;
-  eLen += mLen;
-  for (; eLen > 0; buffer[offset + i] = e & 0xff, i += d, e /= 256, eLen -= 8);
+  e = (e << mLen) | m
+  eLen += mLen
+  for (; eLen > 0; buffer[offset + i] = e & 0xff, i += d, e /= 256, eLen -= 8) {}
 
-  buffer[offset + i - d] |= s * 128;
-};
+  buffer[offset + i - d] |= s * 128
+}
 
 }).call(this,require("1YiZ5S"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/../node_modules/gulp-browserify/node_modules/browserify/node_modules/buffer/node_modules/ieee754/index.js","/../node_modules/gulp-browserify/node_modules/browserify/node_modules/buffer/node_modules/ieee754")
 },{"1YiZ5S":18,"buffer":14}],17:[function(require,module,exports){
