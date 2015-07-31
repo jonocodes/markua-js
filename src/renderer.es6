@@ -244,6 +244,11 @@ class Renderer {
     return `<code${attrs}>${text}</code>`;
   }
 
+  span(text, attributes) {
+    let attrs = this.convertAttributes(attributes);
+    return `<span${attrs}>${text}</span>`;
+  }
+
   br() {
     return '<br>';
   }

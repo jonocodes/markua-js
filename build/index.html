@@ -34,7 +34,7 @@
             while(count < position.row && (i = src.indexOf('\n', i) + 1)) {
               count++;
             }
-            index = i - 1 + position.column;
+            index = i + 1 + position.column;
 
             markua.run(function(error, result) {
               $("#output").html(result)
@@ -43,7 +43,7 @@
                 if (!/http:|https:/.test(currentSrc))
                   $(this).attr('src', "/data/test_book/" + currentSrc);
               });
-            }, { cursor: i >= 0 ? { position: i, filename: currentFile.substr(currentFile.lastIndexOf("/") + 1) } : null});
+            }, { cursor: i >= 0 ? { position: index, filename: currentFile.substr(currentFile.lastIndexOf("/") + 1) } : null});
           };
 
           editor = ace.edit('editor');

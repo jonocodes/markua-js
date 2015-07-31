@@ -76,7 +76,7 @@ var inline = {
   code: /^(`+)\s*([\s\S]*?[^`])\s*\1(?!`)/,
   br: /^ {2,}\n(?!\s*$)/,
   del: noop,
-  text: /^[\s\S]+?(?=[\\<!\[_*`]| {2,}\n|$)/
+  text: /^(?:inlineAttr)?[\s\S]+?(?=[\\<!\[_*`]| {2,}\n|$)(?:inlineAttr)?/
 };
 
 exports.inline = inline;
@@ -169,7 +169,7 @@ block.normal = ObjectAssign({}, block);
  * Inline Attributes
  */
 inline.normal.attribute = block.attribute;
-
+inline.normal.text = replace(inline.normal.text)(/inlineAttr/g, block.normal.attribute.inlineGroup)();
 /**
  * Renderer constants
  */

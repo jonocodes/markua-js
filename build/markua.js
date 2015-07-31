@@ -118,11 +118,11 @@ var Markua = (function () {
       } else {
         async.map(chapters, function (chapter, cb) {
           _this.fileAccessor.get(chapter, function (error, contents) {
-
             // If we are given a cursor position, then insert that into the markua text
             // TODO: This will not work until inline attributes are done.
-            if (_this.options.cursor && _this.options.cursor.filename === chapter) contents = _.string.splice(contents, _this.options.cursor.position, 0, "{ data-markua-cursor-position: __markuaCursorPosition__ }\n");
-
+            if (_this.options.cursor && _this.options.cursor.filename === chapter) {
+              contents = _.string.splice(contents, _this.options.cursor.position + 1, 0, "{ data-markua-cursor-position: __markuaCursorPosition__ }");
+            }
             cb(null, contents);
           });
         }, done);

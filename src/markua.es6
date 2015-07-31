@@ -83,12 +83,11 @@ class Markua {
     else {
       async.map(chapters, (chapter, cb) => {
         this.fileAccessor.get(chapter, (error, contents) => {
-
           // If we are given a cursor position, then insert that into the markua text
           // TODO: This will not work until inline attributes are done.
-          if (this.options.cursor && this.options.cursor.filename === chapter)
-            contents = _.string.splice(contents, this.options.cursor.position, 0, "{ data-markua-cursor-position: __markuaCursorPosition__ }\n")
-
+          if (this.options.cursor && this.options.cursor.filename === chapter) {
+            contents = _.string.splice(contents, this.options.cursor.position + 1, 0, "{ data-markua-cursor-position: __markuaCursorPosition__ }")
+          }
           cb(null, contents)
         });
       }, done);

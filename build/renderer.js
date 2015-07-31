@@ -266,6 +266,12 @@ var Renderer = (function () {
       return "<code" + attrs + ">" + text + "</code>";
     }
   }, {
+    key: "span",
+    value: function span(text, attributes) {
+      var attrs = this.convertAttributes(attributes);
+      return "<span" + attrs + ">" + text + "</span>";
+    }
+  }, {
     key: "br",
     value: function br() {
       return "<br>";
