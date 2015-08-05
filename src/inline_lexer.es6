@@ -49,28 +49,32 @@ class InlineLexer {
           text = escape(cap[1]);
           href = text;
         }
-        out += this.renderer.link(href, null, text, this.attributeSet && this.attributeSet.attributes);
+        out += this.renderer.link(href, null, text, this.attributeSet && this.attributeSet.length && this.attributeSet.shift().attributes);
         continue;
       }
 
       // attributes
-      if (cap = this.rules.attribute.inlineGroup.exec(src)) {
-        // Since there could be text before the match (middle of a paragraph)
-        // we need to cut the attributes out.
-        let index = src.search(this.rules.attribute.inlineGroup);
-        let length = cap[0].length
+      if (this.rules.attribute.inlineGroup.exec(src)) {
+        this.attributeSet = [];
+        while (cap = this.rules.attribute.inlineGroup.exec(src)) {
+          // Since there could be text before the match (middle of a paragraph)
+          // we need to cut the attributes out.
+          let index = src.search(this.rules.attribute.inlineGroup);
+          let length = cap[0].length
 
-        src = _.string.splice(src, index, cap[0].length);
+          // Cut out the attributes
+          src = _.string.splice(src, index, cap[0].length);
 
-        let attributes = [];
-        let pair;
-
-        while ((pair = _.compact(this.rules.attribute.value.exec(cap[0]))).length) {
-          attributes.push({ key: pair[1], value: pair[2] });
+          // Go through the k/v pairs in between the {} and push them into an
+          // attributeSet
+          let attributes = [];
+          let pair;
+          while ((pair = _.compact(this.rules.attribute.value.exec(cap[0]))).length) {
+            attributes.push({ key: pair[1], value: pair[2] });
+          }
+          this.attributeSet.push({ attributes: attributes, index: index });
+          this.prevAttributeSet = true;
         }
-
-        this.attributeSet = { attributes: attributes, index: index };
-        this.prevAttributeSet = true;
         continue;
       }
 
@@ -79,7 +83,7 @@ class InlineLexer {
         src = src.substring(cap[0].length);
         text = escape(cap[1]);
         href = text;
-        out += this.renderer.link(href, null, text, this.attributeSet && this.attributeSet.attributes);
+        out += this.renderer.link(href, null, text, this.attributeSet && this.attributeSet.length && this.attributeSet.shift().attributes);
         continue;
       }
 
@@ -115,21 +119,21 @@ class InlineLexer {
       // strong
       if (cap = this.rules.strong.exec(src)) {
         src = src.substring(cap[0].length);
-        out += this.renderer.strong(this.output(cap[2] || cap[1]), this.attributeSet && this.attributeSet.attributes);
+        out += this.renderer.strong(this.output(cap[2] || cap[1]), this.attributeSet && this.attributeSet.length && this.attributeSet.shift().attributes);
         continue;
       }
 
       // em
       if (cap = this.rules.em.exec(src)) {
         src = src.substring(cap[0].length);
-        out += this.renderer.em(this.output(cap[2] || cap[1]), this.attributeSet && this.attributeSet.attributes);
+        out += this.renderer.em(this.output(cap[2] || cap[1]), this.attributeSet && this.attributeSet.length && this.attributeSet.shift().attributes);
         continue;
       }
 
       // code
       if (cap = this.rules.code.exec(src)) {
         src = src.substring(cap[0].length);
-        out += this.renderer.codespan(escape(cap[2], true), this.attributeSet && this.attributeSet.attributes);
+        out += this.renderer.codespan(escape(cap[2], true), this.attributeSet && this.attributeSet.length && this.attributeSet.shift().attributes);
         continue;
       }
 
@@ -143,13 +147,14 @@ class InlineLexer {
       // del (gfm)
       if (cap = this.rules.del.exec(src)) {
         src = src.substring(cap[0].length);
-        out += this.renderer.del(this.output(cap[1]), this.attributeSet && this.attributeSet.attributes);
+        out += this.renderer.del(this.output(cap[1]), this.attributeSet && this.attributeSet.length && this.attributeSet.shift().attributes);
         continue;
       }
 
       // text
       if (cap = this.rules.text.exec(src)) {
-        if (this.attributeSet) {
+        if (this.attributeSet && this.attributeSet.length) {
+          let set, captureString = cap[0];
           // We have found an attribute set in the text.  This means that
           // we should create a span and attach the attributes to that span.
           //
@@ -159,19 +164,30 @@ class InlineLexer {
           // output:
           //    <p>This is paragraph text <span foo="bar">something.</span>
 
-          let beforeAttrs = cap[0].substr(0, this.attributeSet.index)
-          let afterAttrs = cap[0].substr(this.attributeSet.index)
+          while(set = this.attributeSet.shift()) {
+            let beforeAttrs = captureString.substr(0, set.index)
+            let afterAttrs = captureString.substr(set.index)
 
-          if (afterAttrs.length) {
-            // We have things that come after the attribute
-            // Wrap it in a span and add the attributes to that span.
-            out += escape(this.smartypants(beforeAttrs))
-            out += this.renderer.span(escape(this.smartypants(afterAttrs)), this.attributeSet.attributes)
+            if (afterAttrs.length) {
+              // We have things that come after the attribute
+              // Wrap it in a span and add the attributes to that span.
+              // get the word after the attribute
+              let nextWord = afterAttrs.substr(0, afterAttrs.indexOf(' '))
+
+              out += escape(this.smartypants(beforeAttrs))
+              out += this.renderer.span(escape(this.smartypants(nextWord)), set.attributes)
+              src = src.substring(beforeAttrs.length + nextWord.length)
+              captureString = captureString.substring(beforeAttrs.length + nextWord.length)
+            } else {
+              out += this.renderer.span(escape(this.smartypants(beforeAttrs)), set.attributes)
+              src = src.substring(beforeAttrs.length)
+              captureString = captureString.substring(beforeAttrs.length)
+            }
           }
         } else {
           out += escape(this.smartypants(cap[0]));
+          src = src.substring(cap[0].length);
         }
-        src = src.substring(cap[0].length);
         continue;
       }
 
@@ -182,8 +198,8 @@ class InlineLexer {
     }
 
     // We have attributes that we have to put on the previous element
-    // if (this.attributeSet)
-      // console.log("TODO: @bradens, need to attach attrs to the previous element")
+    if (this.attributeSet && this.attributeSet.length)
+      throw new Error("need to attach attrs to the previous element, we have left-over non-applied attributes")
     return out;
   }
 
@@ -193,8 +209,8 @@ class InlineLexer {
         title = link.title ? escape(link.title) : null;
 
     return cap[0].charAt(0) !== '!'
-      ? this.renderer.link(href, title, this.output(cap[1]), this.attributeSet && this.attributeSet.attributes)
-      : this.renderer.image(href, title, escape(cap[1]), this.attributeSet && this.attributeSet.attributes);
+      ? this.renderer.link(href, title, this.output(cap[1]), this.attributeSet && this.attributeSet.length && this.attributeSet.shift().attributes)
+      : this.renderer.image(href, title, escape(cap[1]), this.attributeSet && this.attributeSet.length && this.attributeSet.shift().attributes);
   }
 
   // Turn dashes and stuff into special characters
