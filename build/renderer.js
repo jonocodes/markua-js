@@ -239,13 +239,6 @@ var Renderer = (function () {
       return tag + content + "</" + type + ">\n";
     }
   }, {
-    key: "cursor",
-
-    // Cursor
-    value: function cursor() {
-      return "<span id=\"__markuaCursorPosition__\"></span>";
-    }
-  }, {
     key: "strong",
 
     // span level renderer

@@ -47,7 +47,7 @@ gulp.task('browserify', ['build-js'], function() {
 
 gulp.task('watch', ['build-js', 'build-styles'], function() {
   gulp.watch("./src/styles/**/*", ['build-styles']);
-  gulp.watch("./src/*", ['browserify']);
+  gulp.watch("./src/**/*", ['browserify']);
   gulp.watch("./index.html", ['assets']);
 });
 

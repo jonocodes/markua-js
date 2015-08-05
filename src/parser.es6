@@ -78,9 +78,29 @@ class Parser {
           attributes);
       }
       case 'attribute': {
+        let output = '';
         // Set the attributes for the next tag
-        this.attributes = this.token.attributes;
-        return '';
+        // or If we already have attributes, then print out the ones normally as text,
+        // since we want to indicate to the user that they are not being used.
+        // Unless it's the cursor, then we want to create a span and add the attr to it first.
+        if (this.attributes) {
+          let cursor;
+          if (cursor = (_.find(this.attributes, (a) => a.key === 'data-markua-cursor-position' ? a : null))) {
+            output = this.renderer.span('', [cursor]);
+            this.attributes = this.token.attributes;
+          } else if (cursor = (_.find(this.token.attributes, (a) => a.key === 'data-markua-cursor-position' ? a : null))) {
+            output = this.renderer.span('', [cursor]);
+
+            // Transfer attributes
+            this.token.attributes = this.attributes;
+          } else {
+            output = this.renderer.paragraph(`{ ${_.map(this.attributes, (a) => a.key + ': ' + a.value ).join(',')} }`)
+            this.attributes = this.token.attributes;
+          }
+        } else {
+          this.attributes = this.token.attributes;
+        }
+        return output;
       }
       case 'figure': {
         return this.renderer.figure(this.token.alt,

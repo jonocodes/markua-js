@@ -221,7 +221,7 @@ var _web_file_accessor = require("./web_file_accessor");
 var _web_file_accessor2 = _interopRequireDefault(_web_file_accessor);
 
 if (typeof window !== "undefined") window.markua = new _markua2["default"]("/data/test_book", { fileAccessor: _web_file_accessor2["default"], debug: true });
-}).call(this,require("1YiZ5S"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/fake_7e79cd19.js","/")
+}).call(this,require("1YiZ5S"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/fake_f9e3c70e.js","/")
 },{"./markua":6,"./web_file_accessor":11,"1YiZ5S":18,"buffer":14}],3:[function(require,module,exports){
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
 "use strict";
@@ -1287,9 +1287,35 @@ var Parser = (function () {
           }
         case "attribute":
           {
+            var output = "";
             // Set the attributes for the next tag
-            this.attributes = this.token.attributes;
-            return "";
+            // or If we already have attributes, then print out the ones normally as text,
+            // since we want to indicate to the user that they are not being used.
+            // Unless it's the cursor, then we want to create a span and add the attr to it first.
+            if (this.attributes) {
+              var cursor = undefined;
+              if (cursor = _.find(this.attributes, function (a) {
+                return a.key === "data-markua-cursor-position" ? a : null;
+              })) {
+                output = this.renderer.span("", [cursor]);
+                this.attributes = this.token.attributes;
+              } else if (cursor = _.find(this.token.attributes, function (a) {
+                return a.key === "data-markua-cursor-position" ? a : null;
+              })) {
+                output = this.renderer.span("", [cursor]);
+
+                // Transfer attributes
+                this.token.attributes = this.attributes;
+              } else {
+                output = this.renderer.paragraph("{ " + _.map(this.attributes, function (a) {
+                  return a.key + ": " + a.value;
+                }).join(",") + " }");
+                this.attributes = this.token.attributes;
+              }
+            } else {
+              this.attributes = this.token.attributes;
+            }
+            return output;
           }
         case "figure":
           {
@@ -1646,13 +1672,6 @@ var Renderer = (function () {
       var type = flags.header ? "th" : "td";
       var tag = flags.align ? "<" + type + " style=\"text-align: " + flags.align + "\">" : "<" + type + ">";
       return tag + content + "</" + type + ">\n";
-    }
-  }, {
-    key: "cursor",
-
-    // Cursor
-    value: function cursor() {
-      return "<span id=\"__markuaCursorPosition__\"></span>";
     }
   }, {
     key: "strong",
