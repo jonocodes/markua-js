@@ -221,7 +221,7 @@ var _web_file_accessor = require("./web_file_accessor");
 var _web_file_accessor2 = _interopRequireDefault(_web_file_accessor);
 
 if (typeof window !== "undefined") window.markua = new _markua2["default"]("/data/test_book", { fileAccessor: _web_file_accessor2["default"], debug: true });
-}).call(this,require("1YiZ5S"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/fake_88ff5b82.js","/")
+}).call(this,require("1YiZ5S"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/fake_7e79cd19.js","/")
 },{"./markua":6,"./web_file_accessor":11,"1YiZ5S":18,"buffer":14}],3:[function(require,module,exports){
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
 "use strict";
