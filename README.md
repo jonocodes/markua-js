@@ -2,7 +2,7 @@
 
 ## Warning: This is an alpha build, and should be used with extreme caution. Everything could change.
 
-### A javascript implementation for the [markua specification](http://markua.com)
+### A javascript implementation for the [Markua specification](http://markua.com)
 
 Many thanks to the authors of [marked](https://github.com/chjj/marked), from which
 a large amount of the regexes were taken.
@@ -24,13 +24,13 @@ of [nodejs](http://nodejs.org).
 #### Running
 
 Run the markua executable by running `./markua`, symlink it to somewhere like
-`usr/local/bin` for ease of use.  
+`usr/local/bin` for ease of use.
 
-You may try passing in stdin like to see the raw markua -> html conversion: 
+You may try passing in stdin like to see the raw markua -> html conversion:
 
-`echo '# Heading 1' | ./markua` 
+`echo '# Heading 1' | ./markua`
 
-or you can run it against a directory (correctly organized to the markua standard, see [/data/test_book](https://github.com/markuadoc/markua-js/tree/master/data/test_book)) like this: 
+or you can run it against a directory (correctly organized to the Markua standard, see [/data/test_book](https://github.com/markuadoc/markua-js/tree/master/data/test_book)) like this:
 
 `./markua /path/to/directory`
 
