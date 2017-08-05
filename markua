@@ -1,10 +1,10 @@
-#! /bin/bash
+#!/usr/bin/env bash
 
 cd "$(dirname "$0")"
 
 str=""
 NEWLINE=$'\n'
-if [ $1 == '' ]
+if [ '$1' == '' ]
 then
   # Read from std in
   while IFS='' read -r line
